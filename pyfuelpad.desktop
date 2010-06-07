@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Name=PyFuelpad
+Exec=pyfuelpad
+Icon=pyfuelpad
+X-Window-Icon=pyfuelpad
+X-Window-Icon-Dimmed=pyfuelpad
+#X-Osso-Service=org.luukko.fuelpad
+#X-Osso-Type=application/x-executable
+Maemo-Display-Name=PyFuelpad
+
