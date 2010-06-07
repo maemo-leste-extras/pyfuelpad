@@ -1,0 +1,24 @@
+
+Reduce font for maemo
+
+Review individualized units
+
+----
+
+db is completelly gui-agnostic and is completelly finished
+
+configuration is nearly gui-agnostic (appart from gconf) but is finished
+
+utils is completelly finished, but could be incorporated to other module
+
+
+-*- GUI dependant modules -*-
+
+pyfueldpad is finished (filters are the only GUI feature not implemented)
+
+combos completelly finished (abstract class is GUI-agnostic, but specific intermediate widgets are required. The widgets actually used are portable)
+
+callbacks is functionally fihised but requires hard work. First, the gtk.Notebook must be transformed into a hildon wizard. And appart, needs strong code reorganization respect to edit window. Some separation hildon-gtk is still required
+
+ui is functional and finished
+
