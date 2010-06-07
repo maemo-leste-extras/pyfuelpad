@@ -32,7 +32,10 @@ def callback_tripadded ( widget , event , pui , config ) :
       # BUGFIX : happens when database is brand new
       if lastkm == 0.0 :
         return False
-    buf = "%.1f" % config.SIlength2user( lastkm + trip )
+    if widget :
+      buf = "%.1f" % config.SIlength2user( lastkm + trip )
+    else :
+      buf = "%d" % config.SIlength2user( lastkm + trip )
     pui.entrykm.set_text( buf )
   return False
 
@@ -154,6 +157,9 @@ class ButtonPad ( gtk.Table ) :
     def get_text ( self ) :
         return self.label.get_text()
 
+    def set_text ( self , value ) :
+        return self.label.set_text( value )
+
 
 class FuelpadEdit ( gtk.Notebook ) :
 
@@ -179,6 +185,16 @@ class FuelpadEdit ( gtk.Notebook ) :
 
         # To avoid confusion with FuelpadFullEdit
         self.entryprice = False
+
+        # Set a handler for "switch-page" signal
+        self.connect_object( "switch-page" , self.on_page_switch , config )
+
+    def on_page_switch( self , config , page , num ) :
+        if self.get_current_page() == 1 :
+            callback_tripadded( None , None , self , config )
+        elif self.get_current_page() == 2 :
+            callback_kmadded( None , None , self , config )
+        return True
 
 
 # Ported the GTK part
