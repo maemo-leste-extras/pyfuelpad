@@ -140,9 +140,6 @@ class timed_locator :
             self.control.start()
 
     def do_stop ( self ) :
-        if self.timeout_handler :
-            gobject.source_remove( self.timeout_handler )
-            self.timeout_handler = None
         if self.update_handler :
             self.device.disconnect( self.update_handler )
             self.update_handler = None
@@ -155,6 +152,9 @@ class timed_locator :
             self.db.commit()
         self.device.stop()
         self.control.stop()
+        if self.timeout_handler :
+            gobject.source_remove( self.timeout_handler )
+            self.timeout_handler = None
 
     def do_update ( self , data=None ) :
 
@@ -177,6 +177,7 @@ class database :
         self.db = None
         self.currentcar = None
         self.currentdriver = None
+        self.locator = None
 
     def get_current ( self , key ) :
         if key.lower() == "car" :
@@ -276,7 +277,7 @@ class database :
             query = "INSERT INTO record ( %s ) VALUES  ( %s )" % ( ",".join(columns) , values )
             rc = self.db.execute( query )
             if rc.rowcount :
-                timed_locator( rc.lastrowid , self.db )
+                self.locator = timed_locator( rc.lastrowid , self.db )
                 self.db.commit()
                 return rc.lastrowid
 

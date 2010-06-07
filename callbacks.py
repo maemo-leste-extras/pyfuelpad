@@ -8,15 +8,36 @@ import combos
 
 import utils
 
-import gtk
+import gtk , gobject
 try :
     import hildon
 except :
     hildon = False
 
 
+delay_quit_interval = 10
+
 def delete_event ( widget , event , data=None ) :
+  locator = None
+  if data :
+    if data.config.db.locator :
+      locator = data.config.db.locator 
+  else :
+    if widget.config.db.locator :
+      locator = widget.config.db.locator 
+  if locator :
+    if locator.timeout_handler :
+      gobject.timeout_add( delay_quit_interval * 1000 , mainloop_exit , locator )
+    else :
+      gtk.main_quit()
+  else :
+    gtk.main_quit()
+
+def mainloop_exit ( locator ) :
+  if locator.timeout_handler :
+    return True
   gtk.main_quit()
+  return False
 
 def destroy_event ( widget , event , data=None ) :
   widget.destroy()

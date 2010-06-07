@@ -162,7 +162,7 @@ class FuelpadAbstractWindow :
 
     def __init__ ( self , config ) :
 
-        self.connect( "delete_event" , callbacks.delete_event , None )
+        self.connect( "delete_event" , callbacks.delete_event , self )
 
         self.mainfullscreen = False
         self.config = config
@@ -263,7 +263,7 @@ class FuelpadAbstractWindow :
       #  self.mtb_down.connect( "clicked", callback_nextrecord, self)
       #  self.mtb_delete.connect( "clicked", callback_deleterecord, self)
       #  self.mtb_reminder.connect( "clicked", callback_alarm, self)
-        self.mtb_close.connect( "clicked" , callbacks.delete_event , None , None )
+        self.mtb_close.connect( "clicked" , callbacks.delete_event , self )
 
     def create_secondary_toolbar( self ) :
 
@@ -670,7 +670,7 @@ else :
         #    #if libhelp :
         #    #  g_signal_connect(G_OBJECT(self.mm_item_help), "activate", callback_help), NULL);
         #    g_signal_connect(G_OBJECT(self.mm_item_about), "activate", callback_about), NULL);
-            self.mm_item_exit.connect( "activate", callbacks.delete_event, None )
+            self.mm_item_exit.connect( "activate", callbacks.delete_event, self )
 
         #    g_signal_connect(G_OBJECT(self.mm_item_open), "activate", callback_open_db), pui);
         #    g_signal_connect(G_OBJECT(self.mm_item_close), "activate", callback_close_db), pui);
