@@ -23,8 +23,8 @@ def delete_event ( widget , event , data=None ) :
     if data.config.db.locator :
       locator = data.config.db.locator 
   else :
-    if widget.config.db.locator :
-      locator = widget.config.db.locator 
+    if event.config.db.locator :
+      locator = event.config.db.locator 
   if locator :
     if locator.timeout_handler :
       gobject.timeout_add( delay_quit_interval * 1000 , mainloop_exit , locator )
