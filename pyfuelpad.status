@@ -18,7 +18,7 @@ pyfueldpad is finished (filters are the only GUI feature not implemented)
 
 combos completelly finished (abstract class is GUI-agnostic, but specific intermediate widgets are required. The widgets actually used are portable)
 
-callbacks is functionally fihised but requires hard work. First, the gtk.Notebook must be transformed into a hildon wizard. And appart, needs strong code reorganization respect to edit window. Some separation hildon-gtk is still required
+callbacks is functionally fihised but requires hard work. Needs strong code reorganization respect to edit window. Some separation hildon-gtk is still required
 
 ui is functional and finished
 

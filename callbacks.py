@@ -9,6 +9,10 @@ import combos
 import utils
 
 import gtk
+try :
+    import hildon
+except :
+    hildon = False
 
 
 def delete_event ( widget , event , data=None ) :
@@ -82,28 +86,6 @@ class FuelpadEdit ( gtk.Notebook ) :
                'EDIT_DRIVER':"Driver"}
 
     def __init__( self , config , add ) :
-
-#  if False : # JP maemo5 :
-#    pass
-##  scrollwin = hildon_pannable_area_new();
-##  gtk_widget_set_size_request(scrollwin, -1, DIALOG_MIN_HEIGHTMAX);
-##
-##  if (add)
-##    table = gtk_table_new(12, 2, FALSE);
-##  else
-##    table = gtk_table_new(10, 2, FALSE);
-##
-##  row=0;
-#
-## ...
-#
-##  gtk_widget_show(table);
-##  gtk_box_pack_start (GTK_BOX(GTK_DIALOG (dialog)->vbox), scrollwin, TRUE, TRUE, 0);
-##  gtk_widget_show(scrollwin);
-##  hildon_pannable_area_add_with_viewport(HILDON_PANNABLE_AREA(scrollwin),table);
-##
-#  else : # MAEMO_VERSION_MAJOR != 5
-
         gtk.Notebook.__init__( self )
         self.set_tab_pos(gtk.POS_TOP)
 
@@ -383,7 +365,8 @@ def add_record_response ( widget , event , editwin , pui ) :
        widget.destroy()
        return
 
-  if event == gtk.RESPONSE_ACCEPT :
+  # NOTE : response from hildon wizard is an unexpected value
+  if event == gtk.RESPONSE_ACCEPT or event == 2 :
 
 #    if (carchanged)
 #      update_car_changed(pui);
@@ -459,23 +442,25 @@ def callback_newrecord ( action, pui ) :
     header = ( "Add a new record" , )
 
     if pui.config.db.is_open() :
-        dialog = gtk.Dialog( header[0],
-                             pui,
-                             gtk.DIALOG_MODAL,
-                             ( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
-                               gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
-                               )
-                             )
-        editwin = FuelpadEdit(pui.config, 1)
-        dialog.vbox.pack_start(editwin , True, True, 0)
-        editwin.show()
+        editwin = FuelpadEdit( pui.config , 1 )
+        if hildon :
+            dialog = hildon.WizardDialog( pui , header[0] , editwin )
+        else :
+            dialog = gtk.Dialog( header[0],
+                                 pui,
+                                 gtk.DIALOG_MODAL,
+                                 ( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                                   gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
+                                   )
+                                 )
+            dialog.vbox.pack_start(editwin , True, True, 0)
+        dialog.connect( "response", add_record_response, editwin , pui )
+
         #if libhelp :
         #    help_dialog_help_enable(GTK_DIALOG(dialog),
         #                                   HELP_ID_ADDRECORD,
         #                                   pui->app->osso);
 
-        #dialog.connect( "response", add_record_response, pui )
-        dialog.connect( "response", add_record_response, editwin , pui )
 
     else :
         dialog = gtk.Dialog( header[0],
@@ -490,7 +475,7 @@ def callback_newrecord ( action, pui ) :
 
         dialog.connect( "response", destroy_event , None )
 
-    dialog.show()
+    dialog.show_all()
 
 
 # Actions for carcombo item done
