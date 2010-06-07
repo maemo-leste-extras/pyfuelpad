@@ -68,8 +68,121 @@ ENTRYSERVICEMAX = 8
 ENTRYOILMAX = 8
 ENTRYTIRESMAX = 8
 
-# Ported the GTK part
+
+class KeypadAbstractButton :
+
+        def __init__ ( self , text_label ) :
+            label = gtk.Label( text_label )
+            attrs = configuration.font_attrs( -2 )
+            label.set_attributes( attrs )
+            self.add( label )
+
+if hildon :
+
+    class KeypadButton ( hildon.Button , KeypadAbstractButton ) :
+
+        def __init__ ( self , text_label ) :
+            hildon.Button.__init__( self , gtk.HILDON_SIZE_THUMB_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
+            KeypadAbstractButton.__init__( self , text_label )
+
+else :
+
+    class KeypadButton ( gtk.Button , KeypadAbstractButton ) :
+
+        def __init__ ( self , text_label ) :
+            gtk.Button.__init__( self )
+            KeypadAbstractButton.__init__( self , text_label )
+
+
+class ButtonPad ( gtk.Table ) :
+
+    # FIXME : while label is empty, backspace button must be disabled
+
+    def __init__ ( self , decimals=False ) :
+
+        gtk.Table.__init__( self , 4 , 4 , True )
+
+        # Label for written values
+        x , y = 0 , 0
+        # FIXME : is self.label already allocated ???
+        self.label = gtk.Label()
+        attrs = configuration.font_attrs( -1 )
+        self.label.set_attributes( attrs )
+        self.attach( self.label , x , x+4 , y , y+1 )
+        self.label.show()
+
+        # Button for decimal dot
+        if decimals :
+            self.decimals = decimals
+            x , y = 3 , 2
+            button = KeypadButton( "." )
+            button.connect("clicked", self.verified_write, ".")
+            self.attach( button , x , x+1 , y , y+1 )
+            button.show()
+
+        # Button for 0
+        x , y = 3 , 3
+        button = KeypadButton( "%s" % 0 )
+        button.connect("clicked", self.write, 0)
+        self.attach( button , x , x+1 , y , y+1 )
+        button.show()
+
+        for i in range(9) :
+            button = KeypadButton( "%s" % (i+1) )
+            button.connect("clicked", self.write, i+1)
+            self.attach( button , i%3 , i%3+1 , int(i/3)+1 , int(i/3)+2 )
+            button.show()
+
+        x , y = 3 , 1
+        button = KeypadButton( "<-" )
+        button.connect("clicked", self.backspace, None)
+        self.attach( button , x , x+1 , y , y+1 )
+        button.show()
+
+    def verified_write(self, widget, data=None):
+        self.write( widget , data )
+
+    def write(self, widget, data=None):
+        txt = self.label.get_text()
+        self.label.set_text( "%s%s" % ( txt , data ) )
+
+    def backspace ( self , widget , data=None ) :
+        txt = self.label.get_text()
+        if txt :
+            self.label.set_text( txt[:-1] )
+
+    def get_text ( self ) :
+        return self.label.get_text()
+
+
 class FuelpadEdit ( gtk.Notebook ) :
+
+    def __init__( self , config , add ) :
+        gtk.Notebook.__init__( self )
+
+        self.entryfill = ButtonPad( True )
+        self.entrytrip = ButtonPad( True )
+        self.entrykm = ButtonPad()
+        self.append_page( self.entryfill , gtk.Label( "Fill" ) )
+        self.append_page( self.entrytrip , gtk.Label( "Trip" ) )
+        self.append_page( self.entrykm , gtk.Label( "Total KM" ) )
+
+        # FIXME : focus actually never enters nor leave the entries
+        if add :
+            self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
+            self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
+
+        # Not shown widgets
+        self.entrydate = gtk.Entry()
+        self.entrydate.set_text( utils.gettimefmt( config.dateformat ) )
+        self.buttonnotfull = gtk.CheckButton()
+
+        # To avoid confusion with FuelpadFullEdit
+        self.entryprice = False
+
+
+# Ported the GTK part
+class FuelpadFullEdit ( gtk.Notebook ) :
 
     labels = { 'EDIT_DATE':"Date",
                'EDIT_KM':"Km",
@@ -386,11 +499,15 @@ def add_record_response ( widget , event , editwin , pui ) :
     km  = config.user2SIlength( float( editwin.entrykm.get_text() or "-1" ) )
     trip = config.user2SIlength( float( editwin.entrytrip.get_text() or "-1" ) )
     fill  = config.user2SIvolume( float( editwin.entryfill.get_text() or "-1" ) )
-    price  =  float( editwin.entryprice.get_text() or "-1" )
-    service =  float( editwin.entryservice.get_text() or "-1" )
-    oil =  float( editwin.entryoil.get_text() or "-1" )
-    tires =  float( editwin.entrytires.get_text() or "-1" )
-    notes = editwin.entrynotes.get_text()
+    if editwin.entryprice :
+        price = float( editwin.entryprice.get_text() or "-1" )
+        service = float( editwin.entryservice.get_text() or "-1" )
+        oil = float( editwin.entryoil.get_text() or "-1" )
+        tires = float( editwin.entrytires.get_text() or "-1" )
+        notes = editwin.entrynotes.get_text()
+    else :
+        price = service = oil = tires = 0
+        notes = ""
 
     if editwin.buttonnotfull.get_active() :
 

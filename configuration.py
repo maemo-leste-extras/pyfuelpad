@@ -20,7 +20,7 @@ datefmtstr = ("%Y-%m-%d", "%d.%m.%Y", "%d/%m/%Y", "%d/%m/%y",
 
 
 import pango
-fontscalefactors = ( pango.SCALE_MEDIUM , pango.SCALE_X_SMALL , pango.SCALE_SMALL , pango.SCALE_MEDIUM , pango.SCALE_LARGE )
+fontscalefactors = ( pango.SCALE_MEDIUM , pango.SCALE_X_SMALL , pango.SCALE_SMALL , pango.SCALE_MEDIUM , pango.SCALE_LARGE , pango.SCALE_XX_LARGE )
 
 # text size : create/modify pango attributes
 def font_attrs ( fontsize , widget=None ) :
