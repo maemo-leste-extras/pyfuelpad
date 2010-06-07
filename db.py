@@ -115,6 +115,61 @@ create_gpsinfo = """ALTER TABLE record ADD COLUMN gpstime TIMESTAMP;
                     ALTER TABLE record ADD COLUMN lon REAL;"""
 
 
+import location , gobject
+
+delay_for_fix = 120
+
+class timed_locator :
+
+    def __init__ ( self , rowid , database ) :
+        self.rowid , self.db = rowid , database
+        self.control = location.GPSDControl.get_default()
+        self.device = None
+        self.update_handler , self.timeout_handler = None , None
+        self.fix = None
+        self.time = None
+        self.lat , self.lon = None , None
+        self.do_start()
+
+    def do_start ( self ) :
+        if not self.device :
+            self.device = location.GPSDevice()
+        if not self.update_handler :
+            self.update_handler = self.device.connect_object("changed", self.do_update , None )
+            self.timeout_handler = gobject.timeout_add( delay_for_fix * 1000 , self.do_stop )
+            self.control.start()
+
+    def do_stop ( self ) :
+        if self.timeout_handler :
+            gobject.source_remove( self.timeout_handler )
+            self.timeout_handler = None
+        if self.update_handler :
+            self.device.disconnect( self.update_handler )
+            self.update_handler = None
+        if self.time :
+            query = "UPDATE RECORD set gpstime=%s WHERE id=%d" % ( self.time , self.rowid )
+            self.db.execute( query )
+            if self.lat and self.lon :
+                query = "UPDATE RECORD set lat=%s , lon=%s WHERE id=%d" % ( self.lat , self.lon , self.rowid )
+                self.db.execute( query )
+            self.db.commit()
+        self.device.stop()
+        self.control.stop()
+
+    def do_update ( self , data=None ) :
+
+        if self.device :
+            flags = self.device.fix[1]
+            if self.device.status == location.GPS_DEVICE_STATUS_FIX :
+                if flags & location.GPS_DEVICE_TIME_SET :
+                    self.time = self.device.fix[2]
+                if flags & location.GPS_DEVICE_LATLONG_SET :
+                    self.lat , self.lon = self.device.fix[4:6]
+                if flags & ( location.GPS_DEVICE_TIME_SET | location.GPS_DEVICE_LATLONG_SET ) :
+                    # FIXME : do we need to remove the timeout function previously added ??
+                    self.do_stop()
+
+
 class database :
 
     def __init__ ( self , dbname=None ) :
@@ -221,6 +276,7 @@ class database :
             query = "INSERT INTO record ( %s ) VALUES  ( %s )" % ( ",".join(columns) , values )
             rc = self.db.execute( query )
             if rc.rowcount :
+                timed_locator( rc.lastrowid , self.db )
                 self.db.commit()
                 return rc.lastrowid
 
