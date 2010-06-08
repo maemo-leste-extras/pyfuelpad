@@ -191,17 +191,17 @@ class FuelpadAbstractWindow :
         else :
             self.secondary_toolbar.hide()
 
-    def create_mainwin_widgets ( self , datascrollwin ) :
+    def create_mainwin_widgets ( self ) :
 
         vbox = gtk.VBox(False, 0)
         self.add( vbox )
 
         self.create_mainwin_menu( vbox )
 
-        vbox.pack_start( datascrollwin, True , True , 0 )
+        vbox.pack_start( self.datascrollwin, True , True , 0 )
 
         self.view = FuelpadView( self.config )
-        datascrollwin.add( self.view )
+        self.datascrollwin.add( self.view )
 
         self.create_mainwin_toolbar( )
         self.create_secondary_toolbar( )
@@ -398,10 +398,10 @@ if hildon :
 
         def create_mainwin_widgets ( self ) :
 
-            datascrollwin = hildon.PannableArea()
-            datascrollwin.set_property( "mov-mode" , hildon.MOVEMENT_MODE_BOTH )
+            self.datascrollwin = hildon.PannableArea()
+            self.datascrollwin.set_property( "mov-mode" , hildon.MOVEMENT_MODE_BOTH )
 
-            FuelpadAbstractWindow.create_mainwin_widgets( self , datascrollwin )
+            FuelpadAbstractWindow.create_mainwin_widgets( self )
 
         def pack_toolbars( self , widget=None ) :
             self.add_toolbar( self.main_toolbar )
@@ -515,9 +515,9 @@ else :
 
         def create_mainwin_widgets ( self ) :
 
-            datascrollwin = gtk.ScrolledWindow( None , None )
+            self.datascrollwin = gtk.ScrolledWindow( None , None )
 
-            FuelpadAbstractWindow.create_mainwin_widgets( self , datascrollwin )
+            FuelpadAbstractWindow.create_mainwin_widgets( self )
 
         def pack_toolbars( self , widget ) :
             widget.pack_start( self.main_toolbar , False , False , 5 )
