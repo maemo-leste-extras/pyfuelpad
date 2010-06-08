@@ -332,7 +332,7 @@ else :
               self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
 
             # Second row, second entry
-            self.entryfill = self.add_item( table , 'EDIT_FILL' , 2 )
+            self.entryfill = self.add_item( table , 'EDIT_FILL' , 1 , 2 )
 
             # Not full button
             self.buttonnotfull = gtk.CheckButton( label=self.labels['EDIT_NOTFULL'][0] )
@@ -345,7 +345,7 @@ else :
             self.entryprice = self.add_item( table , 'EDIT_PRICE' , 3 )
 
             # Third row, second entry
-            self.entrynotes = self.add_item( table , 'EDIT_NOTES' , 2 )
+            self.entrynotes = self.add_item( table , 'EDIT_NOTES' , 3 , 2 )
 
     #        completion = gtk.EntryCompletion()
     #        store = pui.view.get_model()
