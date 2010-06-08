@@ -163,19 +163,21 @@ class FuelpadEdit ( gtk.Notebook ) :
 
 class FuelpadAbstractFullEdit :
 
-    labels = { 'EDIT_DATE':( "Date", 20 ) ,
-               'EDIT_KM':( "Km", 8 ) ,
-               'EDIT_MILES':( "Miles", 8 ) ,
-               'EDIT_TRIP':( "Trip", 8 ) ,
-               'EDIT_FILL':( "Fill", 8 ) ,
-               'EDIT_NOTFULL':( "Not full tank", None ) ,
-               'EDIT_PRICE':( "Price", 8 ) ,
-               'EDIT_NOTES':( "Notes", 50 ) ,
-               'EDIT_SERVICE':( "Service", 8 ) ,
-               'EDIT_OIL':( "Oil", 8 ) ,
-               'EDIT_TIRES':( "Tires", 8 ) ,
-               'EDIT_CAR':( "Car", None ) ,
-               'EDIT_DRIVER':( "Driver", None )
+    widgets = {}
+
+    labels = { 'EDIT_DATE':( "Date", 20 , configuration.column_dict['DAY']) ,
+               'EDIT_KM':( "Km", 8 , configuration.column_dict['KM']) ,
+               'EDIT_MILES':( "Miles", 8 , configuration.column_dict['KM']) ,
+               'EDIT_TRIP':( "Trip", 8 , configuration.column_dict['TRIP']) ,
+               'EDIT_FILL':( "Fill", 8 , configuration.column_dict['FILL']) ,
+               'EDIT_NOTFULL':( "Not full tank", None , None) ,
+               'EDIT_PRICE':( "Price", 8 , configuration.column_dict['PRICE']) ,
+               'EDIT_NOTES':( "Notes", 50 , configuration.column_dict['NOTES']) ,
+               'EDIT_SERVICE':( "Service", 8 , configuration.column_dict['SERVICE']) ,
+               'EDIT_OIL':( "Oil", 8 , configuration.column_dict['OIL']) ,
+               'EDIT_TIRES':( "Tires", 8 , configuration.column_dict['TIRES']) ,
+               'EDIT_CAR':( "Car", None , None ) ,
+               'EDIT_DRIVER':( "Driver", None , None)
                }
 
     #DIALOG_MIN_HEIGHT0 = 300
@@ -185,6 +187,8 @@ class FuelpadAbstractFullEdit :
     #DIALOG_MIN_WIDTH1 = 720
 
     def add_label ( self , table , id , item , row , column=0 ) :
+        if self.labels[id][2] :
+            self.widgets[ self.labels[id][2] ] = item
         label = gtk.Label( self.labels[id][0] )
         table.attach(label, column, column+1, row, row+1,
                      gtk.EXPAND|gtk.FILL,
@@ -223,6 +227,7 @@ if hildon :
             # First row, first entry
             self.entrydate = hildon.DateButton( gtk.HILDON_SIZE_FINGER_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
             self.add_button( table , self.entrydate , row )
+            self.widgets[ self.labels['EDIT_DATE'][2] ] = self.entrydate
             row += 1
 
             # First row, second entry

@@ -94,6 +94,122 @@ def ui_find_iter( store , id ) :
         iter = store.iter_next(iter)
     return iter
 
+def edit_record_response ( widget , event , editwin , pui  ) :
+
+    view , config = pui.view , pui.config
+
+    if not config.db.is_open() :
+        widget.destroy()
+        return
+
+    # NOTE ?? : response from hildon wizard is an unexpected value
+    if event == gtk.RESPONSE_ACCEPT : # or event == 2 :
+
+        selection = pui.view.get_selection()
+        model , iter = selection.get_selected()
+        if iter :
+            id = store.get( iter , configuration.column_dict['ID'] )[0]
+
+            if False : #  hildon : JP
+                if maemo5 :
+                    _date = editwin.entrydate.get_date() # &year, &month, &day);  /* Month is betweewn 0 and 11 */
+                    month += 1
+                else :
+                    _date = editwin.entrydate.get_date() #  &year, &month, &day);
+                print "DATE:",_date
+                date = "%d-%02d-%02d" % _date
+            else :
+                date = editwin.entrydate.get_text()
+            date = utils.date2sqlite( config.dateformat , date )
+
+            km  = config.user2SIlength( float( editwin.entrykm.get_text() or "-1" ) )
+            trip = config.user2SIlength( float( editwin.entrytrip.get_text() or "-1" ) )
+            fill  = config.user2SIvolume( float( editwin.entryfill.get_text() or "-1" ) )
+            if editwin.entryprice :
+                price = float( editwin.entryprice.get_text() or "-1" )
+                service = float( editwin.entryservice.get_text() or "-1" )
+                oil = float( editwin.entryoil.get_text() or "-1" )
+                tires = float( editwin.entrytires.get_text() or "-1" )
+                notes = editwin.entrynotes.get_text()
+            else :
+                price = service = oil = tires = 0
+                notes = ""
+
+            oldnotfull = False
+            """
+      /* 
+       * Well need to obtain the unmodified data to be excluded from the new 
+       * consumption calculations 
+       */
+      if (SQLITE_OK == sqlite3_bind_int(ppStmtOneRecord, 1, id)) {
+        while (SQLITE_ROW == sqlite3_step(ppStmtOneRecord)) {
+          oldfill=sqlite3_column_double(ppStmtOneRecord,3);
+          oldtrip=sqlite3_column_double(ppStmtOneRecord,2);
+          oldconsum=sqlite3_column_double(ppStmtOneRecord,9);
+          oldnotfull=(oldfill>0.0) && (abs(oldconsum)<1e-5);
+        }
+        sqlite3_reset(ppStmtOneRecord);
+      }
+"""
+
+            if editwin.buttonnotfull.get_active() :
+
+                # For this record
+                consum = 0.0
+
+                # Find next full record 
+                fullid , fullfill , fullkm = config.db.find_next_full( km )
+                if fullid : 
+                    if not oldnotfull :
+                        oldfill = 0.0
+                        oldtrip = 0.0
+                    fullconsum = (fullfill+fill-oldfill)/(fullkm+trip-oldtrip)*100
+
+                    # Update now the full record consum
+                    query = "UPDATE record set consum=%s WHERE id=%s" % ( fullconsum , fullid )
+                    config.db.execute( query )
+
+            else :
+
+                if oldnotfull :
+
+                    # Find next full record 
+                    fullid , fullfill , fullkm = config.db.find_next_full( km )
+                    if fullid : 
+                        fullconsum = (fullfill-oldfill)/(fullkm-oldtrip)*100
+
+                        # Update now the full record consum
+                        query = "UPDATE record set consum=%s WHERE id=%s" % ( fullconsum , fullid )
+                        config.db.execute( query )
+
+                    # Find if there are any not full fills before this record
+                    fullfill , fullkm = config.db.find_prev_full( km )
+                    if not oldnotfull :
+                        oldfill = 0.0
+                        oldtrip = 0.0
+                    fullconsum = (fullfill+fill)/(fullkm+trip)*100
+
+            if config.db.is_open() :
+                recordid = config.db.update_record(date, km, trip, fill, consum, price, service, oil, tires, notes)
+                if recordid == id :
+                    store = get_store_and_iter(None, view, None, None, config)
+                    storeiter = store.append()
+                    ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, service, oil, tires, notes, recordid, True)
+
+                    # Update the data for the full fill
+                    if notfull or notfull!=oldnotfull : # not enough to test notfull, but when?
+                      if fullid>0 :
+                        fullstore = get_store_and_iter(None, view, None, None, config);
+                        fullstoreiter = ui_find_iter( fullstore , fullid )
+                        if fullstoreiter :
+                          ui_update_row_data(fullstore, fullstoreiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
+                    pui.update_totalkm()
+
+        widget.destroy()
+
+    elif event == gtk.RESPONSE_REJECT :
+        widget.destroy()
+
 def add_record_response ( widget , event , editwin , pui ) :
 
   view , config = pui.view , pui.config
@@ -179,8 +295,59 @@ def callback_recordactivated ( view , path , col , pui ) :
     callback_editrecord(None, pui)
 
 def callback_editrecord ( action , pui ) :
-   # NOT EDITABLE
-   pass
+
+    header = ( "Edit a record" , )
+
+    if pui.config.db.is_open() :
+        selection = pui.view.get_selection()
+        model , iter = selection.get_selected()
+        if iter :
+            dialog = gtk.Dialog( header[0],
+                                 pui,
+                                 gtk.DIALOG_MODAL,
+                                 ( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                                   gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
+                                   )
+                                 )
+            editwin = wizard.FuelpadFullEdit( pui.config , 0 )
+
+            # FIXME : notfull toggle needs to be manually worked
+            for colid,widget in editwin.widgets.iteritems() :
+                widget.set_text( "%s" % model.get_value( iter , colid ) )
+
+            dialog.vbox.pack_start(editwin , True, True, 0)
+            editwin.show()
+
+            dialog.connect( "response", edit_record_response, editwin , pui )
+
+        else :
+            dialog = gtk.Dialog( header[0],
+                                 pui ,
+                                 gtk.DIALOG_MODAL ,
+                                 ( gtk.STOCK_OK, gtk.RESPONSE_REJECT )
+                                 )
+
+            label = gtk.Label( "Select a record first" )
+            dialog.vbox.pack_start( label, True, True, 5)
+            label.show()
+
+            dialog.connect( "response", destroy_event , None )
+
+    else :
+        dialog = gtk.Dialog( header[0],
+                             pui ,
+                             gtk.DIALOG_MODAL ,
+                             ( gtk.STOCK_OK, gtk.RESPONSE_REJECT )
+                             )
+
+        label = gtk.Label( "Select a record first" )
+        label = gtk.Label( "Can't access database - editing records not possible" )
+        dialog.vbox.pack_start( label, True, True, 5)
+        label.show()
+
+        dialog.connect( "response", destroy_event , None )
+
+    dialog.show()
 
 def callback_newrecord ( action, pui ) :
 
@@ -199,7 +366,8 @@ def callback_newrecord ( action, pui ) :
                                    )
                                  )
             dialog.vbox.pack_start(editwin , True, True, 0)
-            editwin.show()
+
+        editwin.show_all()
 
         dialog.connect( "response", add_record_response, editwin , pui )
 
@@ -207,7 +375,6 @@ def callback_newrecord ( action, pui ) :
         #    help_dialog_help_enable(GTK_DIALOG(dialog),
         #                                   HELP_ID_ADDRECORD,
         #                                   pui->app->osso);
-
 
     else :
         dialog = gtk.Dialog( header[0],
@@ -222,7 +389,7 @@ def callback_newrecord ( action, pui ) :
 
         dialog.connect( "response", destroy_event , None )
 
-    dialog.show_all()
+    dialog.show()
 
 
 # Actions for carcombo item done

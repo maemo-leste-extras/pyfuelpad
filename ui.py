@@ -227,7 +227,7 @@ class FuelpadAbstractWindow :
 
         # Create toolbar button items
         self.mtb_add = gtk.ToolButton( gtk.STOCK_ADD )
-      #  self.mtb_edit = gtk.ToolButton( gtk.STOCK_EDIT )
+        self.mtb_edit = gtk.ToolButton( gtk.STOCK_EDIT )
       #  self.mtb_up = gtk.ToolButton( gtk.STOCK_GO_UP )
       #  self.mtb_down = gtk.ToolButton( gtk.STOCK_GO_DOWN )
       #  self.mtb_delete = gtk.ToolButton( gtk.STOCK_DELETE )
@@ -235,7 +235,7 @@ class FuelpadAbstractWindow :
         self.mtb_close = gtk.ToolButton( gtk.STOCK_QUIT )
 
         self.mtb_add.set_expand( True )
-      #  self.mtb_edit.set_expand( True )
+        self.mtb_edit.set_expand( True )
       #  self.mtb_up.set_expand( True )
       #  self.mtb_down.set_expand( True )
       #  self.mtb_delete.set_expand( True )
@@ -245,7 +245,7 @@ class FuelpadAbstractWindow :
         # Add all items to toolbar
         self.main_toolbar.insert( self.mtb_add, -1)
         self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
-      #  self.main_toolbar.insert( self.mtb_edit, -1)
+        self.main_toolbar.insert( self.mtb_edit, -1)
       #  self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
       #  self.main_toolbar.insert( self.mtb_up, -1)
       #  self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
@@ -258,7 +258,7 @@ class FuelpadAbstractWindow :
         self.main_toolbar.insert( self.mtb_close, -1)
 
         self.mtb_add.connect( "clicked" , callbacks.callback_newrecord , self )
-      #  self.mtb_edit.connect( "clicked", callback_editrecord, self)
+        self.mtb_edit.connect( "clicked", callbacks.callback_editrecord, self)
       #  self.mtb_up.connect( "clicked", callback_prevrecord, self)
       #  self.mtb_down.connect( "clicked", callback_nextrecord, self)
       #  self.mtb_delete.connect( "clicked", callback_deleterecord, self)
@@ -319,7 +319,7 @@ class FuelpadAbstractWindow :
 
         dbopen = self.config.db.is_open()
         self.mtb_add.set_sensitive( dbopen )
-      #  self.mtb_edit.set_sensitive( dbopen )
+        self.mtb_edit.set_sensitive( dbopen )
       #  self.mtb_up.set_sensitive( dbopen )
       #  self.mtb_down.set_sensitive( dbopen )
       #  self.mtb_delete.set_sensitive( dbopen )
@@ -474,7 +474,7 @@ if hildon :
             self.main_menu.append( self.mm_item_settings )
 
             self.mm_item_new.connect( "clicked", callbacks.callback_newrecord , self )
-        #  self.mm_item_edit.connect( "clicked", callback_editrecord , self )
+            self.mm_item_edit.connect( "clicked", callbacks.callback_editrecord , self )
         #  self.mm_item_alarm.connect( "clicked", callback_alarm , self )
         #  self.mm_item_settings.connect( "clicked", callback_settings , self )
         #  self.mm_item_delete.connect( "clicked", callback_deleterecord , self )
@@ -678,7 +678,7 @@ else :
         #    g_signal_connect(G_OBJECT(self.mm_item_export), "activate", callback_export), NULL);
 
             self.mm_item_new.connect( "activate" , callbacks.callback_newrecord, self )
-        #    g_signal_connect(G_OBJECT(self.mm_item_edit), "activate", callback_editrecord), pui);
+            self.mm_item_edit.connect( "activate" , callbacks.callback_editrecord, self )
         #    g_signal_connect(G_OBJECT(self.mm_item_delete), "activate", callback_deleterecord), pui);
 
             self.main_menu_item_fullscreen.connect( "toggled" , callbacks.cb_main_fullscreen , self )
