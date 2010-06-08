@@ -44,7 +44,7 @@ def callback_kmadded ( widget , event , pui , config ) :
 #DIALOG_MIN_HEIGHT0 = 300
 DIALOG_MIN_HEIGHT1 = 200
 #DIALOG_MIN_HEIGHT2 = 150
-#DIALOG_MIN_HEIGHTMAX = 400
+DIALOG_MIN_HEIGHTMAX = 400
 #DIALOG_MIN_WIDTH1 = 720
 
 # Add record dialog
@@ -185,7 +185,220 @@ class FuelpadEdit ( gtk.Notebook ) :
         return True
 
 # Ported the GTK part
-class FuelpadFullEdit ( gtk.Notebook ) :
+class FuelpadFullEdit ( hildon.PannableArea ) :
+
+    labels = { 'EDIT_DATE':"Date",
+               'EDIT_KM':"Km",
+               'EDIT_MILES':"Miles",
+               'EDIT_TRIP':"Trip",
+               'EDIT_FILL':"Fill",
+               'EDIT_NOTFULL':"Not full tank",
+               'EDIT_PRICE':"Price",
+               'EDIT_NOTES':"Notes",
+               'EDIT_SERVICE':"Service",
+               'EDIT_OIL':"Oil",
+               'EDIT_TIRES':"Tires",
+               'EDIT_CAR':"Car",
+               'EDIT_DRIVER':"Driver"}
+
+    def __init__( self , config , add ) :
+        hildon.PannableArea.__init__( self )
+        self.set_size_request( -1 , DIALOG_MIN_HEIGHTMAX )
+
+        if add :
+            table = gtk.Table(12, 2, False)
+        else :
+            table = gtk.Table(10, 2, False)
+
+        row = 0
+
+        if add :
+
+            self.carcombo = combos.FuelpadCarCombo( config )
+            table.attach(self.carcombo, 0, 2, row, row+1, 
+                         gtk.EXPAND|gtk.FILL,
+                         0, 0, 5)
+            self.carcombo.show()
+            row += 1
+
+            self.drivercombo = combos.FuelpadDriverCombo( config )
+            table.attach( self.drivercombo, 0, 2, row, row+1,
+                          gtk.EXPAND|gtk.FILL,
+                          0, 0, 5)
+            self.drivercombo.show()
+            row += 1
+
+        # First row, first entry
+        self.entrydate = hildon.DateButton( gtk.HILDON_SIZE_FINGER_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
+        table.attach( self.entrydate, 0, 2, row, row+1,
+                     gtk.EXPAND|gtk.FILL,
+                     0, 0, 5)
+        self.entrydate.show()
+        row += 1
+  
+        # First row, second entry
+        if config.isSI( 'length' ) :
+          label = gtk.Label( self.labels['EDIT_KM'] )
+        else :
+          label = gtk.Label( self.labels['EDIT_MILES'] )
+        table.attach(label, 0, 1, row, row+1,
+                     gtk.EXPAND|gtk.FILL,
+                     0, 0, 5)
+        label.show()
+
+        self.entrykm = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+        self.entrykm.set_max_length( ENTRYKMMAX )
+        self.entrykm.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
+#        self.entrykm.set_property( "autocap", False)
+        if add :
+          self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
+
+        table.attach( self.entrykm, 1, 2, row, row+1,
+                      gtk.EXPAND|gtk.FILL,
+                      0, 0, 5)
+        self.entrykm.show()
+        row += 1
+
+        # Second row, first entry
+        label = gtk.Label( self.labels['EDIT_TRIP'] )
+        table.attach(label, 0, 1, row, row+1,
+                     gtk.EXPAND|gtk.FILL,
+                     0, 0, 5)
+        label.show()
+
+        self.entrytrip = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+        self.entrytrip.set_max_length( ENTRYTRIPMAX )
+        self.entrytrip.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
+#        self.entrytrip.set_property( "autocap", False)
+        if add :
+          self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
+
+        table.attach( self.entrytrip, 1, 2, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        self.entrytrip.show()
+        row += 1
+
+        # Second row, second entry
+        label = gtk.Label( self.labels['EDIT_FILL'] )
+        table.attach( label, 0, 1, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        label.show()
+
+        self.entryfill = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+        self.entryfill.set_max_length( ENTRYFILLMAX )
+        self.entryfill.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
+#        self.entryfill.set_property( "autocap", False)
+        table.attach( self.entryfill, 1, 2, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        self.entryfill.show()
+        row += 1
+
+        # Not full button
+        self.buttonnotfull = hildon.CheckButton( gtk.HILDON_SIZE_FINGER_HEIGHT )
+        self.buttonnotfull.set_label( self.labels['EDIT_NOTFULL'] )
+        table.attach( self.buttonnotfull, 1, 2, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        self.buttonnotfull.show()
+        row += 1
+
+        # Third row, first entry
+        label = gtk.Label( self.labels['EDIT_PRICE'] )
+        table.attach( label, 0, 1, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        label.show()
+
+        self.entryprice = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+        self.entryprice.set_max_length( ENTRYPRICEMAX )
+        self.entryprice.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
+#        self.entryprice.set_property( "autocap", False)
+        table.attach( self.entryprice, 1, 2, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        self.entryprice.show()
+        row += 1
+
+        # Third row, second entry
+        label = gtk.Label( self.labels['EDIT_NOTES'] )
+        table.attach( label, 0, 1, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        label.show()
+
+        self.entrynotes = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+        self.entrynotes.set_max_length( ENTRYNOTESMAX )
+        table.attach( self.entrynotes, 1, 2, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5);
+        self.entrynotes.show()
+
+#        completion = gtk.EntryCompletion()
+#        store = pui.view.get_model()
+#        completion.set_model( store )
+#        completion.set_text_column( configuration.column_dict['NOTES'] )
+#        self.entrynotes.set_completion( completion )
+        row += 1
+
+        # First row, first entry
+        label = gtk.Label( self.labels['EDIT_SERVICE'] )
+        table.attach( label, 0, 1, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        label.show()
+
+        self.entryservice = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+        self.entryservice.set_max_length( ENTRYSERVICEMAX )
+        self.entryservice.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
+#        self.entryservice.set_property( "autocap", False)
+        table.attach( self.entryservice, 1, 2, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        self.entryservice.show()
+        row += 1
+
+        # Second row, first entry
+        label = gtk.Label( self.labels['EDIT_OIL'] )
+        table.attach( label, 0, 1, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        label.show()
+
+        self.entryoil = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+        self.entryoil.set_max_length( ENTRYOILMAX )
+        self.entryoil.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
+#        self.entryoil.set_property( "autocap", False)
+        table.attach( self.entryoil, 1, 2, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        self.entryoil.show()
+        row += 1
+
+        # Third row, first entry
+        label = gtk.Label( self.labels['EDIT_TIRES'] )
+        table.attach( label, 0, 1, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        label.show()
+
+        self.entrytires = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+        self.entrytires.set_max_length( ENTRYTIRESMAX )
+        self.entrytires.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
+#        self.entrytires.set_property( "autocap", False)
+        table.attach( self.entrytires, 1, 2, row, row+1,
+                   gtk.EXPAND|gtk.FILL,
+                   0, 0, 5)
+        self.entrytires.show()
+        row += 1
+
+        self.add_with_viewport( table )
+
+
+# Ported the GTK part
+class GTK_FuelpadFullEdit ( gtk.Notebook ) :
 
     labels = { 'EDIT_DATE':"Date",
                'EDIT_KM':"Km",
@@ -241,14 +454,6 @@ class FuelpadFullEdit ( gtk.Notebook ) :
 
         self.entrykm = gtk.Entry()
         self.entrykm.set_max_length( ENTRYKMMAX )
-#  if hildon :
-#    if maemo5 :
-#      pui.entrykm.set( "hildon-input-mode",
-#		 HILDON_GTK_INPUT_MODE_NUMERIC|HILDON_GTK_INPUT_MODE_SPECIAL,
-#		 None)
-#    else:
-#      pui.entrykm.set( "input-mode", hildon.INPUT_MODE_HINT_NUMERICSPECIAL, None)
-#      pui.entrykm.set( "autocap", False, None)
         if add :
           self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
 
@@ -266,16 +471,6 @@ class FuelpadFullEdit ( gtk.Notebook ) :
 
         self.entrytrip = gtk.Entry()
         self.entrytrip.set_max_length( ENTRYTRIPMAX )
-#  if hildon :
-#    if maemo5 :
-#      g_object_set(G_OBJECT(pui->entrytrip),
-#              "hildon-input-mode",
-#               HILDON_GTK_INPUT_MODE_NUMERIC|HILDON_GTK_INPUT_MODE_SPECIAL,
-#               NULL);
-#    else :
-#      g_object_set(G_OBJECT(pui->entrytrip),
-#               "input-mode", HILDON_INPUT_MODE_HINT_NUMERICSPECIAL, NULL);
-#    g_object_set(G_OBJECT(pui->entrytrip), "autocap", FALSE, NULL);
         if add :
           self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
 
