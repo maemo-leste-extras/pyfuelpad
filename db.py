@@ -392,3 +392,15 @@ class database :
 
        return 0.0 , 0.0
 
+    def find_next_full ( self , km ) :
+       if self.is_open() :
+           query = "SELECT km,trip,fill,consum,id FROM record WHERE carid=%d AND km>%d AND fill>0 AND consum>0 ORDER BY km LIMIT 1" % ( self.currentcar , km )
+           rc = self.db.execute( query )
+           result = rc.fetchone()
+           if result :
+               consum = float( result[3] )
+               if not consum*consum > 1e-6 : # Full fill not found
+                   return float(result[4]) , float( result[2] ) , float( result[1] )
+
+       return 0 , 0.0 , 0.0
+

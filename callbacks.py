@@ -85,6 +85,15 @@ def ui_update_row_data ( store , iter , config , date, km, trip, fill, consum, p
   if notes != None : store.set( iter, configuration.column_dict['NOTES'], notes)
   store.set( iter, configuration.column_dict['ID'], id, configuration.column_dict['VISIBLE'], visible);
 
+def ui_find_iter( store , id ) :
+    iter = store.get_iter_first()
+    while iter :
+        curid = store.get( iter , configuration.column_dict['ID'] )[0]
+        if curid == id :
+            break
+        iter = store.iter_next(iter)
+    return iter
+
 def add_record_response ( widget , event , editwin , pui ) :
 
   view , config = pui.view , pui.config
@@ -126,32 +135,36 @@ def add_record_response ( widget , event , editwin , pui ) :
 
     if editwin.buttonnotfull.get_active() :
 
-	# For this record
-	consum = 0.0
-	print "DEQUENO"
+        # For this record
+        consum = 0.0
 
-#	# Find next full record 
-#	fullid=db_find_next_full(km, &fullfill, &fullkm);
-#	if (fullid>=0) {
-# ...
-#	}
-#	else
-#	  PDEBUG("Full fill not found\n");
-#      }
+        # Find next full record 
+        fullid , fullfill , fullkm = config.db.find_next_full( km )
+        if fullid : 
+           fullconsum = (fullfill+fill)/(fullkm+trip)*100
+
+           # Update now the full record consum and tree view also
+           query = "UPDATE record set consum=%s WHERE id=%s" % ( fullconsum , fullid )
+           config.db.execute( query )
+
+           store = get_store_and_iter(None, view, None, None, config)
+           storeiter = ui_find_iter( store , fullid )
+           if storeiter :
+               ui_update_row_data(store, storeiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
     else :
       # Find if there are any not full fills before this record
       fullfill , fullkm = config.db.find_prev_full( km )
 
-      consum = (fullfill+fill)/(fullkm+trip)*100;
+      consum = (fullfill+fill)/(fullkm+trip)*100
 
     # This is verified also within add_record method
     if config.db.is_open() :
-	recordid = config.db.add_record(date, km, trip, fill, consum, price, service, oil, tires, notes)
-	if recordid : # record succesfully inserted
-	  store = get_store_and_iter(None, view, None, None, config)
-	  storeiter = store.append()
-	  ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, service, oil, tires, notes, recordid, True)
-          pui.update_totalkm()
+        recordid = config.db.add_record(date, km, trip, fill, consum, price, service, oil, tires, notes)
+        if recordid : # record succesfully inserted
+            store = get_store_and_iter(None, view, None, None, config)
+            storeiter = store.append()
+            ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, service, oil, tires, notes, recordid, True)
+            pui.update_totalkm()
 
     widget.destroy()
 
@@ -186,6 +199,8 @@ def callback_newrecord ( action, pui ) :
                                    )
                                  )
             dialog.vbox.pack_start(editwin , True, True, 0)
+            editwin.show()
+
         dialog.connect( "response", add_record_response, editwin , pui )
 
         #if libhelp :
