@@ -9,56 +9,6 @@ except :
     hildon = False
 
 
-def callback_tripadded ( widget , event , pui , config ) :
-  newkm = float( pui.entrykm.get_text() or "0" )
-  if newkm < 0.1 :
-    trip = config.user2SIlength( float( pui.entrytrip.get_text() or "0" ) )
-    lastkm = config.db.last_refill(newkm)
-    if lastkm < 0.1 :
-      lastkm = config.db.last_km()
-      # BUGFIX : happens when database is brand new
-      if lastkm == 0.0 :
-        return False
-    if widget :
-      buf = "%.1f" % config.SIlength2user( lastkm + trip )
-    else :
-      buf = "%d" % config.SIlength2user( lastkm + trip )
-    pui.entrykm.set_text( buf )
-  return False
-
-def callback_kmadded ( widget , event , pui , config ) :
-  trip = float( pui.entrytrip.get_text() or "0" )
-  newkm = config.user2SIlength( float( pui.entrykm.get_text() or "0" ) )
-  if trip < 0.1 and newkm > 0 :
-    lastkm = config.db.last_refill(newkm)
-    if lastkm < 0.1 :
-      lastkm = config.db.last_km()
-      # BUGFIX : happens when database is brand new
-      if lastkm == 0.0 :
-        return False
-    buf = "%.1f" % config.SIlength2user( newkm - lastkm )
-    pui.entrytrip.set_text( buf )
-  return False
-
-
-#DIALOG_MIN_HEIGHT0 = 300
-DIALOG_MIN_HEIGHT1 = 200
-#DIALOG_MIN_HEIGHT2 = 150
-DIALOG_MIN_HEIGHTMAX = 400
-#DIALOG_MIN_WIDTH1 = 720
-
-# Add record dialog
-ENTRYDATEMAX = 20
-ENTRYKMMAX = 8
-ENTRYTRIPMAX = 8
-ENTRYFILLMAX = 8
-ENTRYPRICEMAX = 8
-ENTRYNOTESMAX = 50
-ENTRYSERVICEMAX = 8
-ENTRYOILMAX = 8
-ENTRYTIRESMAX = 8
-
-
 class KeypadAbstractButton :
 
         def __init__ ( self , text_label ) :
@@ -148,6 +98,38 @@ class ButtonPad ( gtk.Table ) :
         return self.label.set_text( value )
 
 
+def callback_tripadded ( widget , event , editwin , config ) :
+    newkm = float( editwin.entrykm.get_text() or "0" )
+    if newkm < 0.1 :
+        trip = config.user2SIlength( float( editwin.entrytrip.get_text() or "0" ) )
+        lastkm = config.db.last_refill(newkm)
+        if lastkm < 0.1 :
+            lastkm = config.db.last_km()
+            # BUGFIX : happens when database is brand new
+            if lastkm == 0.0 :
+                return False
+        if widget :
+            buf = "%.1f" % config.SIlength2user( lastkm + trip )
+        else :
+            buf = "%d" % config.SIlength2user( lastkm + trip )
+        editwin.entrykm.set_text( buf )
+    return False
+
+def callback_kmadded ( widget , event , editwin , config ) :
+    trip = float( editwin.entrytrip.get_text() or "0" )
+    newkm = config.user2SIlength( float( editwin.entrykm.get_text() or "0" ) )
+    if trip < 0.1 and newkm > 0 :
+        lastkm = config.db.last_refill(newkm)
+        if lastkm < 0.1 :
+            lastkm = config.db.last_km()
+            # BUGFIX : happens when database is brand new
+            if lastkm == 0.0 :
+                return False
+        buf = "%.1f" % config.SIlength2user( newkm - lastkm )
+        editwin.entrytrip.set_text( buf )
+    return False
+
+
 class FuelpadEdit ( gtk.Notebook ) :
 
     def __init__( self , config , add ) :
@@ -159,11 +141,6 @@ class FuelpadEdit ( gtk.Notebook ) :
         self.append_page( self.entryfill , gtk.Label( "Fill" ) )
         self.append_page( self.entrytrip , gtk.Label( "Trip" ) )
         self.append_page( self.entrykm , gtk.Label( "Total KM" ) )
-
-        # FIXME : focus actually never enters nor leave the entries
-        if add :
-            self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
-            self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
 
         # Not shown widgets
         self.entrydate = gtk.Entry()
@@ -184,445 +161,242 @@ class FuelpadEdit ( gtk.Notebook ) :
             callback_kmadded( None , None , self , config )
         return True
 
-# Ported the GTK part
-class FuelpadFullEdit ( hildon.PannableArea ) :
+class FuelpadAbstractFullEdit :
 
-    labels = { 'EDIT_DATE':"Date",
-               'EDIT_KM':"Km",
-               'EDIT_MILES':"Miles",
-               'EDIT_TRIP':"Trip",
-               'EDIT_FILL':"Fill",
-               'EDIT_NOTFULL':"Not full tank",
-               'EDIT_PRICE':"Price",
-               'EDIT_NOTES':"Notes",
-               'EDIT_SERVICE':"Service",
-               'EDIT_OIL':"Oil",
-               'EDIT_TIRES':"Tires",
-               'EDIT_CAR':"Car",
-               'EDIT_DRIVER':"Driver"}
+    labels = { 'EDIT_DATE':( "Date", 20 ) ,
+               'EDIT_KM':( "Km", 8 ) ,
+               'EDIT_MILES':( "Miles", 8 ) ,
+               'EDIT_TRIP':( "Trip", 8 ) ,
+               'EDIT_FILL':( "Fill", 8 ) ,
+               'EDIT_NOTFULL':( "Not full tank", None ) ,
+               'EDIT_PRICE':( "Price", 8 ) ,
+               'EDIT_NOTES':( "Notes", 50 ) ,
+               'EDIT_SERVICE':( "Service", 8 ) ,
+               'EDIT_OIL':( "Oil", 8 ) ,
+               'EDIT_TIRES':( "Tires", 8 ) ,
+               'EDIT_CAR':( "Car", None ) ,
+               'EDIT_DRIVER':( "Driver", None )
+               }
 
-    def __init__( self , config , add ) :
-        hildon.PannableArea.__init__( self )
-        self.set_size_request( -1 , DIALOG_MIN_HEIGHTMAX )
+    #DIALOG_MIN_HEIGHT0 = 300
+    DIALOG_MIN_HEIGHT1 = 200
+    #DIALOG_MIN_HEIGHT2 = 150
+    DIALOG_MIN_HEIGHTMAX = 400
+    #DIALOG_MIN_WIDTH1 = 720
 
-        if add :
-            table = gtk.Table(12, 2, False)
-        else :
-            table = gtk.Table(10, 2, False)
+    def add_label ( self , table , id , item , row , column=0 ) :
+        label = gtk.Label( self.labels[id][0] )
+        table.attach(label, column, column+1, row, row+1,
+                     gtk.EXPAND|gtk.FILL,
+                     0, 0, 5)
+        label.show()
+        table.attach(item, column+1, column+2, row, row+1,
+                     gtk.EXPAND|gtk.FILL,
+                     0, 0, 5)
+        item.show()
 
-        row = 0
+if hildon :
 
-        if add :
+    class FuelpadFullEdit ( hildon.PannableArea , FuelpadAbstractFullEdit ) :
 
-            self.carcombo = combos.FuelpadCarCombo( config )
-            table.attach(self.carcombo, 0, 2, row, row+1, 
+        def __init__( self , config , add ) :
+            hildon.PannableArea.__init__( self )
+            self.set_size_request( -1 , self.DIALOG_MIN_HEIGHTMAX )
+
+            if add :
+                table = gtk.Table(12, 2, False)
+            else :
+                table = gtk.Table(10, 2, False)
+
+            row = 0
+
+            if add :
+
+                self.carcombo = combos.FuelpadCarCombo( config )
+                self.add_button( table , self.carcombo , row )
+                row += 1
+
+                self.drivercombo = combos.FuelpadDriverCombo( config )
+                self.add_button( table , self.drivercombo , row )
+                row += 1
+
+            # First row, first entry
+            self.entrydate = hildon.DateButton( gtk.HILDON_SIZE_FINGER_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
+            self.add_button( table , self.entrydate , row )
+            row += 1
+
+            # First row, second entry
+            if config.isSI( 'length' ) :
+              self.entrykm = self.add_item( table , 'EDIT_KM' , row )
+            else :
+              self.entrykm = self.add_item( table , 'EDIT_MILES' , row )
+            row += 1
+
+            if add :
+              self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
+
+            # Second row, first entry
+            self.entrytrip = self.add_item( table , 'EDIT_TRIP' , row )
+            row += 1
+
+            if add :
+              self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
+
+            # Second row, second entry
+            self.entryfill = self.add_item( table , 'EDIT_FILL' , row )
+            row += 1
+
+            # Not full button
+            self.buttonnotfull = hildon.CheckButton( gtk.HILDON_SIZE_FINGER_HEIGHT )
+            self.buttonnotfull.set_label( self.labels['EDIT_NOTFULL'][0] )
+            table.attach( self.buttonnotfull, 1, 2, row, row+1,
+                       gtk.EXPAND|gtk.FILL,
+                       0, 0, 5)
+            self.buttonnotfull.show()
+            row += 1
+
+            # Third row, first entry
+            self.entryprice = self.add_item( table , 'EDIT_PRICE' , row )
+            row += 1
+
+            # Third row, second entry
+            self.entrynotes = self.add_item( table , 'EDIT_NOTES' , row )
+            row += 1
+
+    #        completion = gtk.EntryCompletion()
+    #        store = pui.view.get_model()
+    #        completion.set_model( store )
+    #        completion.set_text_column( configuration.column_dict['NOTES'] )
+    #        self.entrynotes.set_completion( completion )
+
+            # First row, first entry
+            self.entryservice = self.add_item( table , 'EDIT_SERVICE' , row )
+            row += 1
+
+            # Second row, first entry
+            self.entryoil = self.add_item( table , 'EDIT_OIL' , row )
+            row += 1
+
+            # Third row, first entry
+            self.entrytires = self.add_item( table , 'EDIT_TIRES' , row )
+            row += 1
+
+            self.add_with_viewport( table )
+
+        def add_item ( self , table , id , row , column=0 ) :
+            item = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+            item.set_max_length( self.labels[id][1] )
+            item.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
+        #    item.set_property( "autocap", False)
+            self.add_label( table , id , item ,row , column )
+            return item
+
+        def add_button ( self , table , item , row ) :
+            table.attach(item, 0, 2, row, row+1,
                          gtk.EXPAND|gtk.FILL,
                          0, 0, 5)
-            self.carcombo.show()
-            row += 1
+            item.show()
+else :
 
-            self.drivercombo = combos.FuelpadDriverCombo( config )
-            table.attach( self.drivercombo, 0, 2, row, row+1,
-                          gtk.EXPAND|gtk.FILL,
-                          0, 0, 5)
-            self.drivercombo.show()
-            row += 1
+    class FuelpadFullEdit ( gtk.Notebook , FuelpadAbstractFullEdit ) :
 
-        # First row, first entry
-        self.entrydate = hildon.DateButton( gtk.HILDON_SIZE_FINGER_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
-        table.attach( self.entrydate, 0, 2, row, row+1,
-                     gtk.EXPAND|gtk.FILL,
-                     0, 0, 5)
-        self.entrydate.show()
-        row += 1
-  
-        # First row, second entry
-        if config.isSI( 'length' ) :
-          label = gtk.Label( self.labels['EDIT_KM'] )
-        else :
-          label = gtk.Label( self.labels['EDIT_MILES'] )
-        table.attach(label, 0, 1, row, row+1,
-                     gtk.EXPAND|gtk.FILL,
-                     0, 0, 5)
-        label.show()
+        def __init__( self , config , add ) :
+            gtk.Notebook.__init__( self )
+            self.set_tab_pos(gtk.POS_TOP)
 
-        self.entrykm = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-        self.entrykm.set_max_length( ENTRYKMMAX )
-        self.entrykm.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
-#        self.entrykm.set_property( "autocap", False)
-        if add :
-          self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
+            scrollwin = gtk.ScrolledWindow(None, None)
+            scrollwin.set_size_request(-1, self.DIALOG_MIN_HEIGHT1)
+            scrollwin.set_policy(gtk.POLICY_NEVER,
+                                 gtk.POLICY_AUTOMATIC)
 
-        table.attach( self.entrykm, 1, 2, row, row+1,
-                      gtk.EXPAND|gtk.FILL,
-                      0, 0, 5)
-        self.entrykm.show()
-        row += 1
+            table = gtk.Table(4, 4, False)
+            scrollwin.add_with_viewport( table )
 
-        # Second row, first entry
-        label = gtk.Label( self.labels['EDIT_TRIP'] )
-        table.attach(label, 0, 1, row, row+1,
-                     gtk.EXPAND|gtk.FILL,
-                     0, 0, 5)
-        label.show()
+            # First row, first entry
+            self.entrydate = self.add_item( table , 'EDIT_DATE' , 0 )
+            self.entrydate.set_text( utils.gettimefmt( config.dateformat ) )
 
-        self.entrytrip = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-        self.entrytrip.set_max_length( ENTRYTRIPMAX )
-        self.entrytrip.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
-#        self.entrytrip.set_property( "autocap", False)
-        if add :
-          self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
+            # First row, second entry
+            if config.isSI( 'length' ) :
+              self.entrykm = self.add_item( table , 'EDIT_KM' , 0 , 2 )
+            else :
+              self.entrykm = self.add_item( table , 'EDIT_MILES' , 0 , 2 )
 
-        table.attach( self.entrytrip, 1, 2, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entrytrip.show()
-        row += 1
+            if add :
+              self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
 
-        # Second row, second entry
-        label = gtk.Label( self.labels['EDIT_FILL'] )
-        table.attach( label, 0, 1, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
+            # Second row, first entry
+            self.entrytrip = self.add_item( table , 'EDIT_TRIP' , 1 )
 
-        self.entryfill = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-        self.entryfill.set_max_length( ENTRYFILLMAX )
-        self.entryfill.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
-#        self.entryfill.set_property( "autocap", False)
-        table.attach( self.entryfill, 1, 2, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entryfill.show()
-        row += 1
+            if add :
+              self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
 
-        # Not full button
-        self.buttonnotfull = hildon.CheckButton( gtk.HILDON_SIZE_FINGER_HEIGHT )
-        self.buttonnotfull.set_label( self.labels['EDIT_NOTFULL'] )
-        table.attach( self.buttonnotfull, 1, 2, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.buttonnotfull.show()
-        row += 1
+            # Second row, second entry
+            self.entryfill = self.add_item( table , 'EDIT_FILL' , 2 )
 
-        # Third row, first entry
-        label = gtk.Label( self.labels['EDIT_PRICE'] )
-        table.attach( label, 0, 1, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
+            # Not full button
+            self.buttonnotfull = gtk.CheckButton( label=self.labels['EDIT_NOTFULL'][0] )
+            table.attach( self.buttonnotfull, 3, 4, 2, 3,
+                       gtk.EXPAND|gtk.FILL,
+                       0, 0, 5)
+            self.buttonnotfull.show()
 
-        self.entryprice = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-        self.entryprice.set_max_length( ENTRYPRICEMAX )
-        self.entryprice.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
-#        self.entryprice.set_property( "autocap", False)
-        table.attach( self.entryprice, 1, 2, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entryprice.show()
-        row += 1
+            # Third row, first entry
+            self.entryprice = self.add_item( table , 'EDIT_PRICE' , 3 )
 
-        # Third row, second entry
-        label = gtk.Label( self.labels['EDIT_NOTES'] )
-        table.attach( label, 0, 1, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
+            # Third row, second entry
+            self.entrynotes = self.add_item( table , 'EDIT_NOTES' , 2 )
 
-        self.entrynotes = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-        self.entrynotes.set_max_length( ENTRYNOTESMAX )
-        table.attach( self.entrynotes, 1, 2, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5);
-        self.entrynotes.show()
+    #        completion = gtk.EntryCompletion()
+    #        store = pui.view.get_model()
+    #        completion.set_model( store )
+    #        completion.set_text_column( configuration.column_dict['NOTES'] )
+    #        self.entrynotes.set_completion( completion )
 
-#        completion = gtk.EntryCompletion()
-#        store = pui.view.get_model()
-#        completion.set_model( store )
-#        completion.set_text_column( configuration.column_dict['NOTES'] )
-#        self.entrynotes.set_completion( completion )
-        row += 1
+            # Table ready - show it
+            table.show()
+            scrollwin.show()
 
-        # First row, first entry
-        label = gtk.Label( self.labels['EDIT_SERVICE'] )
-        table.attach( label, 0, 1, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
+            label = gtk.Label( "Fuel fill" )
+            self.append_page( scrollwin, label )
 
-        self.entryservice = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-        self.entryservice.set_max_length( ENTRYSERVICEMAX )
-        self.entryservice.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
-#        self.entryservice.set_property( "autocap", False)
-        table.attach( self.entryservice, 1, 2, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entryservice.show()
-        row += 1
+            # Service etc. self
+            table = gtk.Table(1, 3, False)
 
-        # Second row, first entry
-        label = gtk.Label( self.labels['EDIT_OIL'] )
-        table.attach( label, 0, 1, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
+            # First row, first entry
+            self.entryservice = self.add_item( table , 'EDIT_SERVICE' , 0 )
 
-        self.entryoil = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-        self.entryoil.set_max_length( ENTRYOILMAX )
-        self.entryoil.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
-#        self.entryoil.set_property( "autocap", False)
-        table.attach( self.entryoil, 1, 2, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entryoil.show()
-        row += 1
+            # Second row, first entry
+            self.entryoil = self.add_item( table , 'EDIT_OIL' , 1 )
 
-        # Third row, first entry
-        label = gtk.Label( self.labels['EDIT_TIRES'] )
-        table.attach( label, 0, 1, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
+            # Third row, first entry
+            self.entrytires = self.add_item( table , 'EDIT_TIRES' , 2)
 
-        self.entrytires = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-        self.entrytires.set_max_length( ENTRYTIRESMAX )
-        self.entrytires.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
-#        self.entrytires.set_property( "autocap", False)
-        table.attach( self.entrytires, 1, 2, row, row+1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entrytires.show()
-        row += 1
+            # Table ready - show it
+            table.show()
 
-        self.add_with_viewport( table )
+            label = gtk.Label ( "Service/oil/tires" )
+            self.append_page( table, label)
 
+            if add :
+              table = gtk.Table(2, 2, False)
 
-# Ported the GTK part
-class GTK_FuelpadFullEdit ( gtk.Notebook ) :
+              # First row, first entry 
+              self.carcombo = combos.FuelpadCarCombo( config )
+              self.add_label( table , 'EDIT_CAR' , self.carcombo , 0 )
 
-    labels = { 'EDIT_DATE':"Date",
-               'EDIT_KM':"Km",
-               'EDIT_MILES':"Miles",
-               'EDIT_TRIP':"Trip",
-               'EDIT_FILL':"Fill",
-               'EDIT_NOTFULL':"Not full tank",
-               'EDIT_PRICE':"Price",
-               'EDIT_NOTES':"Notes",
-               'EDIT_SERVICE':"Service",
-               'EDIT_OIL':"Oil",
-               'EDIT_TIRES':"Tires",
-               'EDIT_CAR':"Car",
-               'EDIT_DRIVER':"Driver"}
+              # First row, second entry
+              self.drivercombo = combos.FuelpadDriverCombo( config )
+              self.add_label( table , 'EDIT_DRIVER' , self.drivercombo , 1 )
 
-    def __init__( self , config , add ) :
-        gtk.Notebook.__init__( self )
-        self.set_tab_pos(gtk.POS_TOP)
+              table.show()
 
-        scrollwin = gtk.ScrolledWindow(None, None)
-        scrollwin.set_size_request(-1, DIALOG_MIN_HEIGHT1)
-        scrollwin.set_policy(gtk.POLICY_NEVER,
-                             gtk.POLICY_AUTOMATIC)
+              label = gtk.Label( "Driver and car" )
+              self.append_page( table , label )
 
-        table = gtk.Table(4, 4, False)
-        scrollwin.add_with_viewport( table )
-
-        # First row, first entry
-        label = gtk.Label( self.labels['EDIT_DATE'] ) 
-        table.attach(label, 0, 1, 0, 1, 
-                     gtk.EXPAND|gtk.FILL,
-                     0, 0, 5)
-        label.show()
-
-        self.entrydate = gtk.Entry()
-        self.entrydate.set_max_length(ENTRYDATEMAX)
-        self.entrydate.set_text( utils.gettimefmt( config.dateformat ) )
-#      pui.entrydate = hildon.DateEditor()
-        table.attach( self.entrydate, 1, 2, 0, 1, 
-                     gtk.EXPAND|gtk.FILL,
-                     0, 0, 5)
-        self.entrydate.show()
-  
-        # First row, second entry
-        if config.isSI( 'length' ) :
-          label = gtk.Label( self.labels['EDIT_KM'] )
-        else :
-          label = gtk.Label( self.labels['EDIT_MILES'] )
-        table.attach(label, 2, 3, 0, 1, 
-                     gtk.EXPAND|gtk.FILL,
-                     0, 0, 5)
-        label.show()
-
-        self.entrykm = gtk.Entry()
-        self.entrykm.set_max_length( ENTRYKMMAX )
-        if add :
-          self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
-
-        table.attach( self.entrykm, 3, 4, 0, 1, 
-                      gtk.EXPAND|gtk.FILL,
-                      0, 0, 5)
-        self.entrykm.show()
-
-        # Second row, first entry
-        label = gtk.Label( self.labels['EDIT_TRIP'] )
-        table.attach(label, 0, 1, 1, 2,
-                     gtk.EXPAND|gtk.FILL,
-                     0, 0, 5)
-        label.show()
-
-        self.entrytrip = gtk.Entry()
-        self.entrytrip.set_max_length( ENTRYTRIPMAX )
-        if add :
-          self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
-
-        table.attach( self.entrytrip, 1, 2, 1, 2,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entrytrip.show()
-
-        # Second row, second entry
-        label = gtk.Label( self.labels['EDIT_FILL'] )
-        table.attach( label, 2, 3, 1, 2,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
-
-        self.entryfill = gtk.Entry()
-        self.entryfill.set_max_length( ENTRYFILLMAX )
-        table.attach( self.entryfill, 3, 4, 1, 2,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entryfill.show()
-
-        # Not full button
-        self.buttonnotfull = gtk.CheckButton( label=self.labels['EDIT_NOTFULL'] )
-        table.attach( self.buttonnotfull, 3, 4, 2, 3,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.buttonnotfull.show()
-
-        # Third row, first entry
-        label = gtk.Label( self.labels['EDIT_PRICE'] )
-        table.attach( label, 0, 1, 3, 4,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
-
-        self.entryprice = gtk.Entry()
-        self.entryprice.set_max_length( ENTRYPRICEMAX )
-        table.attach( self.entryprice, 1, 2, 3, 4,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entryprice.show()
-
-        # Third row, second entry
-        label = gtk.Label( self.labels['EDIT_NOTES'] )
-        table.attach( label, 2, 3, 3, 4,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
-
-        self.entrynotes = gtk.Entry()
-        self.entrynotes.set_max_length( ENTRYNOTESMAX )
-        table.attach( self.entrynotes, 3, 4, 3, 4,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5);
-        self.entrynotes.show()
-
-#        completion = gtk.EntryCompletion()
-#        store = pui.view.get_model()
-#        completion.set_model( store )
-#        completion.set_text_column( configuration.column_dict['NOTES'] )
-#        self.entrynotes.set_completion( completion )
-
-        # Table ready - show it
-        table.show()
-        scrollwin.show()
-
-        label = gtk.Label( "Fuel fill" )
-        self.append_page( scrollwin, label )
-
-        # Service etc. self
-        table = gtk.Table(1, 3, False)
-
-        # First row, first entry
-        label = gtk.Label( self.labels['EDIT_SERVICE'] )
-        table.attach( label, 0, 1, 0, 1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
-
-        self.entryservice = gtk.Entry()
-        self.entryservice.set_max_length( ENTRYSERVICEMAX )
-        table.attach( self.entryservice, 1, 2, 0, 1,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entryservice.show()
-
-        # Second row, first entry
-        label = gtk.Label( self.labels['EDIT_OIL'] )
-        table.attach( label, 0, 1, 1, 2,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
-
-        self.entryoil = gtk.Entry()
-        self.entryoil.set_max_length( ENTRYOILMAX )
-        table.attach( self.entryoil, 1, 2, 1, 2,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entryoil.show()
-
-        # Third row, first entry
-        label = gtk.Label( self.labels['EDIT_TIRES'] )
-        table.attach( label, 0, 1, 2, 3,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        label.show()
-
-        self.entrytires = gtk.Entry()
-        self.entrytires.set_max_length( ENTRYTIRESMAX )
-        table.attach( self.entrytires, 1, 2, 2, 3,
-                   gtk.EXPAND|gtk.FILL,
-                   0, 0, 5)
-        self.entrytires.show()
-
-        # Table ready - show it
-        table.show()
-
-        label = gtk.Label ( "Service/oil/tires" )
-        self.append_page( table, label)
-
-        if add :
-          table = gtk.Table(2, 2, False)
-
-          # First row, first entry 
-          label = gtk.Label( self.labels['EDIT_CAR'] )
-          table.attach(label, 0, 1, 0, 1, 
-                 gtk.EXPAND|gtk.FILL,
-                 0, 0, 5);
-          label.show()
-
-          self.carcombo = combos.FuelpadCarCombo( config )
-          table.attach(self.carcombo, 1, 2, 0, 1, 
-                 gtk.EXPAND|gtk.FILL,
-                 0, 0, 5)
-          self.carcombo.show()
-
-          # First row, second entry
-          label = gtk.Label( self.labels['EDIT_DRIVER'] )
-          table.attach( label, 0, 1, 1, 2, 
-                 gtk.EXPAND|gtk.FILL,
-                 0, 0, 5);
-          label.show()
-    
-          self.drivercombo = combos.FuelpadDriverCombo( config )
-          table.attach( self.drivercombo, 1, 2, 1, 2, 
-                  gtk.EXPAND|gtk.FILL,
-                  0, 0, 5)
-          self.drivercombo.show()
-
-          table.show()
-
-          label = gtk.Label( "Driver and car" )
-          self.append_page( table , label )
+        def add_item ( self , table , id , row , column=0 ) :
+            item = gtk.Entry()
+            item.set_max_length( self.labels[id][1] )
+            self.add_label( table , id , item ,row , column )
+            return item
 
