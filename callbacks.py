@@ -106,18 +106,14 @@ def edit_record_response ( widget , event , editwin , pui  ) :
     if event == gtk.RESPONSE_ACCEPT : # or event == 2 :
 
         selection = pui.view.get_selection()
-        model , iter = selection.get_selected()
+        store , iter = selection.get_selected()
         if iter :
             id = store.get( iter , configuration.column_dict['ID'] )[0]
 
-            if False : #  hildon : JP
-                if maemo5 :
-                    _date = editwin.entrydate.get_date() # &year, &month, &day);  /* Month is betweewn 0 and 11 */
-                    month += 1
-                else :
-                    _date = editwin.entrydate.get_date() #  &year, &month, &day);
-                print "DATE:",_date
-                date = "%d-%02d-%02d" % _date
+            if hildon :
+                year , month , day = editwin.entrydate.get_date()
+                month += 1
+                date = "%d-%02d-%02d" % ( year , month , day )
             else :
                 date = editwin.entrydate.get_text()
             date = utils.date2sqlite( config.dateformat , date )
@@ -190,7 +186,7 @@ def edit_record_response ( widget , event , editwin , pui  ) :
                     fullconsum = (fullfill+fill)/(fullkm+trip)*100
 
             if config.db.is_open() :
-                recordid = config.db.update_record(date, km, trip, fill, consum, price, service, oil, tires, notes)
+                recordid = config.db.update_record(fullid, date, km, trip, fill, consum, price, price/fill, service, oil, tires, notes)
                 if recordid == id :
                     store = get_store_and_iter(None, view, None, None, config)
                     storeiter = store.append()
@@ -224,14 +220,10 @@ def add_record_response ( widget , event , editwin , pui ) :
 #    if (carchanged)
 #      update_car_changed(pui);
 
-    if False : #  hildon : JP
-      if maemo5 :
-        _date = editwin.entrydate.get_date() # &year, &month, &day);  /* Month is betweewn 0 and 11 */
-        month += 1
-      else :
-        _date = editwin.entrydate.get_date() #  &year, &month, &day);
-      print "DATE:",_date
-      date = "%d-%02d-%02d" % _date
+    if hildon :
+      year , month , day = editwin.entrydate.get_date()
+      month += 1
+      date = "%d-%02d-%02d" % ( year , month , day )
     else :
       date = editwin.entrydate.get_text()
     date = utils.date2sqlite( config.dateformat , date )
@@ -313,7 +305,10 @@ def callback_editrecord ( action , pui ) :
 
             # FIXME : notfull toggle needs to be manually worked
             for colid,widget in editwin.widgets.iteritems() :
-                widget.set_text( "%s" % model.get_value( iter , colid ) )
+                if 'set_title' in dir(widget) :
+                    widget.set_title( "%s" % model.get_value( iter , colid ) )
+                else :
+                    widget.set_text( "%s" % model.get_value( iter , colid ) )
 
             dialog.vbox.pack_start(editwin , True, True, 0)
             editwin.show()
