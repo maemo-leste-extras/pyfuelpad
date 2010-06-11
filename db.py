@@ -283,6 +283,21 @@ class database :
 
         return False
 
+    def update_record (self, id, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes) :
+
+        if self.is_open() :
+
+        #    columns = ( "day" , "km" , "trip" , "fill" , "consum" , "price" , "priceperlitre" , "service" , "oil" , "tires" , "notes" )
+        #    values = "'%s' , %s , %s , %s , %s , %s , %s , %s , %s , %s , '%s'" % ( date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes )
+
+            query = "UPDATE record SET day='%s' , km=%s, trip=%s, fill=%s, consum=%s, price=%s, priceperlitre=%s, service=%s, oil=%s, tires=%s, notes='%s' WHERE id=%s" % ( date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes , id )
+            rc = self.db.execute( query )
+            if rc.rowcount :
+                self.db.commit()
+                return id
+
+        return False
+
     # Fill view is apparently ported
     def create_fillview ( self ) :
         query = "CREATE TEMP VIEW fillview AS SELECT * FROM record WHERE carid=%d ORDER BY km LIMIT -1 OFFSET 1" % self.currentcar

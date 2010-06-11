@@ -287,6 +287,7 @@ if hildon :
             row += 1
 
             self.add_with_viewport( table )
+            table.show()
 
         def add_item ( self , table , id , row , column=0 ) :
             item = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )

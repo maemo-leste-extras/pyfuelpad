@@ -46,18 +46,13 @@ def destroy_event ( widget , event , data=None ) :
 def get_store_and_iter ( model , view , iter , storeiter , config ) :
   sortable = view.get_model()
   store = sortable.get_model()
-#  sortable=gtk_tree_view_get_model(GTK_TREE_VIEW(view));
-#  filter=gtk_tree_model_sort_get_model(GTK_TREE_MODEL_SORT(sortable));
-#  *store = GTK_LIST_STORE(gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(filter)));
-  if model is None or iter is None :
-    storeiter = None
+  if model and iter :
+    if storeiter :
+      raise Exception ("Not implemented")
+    storeiter = model.convert_iter_to_child_iter( storeiter , iter )
   else :
-    print "MODEL",dir(model)
-    print "SORT",dir(sortable)
-    raise Exception ("Not implemented")
-    # model.sort_convert_iter_to_child_iter(GTK_TREE_MODEL_SORT(model), &filteriter, iter);
-    # filter.convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(filter), storeiter, &filteriter);
-  return store
+    storeiter = None
+  return store , storeiter
 
 def ui_update_row_data ( store , iter , config , date, km, trip, fill, consum, price, service, oil, tires, notes , id , visible ) :
 
@@ -83,7 +78,8 @@ def ui_update_row_data ( store , iter , config , date, km, trip, fill, consum, p
 #                                /*                      OTHER, sqlite3_column_double(ppStmtRecords,5), */
   if not consum < 0.0 : store.set( iter, configuration.column_dict['CO2EMISSION'], 0.0) #JP# config.SIemission2user(calc_co2_emission(consum,currentcar)) )
   if notes != None : store.set( iter, configuration.column_dict['NOTES'], notes)
-  store.set( iter, configuration.column_dict['ID'], id, configuration.column_dict['VISIBLE'], visible);
+  store.set( iter, configuration.column_dict['ID'], id )
+  store.set( iter, configuration.column_dict['VISIBLE'], visible)
 
 def ui_find_iter( store , id ) :
     iter = store.get_iter_first()
@@ -94,7 +90,7 @@ def ui_find_iter( store , id ) :
         iter = store.iter_next(iter)
     return iter
 
-def edit_record_response ( widget , event , editwin , pui  ) :
+def edit_record_response ( widget , event , editwin , pui ) :
 
     view , config = pui.view , pui.config
 
@@ -106,9 +102,9 @@ def edit_record_response ( widget , event , editwin , pui  ) :
     if event == gtk.RESPONSE_ACCEPT : # or event == 2 :
 
         selection = pui.view.get_selection()
-        store , iter = selection.get_selected()
+        model , iter = selection.get_selected()
         if iter :
-            id = store.get( iter , configuration.column_dict['ID'] )[0]
+            id = model.get( iter , configuration.column_dict['ID'] )[0]
 
             if hildon :
                 year , month , day = editwin.entrydate.get_date()
@@ -131,24 +127,17 @@ def edit_record_response ( widget , event , editwin , pui  ) :
                 price = service = oil = tires = 0
                 notes = ""
 
-            oldnotfull = False
-            """
-      /* 
-       * Well need to obtain the unmodified data to be excluded from the new 
-       * consumption calculations 
-       */
-      if (SQLITE_OK == sqlite3_bind_int(ppStmtOneRecord, 1, id)) {
-        while (SQLITE_ROW == sqlite3_step(ppStmtOneRecord)) {
-          oldfill=sqlite3_column_double(ppStmtOneRecord,3);
-          oldtrip=sqlite3_column_double(ppStmtOneRecord,2);
-          oldconsum=sqlite3_column_double(ppStmtOneRecord,9);
-          oldnotfull=(oldfill>0.0) && (abs(oldconsum)<1e-5);
-        }
-        sqlite3_reset(ppStmtOneRecord);
-      }
-"""
+            # Well need to obtain the unmodified data to be excluded from the new 
+            # consumption calculations 
+            query = "SELECT day,km,trip,fill,price,service,oil,tires,notes,consum,id FROM record where id=%s" % id
+            row = config.db.db.execute( query ).fetchone()
+            oldfill = row[ configuration.column_dict['FILL'] ]
+            oldtrip = row[ configuration.column_dict['TRIP'] ]
+            oldconsum = row[ configuration.column_dict['CONSUM'] ]
+            oldnotfull = oldfill>0.0 and abs(oldconsum)<1e-5
 
-            if editwin.buttonnotfull.get_active() :
+            notfull = editwin.buttonnotfull.get_active()
+            if notfull :
 
                 # For this record
                 consum = 0.0
@@ -163,7 +152,7 @@ def edit_record_response ( widget , event , editwin , pui  ) :
 
                     # Update now the full record consum
                     query = "UPDATE record set consum=%s WHERE id=%s" % ( fullconsum , fullid )
-                    config.db.execute( query )
+                    config.db.db.execute( query )
 
             else :
 
@@ -176,26 +165,25 @@ def edit_record_response ( widget , event , editwin , pui  ) :
 
                         # Update now the full record consum
                         query = "UPDATE record set consum=%s WHERE id=%s" % ( fullconsum , fullid )
-                        config.db.execute( query )
+                        config.db.db.execute( query )
 
-                    # Find if there are any not full fills before this record
-                    fullfill , fullkm = config.db.find_prev_full( km )
-                    if not oldnotfull :
-                        oldfill = 0.0
-                        oldtrip = 0.0
-                    fullconsum = (fullfill+fill)/(fullkm+trip)*100
+                # Find if there are any not full fills before this record
+                fullfill , fullkm = config.db.find_prev_full( km )
+                if oldnotfull :
+                    oldfill = 0.0
+                    oldtrip = 0.0
+                consum = (fullfill+fill)/(fullkm+trip)*100
 
             if config.db.is_open() :
-                recordid = config.db.update_record(fullid, date, km, trip, fill, consum, price, price/fill, service, oil, tires, notes)
+                recordid = config.db.update_record(id, date, km, trip, fill, consum, price, price/fill, service, oil, tires, notes)
                 if recordid == id :
-                    store = get_store_and_iter(None, view, None, None, config)
-                    storeiter = store.append()
+                    store , storeiter = get_store_and_iter(model, view, iter, None , config)
                     ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, service, oil, tires, notes, recordid, True)
 
                     # Update the data for the full fill
                     if notfull or notfull!=oldnotfull : # not enough to test notfull, but when?
-                      if fullid>0 :
-                        fullstore = get_store_and_iter(None, view, None, None, config);
+                      if fullid :
+                        fullstore , storeiter = get_store_and_iter(None, view, None, None, config)
                         fullstoreiter = ui_find_iter( fullstore , fullid )
                         if fullstoreiter :
                           ui_update_row_data(fullstore, fullstoreiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
@@ -255,7 +243,7 @@ def add_record_response ( widget , event , editwin , pui ) :
            query = "UPDATE record set consum=%s WHERE id=%s" % ( fullconsum , fullid )
            config.db.execute( query )
 
-           store = get_store_and_iter(None, view, None, None, config)
+           store , storeiter = get_store_and_iter(None, view, None, None, config)
            storeiter = ui_find_iter( store , fullid )
            if storeiter :
                ui_update_row_data(store, storeiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
@@ -269,7 +257,7 @@ def add_record_response ( widget , event , editwin , pui ) :
     if config.db.is_open() :
         recordid = config.db.add_record(date, km, trip, fill, consum, price, service, oil, tires, notes)
         if recordid : # record succesfully inserted
-            store = get_store_and_iter(None, view, None, None, config)
+            store , storeiter = get_store_and_iter(None, view, None, None, config)
             storeiter = store.append()
             ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, service, oil, tires, notes, recordid, True)
             pui.update_totalkm()
@@ -344,6 +332,7 @@ def callback_editrecord ( action , pui ) :
 
     dialog.show()
 
+# http://wiki.maemo.org/PyMaemo/UI_tutorial/Windows_and_dialogs#Using_GtkDialogs_in_Hildon_applications
 def callback_newrecord ( action, pui ) :
 
     header = ( "Add a new record" , )
