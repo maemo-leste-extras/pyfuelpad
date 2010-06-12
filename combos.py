@@ -8,8 +8,11 @@ except :
 
 class FuelpadAbstractCombo :
 
-    def __init__ ( self , config=None , changed_cb=None ) :
+    def __init__ ( self , config=None , toggle=False ) :
         raise Exception( "Instantiating abstract class %s" % self.__class__ )
+
+    def render_label ( self , row ) :
+        return( "%s %s" % ( row[0] , row[1] ) )
 
     def fill_combo( self , db ) :
 
@@ -21,7 +24,7 @@ class FuelpadAbstractCombo :
 #         self.handler_block_by_func( self.changed_cb )
 
          for row in db.get_rows( self.query ) :
-            listitemtext = "%s %s" % ( row[0] , row[1] )
+            listitemtext = self.render_label( row )
             self.append_text( listitemtext )
             if row[2] == db.get_current( self.key ) :
               active = i
@@ -31,10 +34,22 @@ class FuelpadAbstractCombo :
 
          self.set_active( active )
 
+    def select_combo_item ( self , db ) :
+        query = "SELECT mark,register,id FROM car WHERE id=%s" % db.currentcar
+        itemtext = self.render_label( db.get_rows( query )[0] )
+        model = self.get_model()
+        iter = model.get_iter_first()
+        while iter :
+            if model.get( iter , 0 )[0] == itemtext :
+                self.set_active_iter( iter )
+                return
+            iter = model.iter_next( iter )
+
     def changed_cb ( self , widget , database ) :
         index = widget.get_active()
         database.currentcar = int( database.carid( index ) )
-
+        if self.toggle :
+            self.toggle.changed = True
 
 class FuelpadAbstractItem ( gtk.ToolItem ) :
 
@@ -69,7 +84,7 @@ if hildon :
 
     class FuelpadCombo ( hildon.PickerButton ) :
 
-        def __init__ ( self , config ) :
+        def __init__ ( self , config , toggle=False ) :
             hildon.PickerButton.__init__( self , gtk.HILDON_SIZE_AUTO, hildon.BUTTON_ARRANGEMENT_VERTICAL )
             self.set_title( self.key )
             selector = FuelpadSelector( config , self )
@@ -90,13 +105,18 @@ else :
 
     class FuelpadCombo ( gtk.ComboBox , FuelpadAbstractCombo ) :
 
-        def __init__ ( self , config ) :
+        def __init__ ( self , config , toggle=False ) :
             gtk.ComboBox.__init__( self , gtk.ListStore(str) )
             cell = gtk.CellRendererText()
 
             gtk.ComboBox.pack_start( self , cell , True )
             gtk.ComboBox.add_attribute( self , cell , 'text' , 0 )
             FuelpadAbstractCombo.fill_combo( self , config.db )
+
+            if toggle :
+                self.toggle = toggle
+            else :
+                self.toggle = None
 
             # NOTE : If registerd before filling, we must ensure we block during that phase
             self.connect( "changed", self.changed_cb, config.db )
@@ -131,7 +151,7 @@ class FuelpadCarCombo ( FuelpadCombo ) :
     def __init__ ( self , config ) :
         self.key = "Car"
         self.query = "SELECT mark,register,id FROM car"
-        FuelpadCombo.__init__( self , config )
+        FuelpadCombo.__init__( self , config , config )
 
 class FuelpadCarItem ( FuelpadItem ) :
 

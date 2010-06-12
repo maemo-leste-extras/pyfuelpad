@@ -205,8 +205,8 @@ def add_record_response ( widget , event , editwin , pui ) :
   # NOTE : response from hildon wizard is an unexpected value
   if event == gtk.RESPONSE_ACCEPT or event == 2 :
 
-#    if (carchanged)
-#      update_car_changed(pui);
+    if config.changed :
+      update_car_changed(pui);
 
     if hildon :
       year , month , day = editwin.entrydate.get_date()
@@ -288,7 +288,7 @@ def callback_editrecord ( action , pui ) :
                                    gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
                                    )
                                  )
-            editwin = wizard.FuelpadEdit( pui.config , 0 )
+            editwin = wizard.FuelpadFullEdit( pui.config , 0 )
 
             # FIXME : notfull toggle needs to be manually worked
             for colid,widget in editwin.widgets.iteritems() :

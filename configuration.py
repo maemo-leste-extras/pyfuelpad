@@ -99,6 +99,8 @@ class FuelpadConfig :
         self.db = db.database( default_db )
         self.result_db = None
 
+        self.changed = False
+
         # global variables from ui.c
         self.fontsize = MEDIUM
         self.stbstattime = OVERALL

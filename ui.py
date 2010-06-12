@@ -151,7 +151,9 @@ class FuelpadAbstractView :
         while gtk.events_pending() :
             gtk.main_iteration()
 
-#        carchanged = False
+        if pui.config.changed :
+           pui.stb_car.combo.select_combo_item( pui.config.db )
+        pui.config.changed = False
 
         self.set_model( FuelpadModel( pui.config ) )
         self.update_column_headers( pui.config )
