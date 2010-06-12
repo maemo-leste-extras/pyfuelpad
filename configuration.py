@@ -99,6 +99,8 @@ class FuelpadConfig :
         self.db = db.database( default_db )
         self.result_db = None
 
+        self.reducedinput = True
+
         self.changed = False
 
         # global variables from ui.c
@@ -129,6 +131,10 @@ class FuelpadConfig :
         self.fontsize = client.get_int( "/apps/fuelpad/mainviewfontsize" )
         self.main_toolbar_visible = not client.get_bool( "/apps/fuelpad/maintoolbar_visible" )
         self.secondary_toolbar_visible = not client.get_bool( "/apps/fuelpad/secondarytoolbar_visible" )
+
+        value = client.get_without_default( "/apps/fuelpad/reducedinput" )
+        if value is not None :
+            self.reducedinput = value.get_bool()
 
         self.maintablesortcol = 0
         self.maintablesortorder = gtk.SORT_ASCENDING
@@ -186,6 +192,8 @@ class FuelpadConfig :
         client.set_int( "/apps/fuelpad/mainviewfontsize" , self.fontsize )
         client.set_bool( "/apps/fuelpad/maintoolbar_visible" , not self.main_toolbar_visible )
         client.set_bool( "/apps/fuelpad/secondarytoolbar_visible" , not self.secondary_toolbar_visible )
+
+        client.set_bool( "/apps/fuelpad/reducedinput" , self.reducedinput )
 
     # To be revised
     def doubleornothing ( self , input ) :

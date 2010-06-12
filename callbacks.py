@@ -337,7 +337,10 @@ def callback_newrecord ( action, pui ) :
     header = ( "Add a new record" , )
 
     if pui.config.db.is_open() :
-        editwin = wizard.FuelpadFullEdit( pui.config , 1 )
+        if pui.config.reducedinput :
+            editwin = wizard.FuelpadEdit( pui.config , 1 )
+        else :
+            editwin = wizard.FuelpadFullEdit( pui.config , 1 )
         if hildon :
             dialog = hildon.WizardDialog( pui , header[0] , editwin )
         else :
