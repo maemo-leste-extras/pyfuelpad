@@ -131,7 +131,7 @@ class FuelpadAbstractView :
 
         select = self.get_selection()
         select.set_mode( gtk.SELECTION_SINGLE )
-        self.connect( "row-activated" , callbacks.callback_recordactivated ) # , ui ) JP
+    #    self.connect( "row-activated" , callbacks.callback_recordactivated )
 
     def update_column_headers ( self , config ) :
 

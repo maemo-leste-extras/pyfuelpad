@@ -268,11 +268,10 @@ def add_record_response ( widget , event , editwin , pui ) :
      widget.destroy()
 
 
-def callback_recordactivated ( view , path , col , pui ) :
-  model = view.get_model()
-  iter = model.get_iter(path) 
+def callback_recordactivated ( view , path , col ) :
+  iter = view.get_model().get_iter(path) 
   if iter :
-    callback_editrecord(None, pui)
+    callback_editrecord(None, None)
 
 def callback_editrecord ( action , pui ) :
 
@@ -289,7 +288,7 @@ def callback_editrecord ( action , pui ) :
                                    gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
                                    )
                                  )
-            editwin = wizard.FuelpadFullEdit( pui.config , 0 )
+            editwin = wizard.FuelpadEdit( pui.config , 0 )
 
             # FIXME : notfull toggle needs to be manually worked
             for colid,widget in editwin.widgets.iteritems() :
@@ -338,7 +337,7 @@ def callback_newrecord ( action, pui ) :
     header = ( "Add a new record" , )
 
     if pui.config.db.is_open() :
-        editwin = wizard.FuelpadEdit( pui.config , 1 )
+        editwin = wizard.FuelpadFullEdit( pui.config , 1 )
         if hildon :
             dialog = hildon.WizardDialog( pui , header[0] , editwin )
         else :
