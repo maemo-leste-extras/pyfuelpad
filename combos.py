@@ -69,6 +69,7 @@ if hildon :
             hildon.TouchSelector.__init__( self , text=True )
             self.key = parentCombo.key
             self.query = parentCombo.query
+            self.toggle = parentCombo.toggle
             FuelpadAbstractCombo.fill_combo( self , config.db )
             # NOTE : registering the callback will drive permanent changes (even to DB) even with cancellation !!!
             self.connect( "changed", self.changed_cb, config.db )
@@ -87,8 +88,17 @@ if hildon :
         def __init__ ( self , config , toggle=False ) :
             hildon.PickerButton.__init__( self , gtk.HILDON_SIZE_AUTO, hildon.BUTTON_ARRANGEMENT_VERTICAL )
             self.set_title( self.key )
+
+            if toggle :
+                self.toggle = toggle
+            else :
+                self.toggle = None
+
             selector = FuelpadSelector( config , self )
             self.set_selector( selector )
+
+        def select_combo_item ( self , db ) :
+            self.get_selector().select_combo_item(  db )
 
     class FuelpadItem ( FuelpadAbstractItem ) :
 
