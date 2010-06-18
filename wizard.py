@@ -199,6 +199,46 @@ class FuelpadAbstractFullEdit :
                      0, 0, 5)
         item.show()
 
+
+class FuelpadSettingsEdit ( gtk.Notebook , FuelpadAbstractFullEdit ) :
+
+    labels = { 'SETTINGS_UNITSYSTEM':( "Unit system", None , "current_unit") ,
+               'SETTINGS_FONTSIZE':( "Font size", None , "mainviewfontsize")
+               }
+
+    def add_item ( self , table , id , row , column=0 ) :
+        item = gtk.Entry()
+        item.set_max_length( self.labels[id][1] )
+        self.add_label( table , id , item ,row , column )
+        return item
+
+    def __init__( self , config , add ) :
+        gtk.Notebook.__init__( self )
+        self.set_tab_pos(gtk.POS_TOP)
+
+        scrollwin = gtk.ScrolledWindow(None, None)
+        scrollwin.set_size_request(-1, self.DIALOG_MIN_HEIGHT1)
+        scrollwin.set_policy(gtk.POLICY_NEVER,
+                                 gtk.POLICY_AUTOMATIC)
+
+        table = gtk.Table(6, 4, False)
+        scrollwin.add_with_viewport( table )
+
+        # First row, first entry
+        item = configuration.unitsystem_combo( config )
+        self.add_label( table , 'SETTINGS_UNITSYSTEM' , item , 0 )
+
+        item = configuration.fontsize_combo( config )
+        self.add_label( table , 'SETTINGS_FONTSIZE' , item , 1 )
+
+        # Table ready - show it
+        table.show()
+        scrollwin.show()
+
+        label = gtk.Label( "Visualization settings" )
+        self.append_page( scrollwin, label )
+
+
 if hildon :
 
     class FuelpadFullEdit ( hildon.PannableArea , FuelpadAbstractFullEdit ) :

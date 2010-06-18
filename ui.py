@@ -478,7 +478,7 @@ if hildon :
             self.mm_item_new.connect( "clicked", callbacks.callback_newrecord , self )
             self.mm_item_edit.connect( "clicked", callbacks.callback_editrecord , self )
         #  self.mm_item_alarm.connect( "clicked", callback_alarm , self )
-        #  self.mm_item_settings.connect( "clicked", callback_settings , self )
+            self.mm_item_settings.connect( "clicked", callbacks.callback_settings , self )
         #  self.mm_item_delete.connect( "clicked", callback_deleterecord , self )
         #  self.mm_item_filter.connect( "clicked", callback_filter_records , self )
         #  self.mm_item_stat.connect( "clicked", callback_stat , self )
@@ -665,7 +665,7 @@ else :
 
             # Attach the callback functions to the activate signal
         #    self.mm_item_alarm.connect( "activate", callback_alarm, pui)
-        #    self.mm_item_settings.connect( "activate", callback_settings, pui)
+            self.mm_item_settings.connect( "activate", callbacks.callback_settings, self)
         #    self.mm_item_quick.connect( "activate", callback_quick_stat, pui)
         #    self.mm_item_monthly.connect( "activate", callback_stat, pui)
         #    self.mm_item_report.connect( "activate", callback_report, pui)

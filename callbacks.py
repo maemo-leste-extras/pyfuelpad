@@ -90,6 +90,37 @@ def ui_find_iter( store , id ) :
         iter = store.iter_next(iter)
     return iter
 
+def settings_response ( widget , event , editwin , pui ) :
+
+    view , config = pui.view , pui.config
+
+    if not config.db.is_open() :
+        widget.destroy()
+        return
+
+    # NOTE ?? : response from hildon wizard is an unexpected value
+    if event == gtk.RESPONSE_ACCEPT : # or event == 2 :
+        if editwin.widgets["mainviewfontsize"].get_active() != pui.config.fontsize :
+            pui.config.fontsize = editwin.widgets["mainviewfontsize"].get_active()
+            if pui.config.fontsize == 1 :
+                cb_fontsize_x_small ( None , pui )
+            elif pui.config.fontsize == 2 :
+                cb_fontsize_small ( None, pui )
+            elif pui.config.fontsize == 3 :
+                cb_fontsize_medium ( None , pui )
+            elif pui.config.fontsize == 4 :
+                cb_fontsize_large ( None , pui )
+        if editwin.widgets["current_unit"].get_active() != pui.config.units["main"] :
+            pui.config.units["main"] = editwin.widgets["current_unit"].get_active()
+            for unit in ( 'length', 'volume', 'consume', 'mass' ) :
+                pui.config.units[ unit ] = editwin.widgets["current_unit"].get_active()
+            pui.view.update_column_headers( pui.config )
+
+        widget.destroy()
+
+    elif event == gtk.RESPONSE_REJECT :
+        widget.destroy()
+
 def edit_record_response ( widget , event , editwin , pui ) :
 
     view , config = pui.view , pui.config
@@ -266,6 +297,25 @@ def add_record_response ( widget , event , editwin , pui ) :
 
   elif event == gtk.RESPONSE_REJECT :
      widget.destroy()
+
+
+def callback_settings ( action, pui ) :
+
+    header = ( "Settings" , )
+
+    editwin = wizard.FuelpadSettingsEdit( pui.config , 1 )
+    dialog = gtk.Dialog( header[0],
+                         pui,
+                         gtk.DIALOG_MODAL,
+                         ( gtk.STOCK_OK, gtk.RESPONSE_ACCEPT )
+                         )
+
+    dialog.vbox.pack_start(editwin , True, True, 0)
+    editwin.show()
+
+    dialog.connect( "response", settings_response, editwin , pui )
+
+    dialog.show_all()
 
 
 def callback_recordactivated ( view , path , col ) :
