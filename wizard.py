@@ -135,12 +135,18 @@ class FuelpadEdit ( gtk.Notebook ) :
     def __init__( self , config , add ) :
         gtk.Notebook.__init__( self )
 
-        self.entryfill = ButtonPad( True )
-        self.entrytrip = ButtonPad( True )
-        self.entrykm = ButtonPad()
-        self.append_page( self.entryfill , gtk.Label( "Fill" ) )
-        self.append_page( self.entrytrip , gtk.Label( "Trip" ) )
-        self.append_page( self.entrykm , gtk.Label( "Total KM" ) )
+        page = {}
+        page["Price"] = self.entryprice = ButtonPad( True )
+        page["Fill"] = self.entryfill = ButtonPad( True )
+        page["Trip"] = self.entrytrip = ButtonPad( True )
+        page["Total KM"] = self.entrykm = ButtonPad()
+        tabs = ( configuration.column_dict['PRICE'] , configuration.column_dict['FILL'] , configuration.column_dict['TRIP'], configuration.column_dict['KM'] )
+        labels = ( "Price" , "Fill" , "Trip", "Total KM" )
+        for i in range( len(tabs) ) :
+            if config.wizardcol & (1<<configuration.column_info[tabs[i]][0]):
+                self.append_page( page[ labels[i] ] , gtk.Label( labels[i] ) )
+            else :
+                page[ labels[i] ] = False
 
         # Not shown widgets
         self.entrydate = gtk.Entry()
@@ -148,7 +154,7 @@ class FuelpadEdit ( gtk.Notebook ) :
         self.buttonnotfull = gtk.CheckButton()
 
         # To avoid confusion with FuelpadFullEdit
-        self.entryprice = False
+        self.entryservice = False
 
         # Set a handler for "switch-page" signal
         self.connect_object( "switch-page" , self.on_page_switch , config )

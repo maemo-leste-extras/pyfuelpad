@@ -250,14 +250,14 @@ def add_record_response ( widget , event , editwin , pui ) :
     km  = config.user2SIlength( float( editwin.entrykm.get_text() or "-1" ) )
     trip = config.user2SIlength( float( editwin.entrytrip.get_text() or "-1" ) )
     fill  = config.user2SIvolume( float( editwin.entryfill.get_text() or "-1" ) )
-    if editwin.entryprice :
-        price = float( editwin.entryprice.get_text() or "-1" )
+    price = float( editwin.entryprice.get_text() or "-1" )
+    if editwin.entryservice :
         service = float( editwin.entryservice.get_text() or "-1" )
         oil = float( editwin.entryoil.get_text() or "-1" )
         tires = float( editwin.entrytires.get_text() or "-1" )
         notes = editwin.entrynotes.get_text()
     else :
-        price = service = oil = tires = 0
+        service = oil = tires = 0
         notes = ""
 
     if editwin.buttonnotfull.get_active() :
