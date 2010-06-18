@@ -99,6 +99,8 @@ class ButtonPad ( gtk.Table ) :
 
 
 def callback_tripadded ( widget , event , editwin , config ) :
+    if not editwin.entrytrip.get_text() :
+        return False
     newkm = float( editwin.entrykm.get_text() or "0" )
     if newkm < 0.1 :
         trip = config.user2SIlength( float( editwin.entrytrip.get_text() or "0" ) )
@@ -116,6 +118,8 @@ def callback_tripadded ( widget , event , editwin , config ) :
     return False
 
 def callback_kmadded ( widget , event , editwin , config ) :
+    if not editwin.entrykm.get_text() :
+        return False
     trip = float( editwin.entrytrip.get_text() or "0" )
     newkm = config.user2SIlength( float( editwin.entrykm.get_text() or "0" ) )
     if trip < 0.1 and newkm > 0 :
