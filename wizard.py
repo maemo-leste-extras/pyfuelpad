@@ -209,7 +209,8 @@ class FuelpadAbstractFullEdit :
 class FuelpadSettingsEdit ( gtk.Notebook , FuelpadAbstractFullEdit ) :
 
     labels = { 'SETTINGS_UNITSYSTEM':( "Unit system", None , "current_unit") ,
-               'SETTINGS_FONTSIZE':( "Font size", None , "mainviewfontsize")
+               'SETTINGS_FONTSIZE':( "Font size", None , "mainviewfontsize") ,
+               'SETTINGS_CURRENCY':( "Currency", 30 , "currency")
                }
 
     def add_item ( self , table , id , row , column=0 ) :
@@ -236,6 +237,9 @@ class FuelpadSettingsEdit ( gtk.Notebook , FuelpadAbstractFullEdit ) :
 
         item = configuration.fontsize_combo( config )
         self.add_label( table , 'SETTINGS_FONTSIZE' , item , 1 )
+
+        self.add_item( table , 'SETTINGS_CURRENCY' , 2 )
+        self.widgets['currency'].set_text( config.currency )
 
         # Table ready - show it
         table.show()

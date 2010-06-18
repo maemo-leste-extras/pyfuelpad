@@ -114,8 +114,10 @@ def settings_response ( widget , event , editwin , pui ) :
             pui.config.units["main"] = editwin.widgets["current_unit"].get_active()
             for unit in ( 'length', 'volume', 'consume', 'mass' ) :
                 pui.config.units[ unit ] = editwin.widgets["current_unit"].get_active()
-            pui.view.update_column_headers( pui.config )
+        if editwin.widgets["currency"].get_text() != pui.config.currency :
+            pui.config.currency = editwin.widgets["currency"].get_text()
 
+        pui.view.update( pui )
         widget.destroy()
 
     elif event == gtk.RESPONSE_REJECT :
