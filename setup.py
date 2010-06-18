@@ -15,6 +15,6 @@ setup(
                  ( 'share/applications/hildon' , [ 'pyfuelpad.desktop' ] ) ,
                  ( 'share/icons/hicolor/scalable/hildon' , [ 'icons/scalable/pyfuelpad.png' ] )
                  ],
-    py_modules = [ 'callbacks' , 'combos' , 'configuration' , 'db'  , 'ui' , 'utils' ]
+    py_modules = [ 'callbacks' , 'combos' , 'wizard', 'configuration' , 'db'  , 'ui' , 'utils' ]
     )
 

@@ -1,5 +1,6 @@
 callbacks.py
 combos.py
+wizard.py
 configuration.py
 db.py
 pyfuelpad
