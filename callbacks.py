@@ -393,7 +393,7 @@ def callback_newrecord ( action, pui ) :
             editwin = wizard.FuelpadEdit( pui.config , 1 )
         else :
             editwin = wizard.FuelpadFullEdit( pui.config , 1 )
-        if hildon :
+        if hildon and pui.config.reducedinput :
             dialog = hildon.WizardDialog( pui , header[0] , editwin )
         else :
             dialog = gtk.Dialog( header[0],
