@@ -441,25 +441,25 @@ if hildon :
                                                           hildon.BUTTON_ARRANGEMENT_VERTICAL,
                                                           "Delete record" ,
                                                           None)
-            self.main_menu.append( self.mm_item_delete )
+        #    self.main_menu.append( self.mm_item_delete )
 
             self.mm_item_filter = hildon.Button(gtk.HILDON_SIZE_AUTO,
                                                           hildon.BUTTON_ARRANGEMENT_VERTICAL,
                                                           "Filter records" ,
                                                           None)
-            self.main_menu.append( self.mm_item_filter )
+        #    self.main_menu.append( self.mm_item_filter )
 
             self.mm_item_stat = hildon.Button(gtk.HILDON_SIZE_AUTO,
                                                           hildon.BUTTON_ARRANGEMENT_VERTICAL,
                                                           "Statistics" ,
                                                           None)
-            self.main_menu.append( self.mm_item_stat )
+        #    self.main_menu.append( self.mm_item_stat )
 
             self.mm_item_report = hildon.Button(gtk.HILDON_SIZE_AUTO,
                                                           hildon.BUTTON_ARRANGEMENT_VERTICAL,
                                                           "Report" ,
                                                           None)
-            self.main_menu.append( self.mm_item_report )
+        #    self.main_menu.append( self.mm_item_report )
 
             if self.warn : warn_text = "Active"
             else : warn_text = "Not active"
@@ -467,7 +467,7 @@ if hildon :
                                                           hildon.BUTTON_ARRANGEMENT_VERTICAL,
                                                           "Reminders" ,
                                                           warn_text)
-            self.main_menu.append( self.mm_item_alarm )
+        #    self.main_menu.append( self.mm_item_alarm )
 
             self.mm_item_settings = hildon.Button(gtk.HILDON_SIZE_AUTO,
                                                           hildon.BUTTON_ARRANGEMENT_VERTICAL,
