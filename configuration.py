@@ -1,5 +1,5 @@
 
-import db , combos
+import db
 
 import gconf
 
@@ -14,9 +14,6 @@ MEDIUM=3
 LARGE=4
 
 fontsizes = [ 'Preconfigured' , 'XSMALL' , 'SMALL' , 'MEDIUM' , 'LARGE' ]
-
-def fontsize_combo ( config ) :
-    return combos.FuelpadListCombo( fontsizes , config.fontsize )
 
 # DB format is hardcoded to "%Y-%m-%d"
 # Possible date format strings (see strptime(3) for format descri ption) 
@@ -44,9 +41,6 @@ US=1
 IMPERIAL=2
 
 unitsystem = [ 'SI' , 'US' , 'IMPERIAL' ]
-
-def unitsystem_combo ( config ) :
-    return combos.FuelpadListCombo( unitsystem , config.units['main'] )
 
 # dbtimespan
 OVERALL=0

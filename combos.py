@@ -157,15 +157,7 @@ else :
             self.apply.set_expand( value )
 
 
-class  FuelpadListCombo ( gtk.ComboBox , FuelpadAbstractCombo ) :
-
-    def __init__ ( self , items , active=None ) :
-        gtk.ComboBox.__init__( self , gtk.ListStore(str) )
-        cell = gtk.CellRendererText()
-
-        gtk.ComboBox.pack_start( self , cell , True )
-        gtk.ComboBox.add_attribute( self , cell , 'text' , 0 )
-        self.fill_combo( items , active )
+class  FuelpadAbstractListCombo ( FuelpadAbstractCombo ) :
 
     def fill_combo( self , items , active=None ) :
 
@@ -176,6 +168,47 @@ class  FuelpadListCombo ( gtk.ComboBox , FuelpadAbstractCombo ) :
               active = i
 
         self.set_active( active )
+
+if hildon :
+
+    class FuelpadListSelector ( hildon.TouchSelector , FuelpadAbstractListCombo ) :
+
+        def __init__ ( self , items , active ) :
+            hildon.TouchSelector.__init__( self , text=True )
+            self.fill_combo( items , active )
+
+        def set_active( self , index ) :
+            return hildon.TouchSelector.set_active( self , 0 , index )
+
+        def get_active( self ) :
+            return hildon.TouchSelector.get_active( self , 0 )
+
+        def changed_cb ( self , widget , id , database ) :
+            FuelpadAbstractListCombo.changed_cb( self , widget , database )
+
+    class FuelpadListCombo ( hildon.PickerButton ) :
+
+        def __init__ ( self , items , active=None ) :
+            hildon.PickerButton.__init__( self , gtk.HILDON_SIZE_AUTO, hildon.BUTTON_ARRANGEMENT_VERTICAL )
+            self.set_title( self.key )
+
+            selector = FuelpadListSelector( items , active )
+            self.set_selector( selector )
+
+        def select_combo_item ( self , db ) :
+            self.get_selector().select_combo_item(  db )
+
+else :
+
+    class  FuelpadListCombo ( gtk.ComboBox , FuelpadAbstractListCombo ) :
+
+        def __init__ ( self , items , active=None ) :
+            gtk.ComboBox.__init__( self , gtk.ListStore(str) )
+            cell = gtk.CellRendererText()
+
+            gtk.ComboBox.pack_start( self , cell , True )
+            gtk.ComboBox.add_attribute( self , cell , 'text' , 0 )
+            self.fill_combo( items , active )
 
 
 class FuelpadDriverCombo ( FuelpadCombo ) :
@@ -197,4 +230,18 @@ class FuelpadCarItem ( FuelpadItem ) :
     def __init__ ( self , config ) :
         self.combo = FuelpadCarCombo( config )
         FuelpadItem.__init__( self , config )
+
+import configuration
+
+class FuelpadUnitsystemCombo ( FuelpadListCombo ) :
+
+    def __init__ ( self , config , label=None ) :
+        self.key = label
+        FuelpadListCombo.__init__( self , configuration.unitsystem , config.units["main"] )
+
+class FuelpadFontsizeCombo ( FuelpadListCombo ) :
+
+    def __init__ ( self , config , label=None ) :
+        self.key = label
+        FuelpadListCombo.__init__( self , configuration.fontsizes , config.fontsize )
 

@@ -99,7 +99,7 @@ def settings_response ( widget , event , editwin , pui ) :
         return
 
     # NOTE ?? : response from hildon wizard is an unexpected value
-    if event == gtk.RESPONSE_ACCEPT : # or event == 2 :
+    if event == gtk.RESPONSE_ACCEPT or event == 2 :
         if editwin.widgets["mainviewfontsize"].get_active() != pui.config.fontsize :
             pui.config.fontsize = editwin.widgets["mainviewfontsize"].get_active()
             if pui.config.fontsize == 1 :
@@ -305,7 +305,7 @@ def callback_settings ( action, pui ) :
 
     header = ( "Settings" , )
 
-    editwin = wizard.FuelpadSettingsEdit( pui.config , 1 )
+    editwin = wizard.FuelpadSettingsEdit( pui.config )
     dialog = gtk.Dialog( header[0],
                          pui,
                          gtk.DIALOG_MODAL,
