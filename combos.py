@@ -50,6 +50,18 @@ class  FuelpadAbstractDBCombo ( FuelpadAbstractCombo ) :
         if self.toggle :
             self.toggle.changed = True
 
+class  FuelpadAbstractListCombo ( FuelpadAbstractCombo ) :
+
+    def fill_combo( self , items , active=None ) :
+
+        for i in range(len(items)) :
+            listitemtext = "%s" % items[i]
+            self.append_text( listitemtext )
+            if i == active :
+              active = i
+
+        self.set_active( active )
+
 class FuelpadAbstractItem ( gtk.ToolItem ) :
 
     def __init__ ( self , config ) :
@@ -77,14 +89,20 @@ if hildon :
 
         def __init__ ( self , config , parentCombo ) :
             FuelpadSelector.__init__( self )
+            self.fill_combo( config.db )
             self.key = parentCombo.key
             self.query = parentCombo.query
-            FuelpadAbstractDBCombo.fill_combo( self , config.db )
             # NOTE : registering the callback will drive permanent changes (even to DB) even with cancellation !!!
             self.connect( "changed", self.changed_cb, config.db )
 
         def changed_cb ( self , widget , id , database ) :
             FuelpadAbstractDBCombo.changed_cb( self , widget , database )
+
+    class FuelpadListSelector ( FuelpadSelector , FuelpadAbstractListCombo ) :
+
+        def __init__ ( self , items , active ) :
+            FuelpadSelector.__init__( self )
+            self.fill_combo( items , active )
 
     class FuelpadButton ( hildon.PickerButton ) :
 
@@ -104,6 +122,12 @@ if hildon :
 
         def set_toggle( self , toggle ) :
             self.get_selector().set_toggle( toggle )
+
+    class FuelpadListCombo ( FuelpadButton ) :
+
+        def __init__ ( self , items , active=None ) :
+            selector = FuelpadListSelector( items , active )
+            FuelpadButton.__init__( self , self.key , selector )
 
     class FuelpadItem ( FuelpadAbstractItem ) :
 
@@ -126,10 +150,20 @@ else :
 
             gtk.ComboBox.pack_start( self , cell , True )
             gtk.ComboBox.add_attribute( self , cell , 'text' , 0 )
-            FuelpadAbstractDBCombo.fill_combo( self , config.db )
+            self.fill_combo( config.db )
 
             # NOTE : If registerd before filling, we must ensure we block during that phase
             self.connect( "changed", self.changed_cb, config.db )
+
+    class  FuelpadListCombo ( gtk.ComboBox , FuelpadAbstractListCombo ) :
+
+        def __init__ ( self , items , active=None ) :
+            gtk.ComboBox.__init__( self , gtk.ListStore(str) )
+            cell = gtk.CellRendererText()
+
+            gtk.ComboBox.pack_start( self , cell , True )
+            gtk.ComboBox.add_attribute( self , cell , 'text' , 0 )
+            self.fill_combo( items , active )
 
     class FuelpadItem ( FuelpadAbstractItem ) :
 
@@ -147,48 +181,6 @@ else :
         def set_expand( self , value ) :
             FuelpadAbstractItem.set_expand( self , value )
             self.apply.set_expand( value )
-
-
-class  FuelpadAbstractListCombo ( FuelpadAbstractCombo ) :
-
-    def fill_combo( self , items , active=None ) :
-
-        for i in range(len(items)) :
-            listitemtext = "%s" % items[i]
-            self.append_text( listitemtext )
-            if i == active :
-              active = i
-
-        self.set_active( active )
-
-if hildon :
-
-    class FuelpadListSelector ( FuelpadSelector , FuelpadAbstractListCombo ) :
-
-        def __init__ ( self , items , active ) :
-            FuelpadSelector.__init__( self )
-            self.fill_combo( items , active )
-
-        def changed_cb ( self , widget , id , database ) :
-            FuelpadAbstractListCombo.changed_cb( self , widget , database )
-
-    class FuelpadListCombo ( FuelpadButton ) :
-
-        def __init__ ( self , items , active=None ) :
-            selector = FuelpadListSelector( items , active )
-            FuelpadButton.__init__( self , self.key , selector )
-
-else :
-
-    class  FuelpadListCombo ( gtk.ComboBox , FuelpadAbstractListCombo ) :
-
-        def __init__ ( self , items , active=None ) :
-            gtk.ComboBox.__init__( self , gtk.ListStore(str) )
-            cell = gtk.CellRendererText()
-
-            gtk.ComboBox.pack_start( self , cell , True )
-            gtk.ComboBox.add_attribute( self , cell , 'text' , 0 )
-            self.fill_combo( items , active )
 
 
 class FuelpadDriverCombo ( FuelpadCombo ) :
