@@ -88,10 +88,10 @@ if hildon :
     class FuelpadDBSelector ( FuelpadSelector , FuelpadAbstractDBCombo ) :
 
         def __init__ ( self , config , parentCombo ) :
-            FuelpadSelector.__init__( self )
-            self.fill_combo( config.db )
             self.key = parentCombo.key
             self.query = parentCombo.query
+            FuelpadSelector.__init__( self )
+            self.fill_combo( config.db )
             # NOTE : registering the callback will drive permanent changes (even to DB) even with cancellation !!!
             self.connect( "changed", self.changed_cb, config.db )
 
