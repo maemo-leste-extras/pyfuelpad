@@ -333,8 +333,9 @@ if hildon :
 
         def add_item ( self , table , id , row , column=0 ) :
             item = FuelpadHildonEditwin.add_item( self , table , id , row , column )
-            item.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
-        #    item.set_property( "autocap", False)
+            if id != 'EDIT_NOTES' :
+                item.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
+            #    item.set_property( "autocap", False)
             return item
 
     class FuelpadSettingsEdit ( FuelpadHildonEditwin , FuelpadAbstractSettingsEdit ) :
