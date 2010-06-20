@@ -194,6 +194,15 @@ class FuelpadAbstractEditwin :
                      0, 0, 5)
         item.show()
 
+    def add_textitem ( self , store , table , id , row , column=0 ) :
+        completion = gtk.EntryCompletion()
+        completion.set_model( store )
+        completion.set_text_column( self.labels[id][2] )
+
+        item = self.add_item( table , id , row , column )
+        item.set_completion( completion )
+        return item
+
 
 class FuelpadAbstractFullEdit :
 
@@ -310,16 +319,9 @@ if hildon :
             row += 1
 
             # Third row, second entry
-            self.entrynotes = self.add_item( table , 'EDIT_NOTES' , row )
+            self.entrynotes = self.add_textitem( pui.view.get_model() , table , 'EDIT_NOTES' , row )
             row += 1
 
-            completion = gtk.EntryCompletion()
-            store = pui.view.get_model()
-            completion.set_model( store )
-            completion.set_text_column( configuration.column_dict['NOTES'] )
-            self.entrynotes.set_completion( completion )
-
-            # First row, first entry
             self.entryservice = self.add_item( table , 'EDIT_SERVICE' , row )
             row += 1
 
@@ -426,7 +428,7 @@ else :
             self.entryprice = self.add_item( table , 'EDIT_PRICE' , 3 )
 
             # Third row, second entry
-            self.entrynotes = self.add_item( table , 'EDIT_NOTES' , 3 , 2 )
+            self.entrynotes = self.add_textitem( pui.view.get_model() , table , 'EDIT_NOTES' , 3 , 2 )
 
             completion = gtk.EntryCompletion()
             store = pui.view.get_model()
