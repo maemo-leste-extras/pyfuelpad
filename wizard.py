@@ -194,6 +194,15 @@ class FuelpadAbstractEditwin :
                      0, 0, 5)
         item.show()
 
+    def new_item ( self ) :
+        raise Exception( "Calling uninmplemented method 'new_item' on class %s" % self.__class__ )
+
+    def add_item ( self , table , id , row , column=0 ) :
+        item = self.new_item()
+        item.set_max_length( self.labels[id][1] )
+        self.add_label( table , id , item ,row , column )
+        return item
+
     def add_textitem ( self , store , table , id , row , column=0 ) :
         completion = gtk.EntryCompletion()
         completion.set_model( store )
@@ -242,11 +251,8 @@ if hildon :
             self.add_with_viewport( table )
             table.show()
 
-        def add_item ( self , table , id , row , column=0 ) :
-            item = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-            item.set_max_length( self.labels[id][1] )
-            self.add_label( table , id , item ,row , column )
-            return item
+        def new_item ( self ) :
+            return hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
 
         def add_button ( self , table , item , row ) :
             table.attach(item, 0, 2, row, row+1,
@@ -380,11 +386,8 @@ else :
             self.append_page( scrollwin , gtk.Label( label ) )
             scrollwin.show()
 
-        def add_item ( self , table , id , row , column=0 ) :
-            item = gtk.Entry()
-            item.set_max_length( self.labels[id][1] )
-            self.add_label( table , id , item ,row , column )
-            return item
+        def new_item ( self ) :
+            return gtk.Entry()
 
     class FuelpadFullEdit ( FuelpadGtkEditwin , FuelpadAbstractFullEdit ) :
 
