@@ -14,9 +14,6 @@ class FuelpadAbstractCombo :
     def fill_combo( self , items , active=None ) :
         raise Exception( "Calling uninmplemented method 'fill_combo' on class %s" % self.__class__ )
 
-    def select_combo_item ( self , items ) :
-        raise Exception( "Calling uninmplemented method 'select_combo_item' on class %s" % self.__class__ )
-
 class  FuelpadAbstractDBCombo ( FuelpadAbstractCombo ) :
 
     def render_label ( self , row ) :
@@ -41,17 +38,6 @@ class  FuelpadAbstractDBCombo ( FuelpadAbstractCombo ) :
 #         self.handler_unblock_by_func( self.changed_cb )
 
          self.set_active( active )
-
-    def select_combo_item ( self , db ) :
-        query = "SELECT mark,register,id FROM car WHERE id=%s" % db.currentcar
-        itemtext = self.render_label( db.get_rows( query )[0] )
-        model = self.get_model()
-        iter = model.get_iter_first()
-        while iter :
-            if model.get( iter , 0 )[0] == itemtext :
-                self.set_active_iter( iter )
-                return
-            iter = model.iter_next( iter )
 
     def changed_cb ( self , widget , database ) :
         index = widget.get_active()
@@ -103,9 +89,6 @@ if hildon :
             self.set_title( title )
             self.set_selector( selector )
 
-        def select_combo_item ( self , db ) :
-            self.get_selector().select_combo_item(  db )
-
     class FuelpadCombo ( FuelpadButton ) :
 
         def __init__ ( self , config , toggle=False ) :
@@ -117,6 +100,9 @@ if hildon :
 
             selector = FuelpadDBSelector( config , self )
             FuelpadButton.__init__( self , self.key , selector )
+
+        def render_label ( self , row ) :
+            return self.get_selector().render_label( row )
 
     class FuelpadItem ( FuelpadAbstractItem ) :
 
@@ -228,6 +214,16 @@ class FuelpadCarItem ( FuelpadItem ) :
     def __init__ ( self , config ) :
         self.combo = FuelpadCarCombo( config )
         FuelpadItem.__init__( self , config )
+
+    def select_combo_item ( self , model , db ) :
+        query = "SELECT mark,register,id FROM car WHERE id=%s" % db.currentcar
+        itemtext = self.combo.render_label( db.get_rows( query )[0] )
+        iter = model.get_iter_first()
+        while iter :
+            if model.get( iter , 0 )[0] == itemtext :
+                self.set_active_iter( iter )
+                return
+            iter = model.iter_next( iter )
 
 import configuration
 
