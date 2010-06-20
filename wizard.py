@@ -247,7 +247,8 @@ if hildon :
 
     class FuelpadFullEdit ( FuelpadHildonEditwin , FuelpadAbstractFullEdit ) :
 
-        def __init__( self , config , add ) :
+        def __init__( self , pui , add ) :
+            config = pui.config
             FuelpadHildonEditwin.__init__( self , config )
 
             if add :
@@ -312,11 +313,11 @@ if hildon :
             self.entrynotes = self.add_item( table , 'EDIT_NOTES' , row )
             row += 1
 
-    #        completion = gtk.EntryCompletion()
-    #        store = pui.view.get_model()
-    #        completion.set_model( store )
-    #        completion.set_text_column( configuration.column_dict['NOTES'] )
-    #        self.entrynotes.set_completion( completion )
+            completion = gtk.EntryCompletion()
+            store = pui.view.get_model()
+            completion.set_model( store )
+            completion.set_text_column( configuration.column_dict['NOTES'] )
+            self.entrynotes.set_completion( completion )
 
             # First row, first entry
             self.entryservice = self.add_item( table , 'EDIT_SERVICE' , row )
@@ -383,7 +384,8 @@ else :
 
     class FuelpadFullEdit ( FuelpadGtkEditwin , FuelpadAbstractFullEdit ) :
 
-        def __init__( self , config , add ) :
+        def __init__( self , pui , add ) :
+            config = pui.config
             FuelpadGtkEditwin.__init__( self , config )
 
             table = gtk.Table(4, 4, False)
@@ -424,11 +426,11 @@ else :
             # Third row, second entry
             self.entrynotes = self.add_item( table , 'EDIT_NOTES' , 3 , 2 )
 
-    #        completion = gtk.EntryCompletion()
-    #        store = pui.view.get_model()
-    #        completion.set_model( store )
-    #        completion.set_text_column( configuration.column_dict['NOTES'] )
-    #        self.entrynotes.set_completion( completion )
+            completion = gtk.EntryCompletion()
+            store = pui.view.get_model()
+            completion.set_model( store )
+            completion.set_text_column( configuration.column_dict['NOTES'] )
+            self.entrynotes.set_completion( completion )
 
             # Service etc. self
             table = gtk.Table(1, 3, False)
