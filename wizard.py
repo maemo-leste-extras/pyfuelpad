@@ -376,6 +376,7 @@ else :
             table.show()
 
             self.append_page( scrollwin , gtk.Label( label ) )
+            scrollwin.show()
 
         def add_item ( self , table , id , row , column=0 ) :
             item = gtk.Entry()
