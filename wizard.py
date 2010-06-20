@@ -171,27 +171,12 @@ class FuelpadEdit ( gtk.Notebook ) :
             callback_kmadded( None , None , self , config )
         return True
 
-class FuelpadAbstractFullEdit :
+class FuelpadAbstractEditwin :
 
     widgets = {}
 
-    labels = { 'EDIT_DATE':( "Date", 20 , configuration.column_dict['DAY']) ,
-               'EDIT_KM':( "Km", 8 , configuration.column_dict['KM']) ,
-               'EDIT_MILES':( "Miles", 8 , configuration.column_dict['KM']) ,
-               'EDIT_TRIP':( "Trip", 8 , configuration.column_dict['TRIP']) ,
-               'EDIT_FILL':( "Fill", 8 , configuration.column_dict['FILL']) ,
-               'EDIT_NOTFULL':( "Not full tank", None , None) ,
-               'EDIT_PRICE':( "Price", 8 , configuration.column_dict['PRICE']) ,
-               'EDIT_NOTES':( "Notes", 50 , configuration.column_dict['NOTES']) ,
-               'EDIT_SERVICE':( "Service", 8 , configuration.column_dict['SERVICE']) ,
-               'EDIT_OIL':( "Oil", 8 , configuration.column_dict['OIL']) ,
-               'EDIT_TIRES':( "Tires", 8 , configuration.column_dict['TIRES']) ,
-               'EDIT_CAR':( "Car", None , None ) ,
-               'EDIT_DRIVER':( "Driver", None , None)
-               }
-
     #DIALOG_MIN_HEIGHT0 = 300
-    DIALOG_MIN_HEIGHT1 = 200
+    DIALOG_MIN_HEIGHT1 = 150
     #DIALOG_MIN_HEIGHT2 = 150
     DIALOG_MIN_HEIGHTMAX = 400
     #DIALOG_MIN_WIDTH1 = 720
@@ -210,39 +195,66 @@ class FuelpadAbstractFullEdit :
         item.show()
 
 
-class FuelpadAbstractSettingsEdit ( FuelpadAbstractFullEdit ) :
+class FuelpadAbstractFullEdit :
+
+    labels = { 'EDIT_DATE':( "Date", 20 , configuration.column_dict['DAY']) ,
+               'EDIT_KM':( "Km", 8 , configuration.column_dict['KM']) ,
+               'EDIT_MILES':( "Miles", 8 , configuration.column_dict['KM']) ,
+               'EDIT_TRIP':( "Trip", 8 , configuration.column_dict['TRIP']) ,
+               'EDIT_FILL':( "Fill", 8 , configuration.column_dict['FILL']) ,
+               'EDIT_NOTFULL':( "Not full tank", None , None) ,
+               'EDIT_PRICE':( "Price", 8 , configuration.column_dict['PRICE']) ,
+               'EDIT_NOTES':( "Notes", 50 , configuration.column_dict['NOTES']) ,
+               'EDIT_SERVICE':( "Service", 8 , configuration.column_dict['SERVICE']) ,
+               'EDIT_OIL':( "Oil", 8 , configuration.column_dict['OIL']) ,
+               'EDIT_TIRES':( "Tires", 8 , configuration.column_dict['TIRES']) ,
+               'EDIT_CAR':( "Car", None , None ) ,
+               'EDIT_DRIVER':( "Driver", None , None)
+               }
+
+
+class FuelpadAbstractSettingsEdit :
 
     labels = { 'SETTINGS_UNITSYSTEM':( "Unit system", None , "current_unit") ,
                'SETTINGS_FONTSIZE':( "Font size", None , "mainviewfontsize") ,
                'SETTINGS_CURRENCY':( "Currency", 30 , "currency")
                }
 
-    def add_label ( self , table , id , item , row , column=0 ) :
-        if self.labels[id][2] :
-            self.widgets[ self.labels[id][2] ] = item
-        label = gtk.Label( self.labels[id][0] )
-        table.attach(label, column, column+1, row, row+1,
-                     gtk.EXPAND|gtk.FILL,
-                     0, 0, 5)
-        label.show()
-        table.attach(item, column+1, column+2, row, row+1,
-                     gtk.EXPAND|gtk.FILL,
-                     0, 0, 5)
-        item.show()
-
 
 if hildon :
 
-    class FuelpadFullEdit ( hildon.PannableArea , FuelpadAbstractFullEdit ) :
+    class FuelpadHildonEditwin ( hildon.PannableArea , FuelpadAbstractEditwin ) :
 
-        def __init__( self , config , add ) :
+        def __init__( self , config ) :
             hildon.PannableArea.__init__( self )
             self.set_size_request( -1 , self.DIALOG_MIN_HEIGHTMAX )
+
+        def add_table( self , table ) :
+            self.add_with_viewport( table )
+            table.show()
+
+        def add_item ( self , table , id , row , column=0 ) :
+            item = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+            item.set_max_length( self.labels[id][1] )
+            self.add_label( table , id , item ,row , column )
+            return item
+
+        def add_button ( self , table , item , row ) :
+            table.attach(item, 0, 2, row, row+1,
+                         gtk.EXPAND|gtk.FILL,
+                         0, 0, 5)
+            item.show()
+
+    class FuelpadFullEdit ( FuelpadHildonEditwin , FuelpadAbstractFullEdit ) :
+
+        def __init__( self , config , add ) :
+            FuelpadHildonEditwin.__init__( self , config )
 
             if add :
                 table = gtk.Table(12, 2, False)
             else :
                 table = gtk.Table(10, 2, False)
+            self.add_table( table )
 
             row = 0
 
@@ -318,30 +330,19 @@ if hildon :
             self.entrytires = self.add_item( table , 'EDIT_TIRES' , row )
             row += 1
 
-            self.add_with_viewport( table )
-            table.show()
-
         def add_item ( self , table , id , row , column=0 ) :
-            item = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-            item.set_max_length( self.labels[id][1] )
+            item = FuelpadHildonEditwin.add_item( self , table , id , row , column )
             item.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
         #    item.set_property( "autocap", False)
-            self.add_label( table , id , item ,row , column )
             return item
 
-        def add_button ( self , table , item , row ) :
-            table.attach(item, 0, 2, row, row+1,
-                         gtk.EXPAND|gtk.FILL,
-                         0, 0, 5)
-            item.show()
-
-    class FuelpadSettingsEdit ( hildon.PannableArea , FuelpadAbstractSettingsEdit ) :
+    class FuelpadSettingsEdit ( FuelpadHildonEditwin , FuelpadAbstractSettingsEdit ) :
 
         def __init__( self , config ) :
-            hildon.PannableArea.__init__( self )
-            self.set_size_request( -1 , self.DIALOG_MIN_HEIGHTMAX )
+            FuelpadHildonEditwin.__init__( self , config )
 
             table = gtk.Table(6, 4, False)
+            self.add_table( table )
 
             # First row, first entry
             item = combos.FuelpadUnitsystemCombo( config , self.labels['SETTINGS_UNITSYSTEM'][0] )
@@ -352,41 +353,41 @@ if hildon :
             self.widgets[ self.labels['SETTINGS_FONTSIZE'][2] ] = item
             self.add_button( table , item , 1 )
 
-            item = self.add_item( table , 'SETTINGS_CURRENCY' , 2 )
+            self.add_item( table , 'SETTINGS_CURRENCY' , 2 )
             self.widgets['currency'].set_text( config.currency )
-
-            # Table ready - show it
-            table.show()
-
-            self.add_with_viewport( table )
-
-        def add_item ( self , table , id , row , column=0 ) :
-            item = hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-            item.set_max_length( self.labels[id][1] )
-            self.add_label( table , id , item ,row , column )
-            return item
-
-        def add_button ( self , table , item , row ) :
-            table.attach(item, 0, 2, row, row+1,
-                         gtk.EXPAND|gtk.FILL,
-                         0, 0, 5)
-            item.show()
 
 else :
 
-    class FuelpadFullEdit ( gtk.Notebook , FuelpadAbstractFullEdit ) :
+    class FuelpadGtkEditwin ( gtk.Notebook , FuelpadAbstractEditwin ) :
 
-        def __init__( self , config , add ) :
+        def __init__( self , config ) :
             gtk.Notebook.__init__( self )
             self.set_tab_pos(gtk.POS_TOP)
 
+        def add_table( self , table , label ) :
             scrollwin = gtk.ScrolledWindow(None, None)
             scrollwin.set_size_request(-1, self.DIALOG_MIN_HEIGHT1)
             scrollwin.set_policy(gtk.POLICY_NEVER,
                                  gtk.POLICY_AUTOMATIC)
 
-            table = gtk.Table(4, 4, False)
             scrollwin.add_with_viewport( table )
+            table.show()
+
+            self.append_page( scrollwin , gtk.Label( label ) )
+
+        def add_item ( self , table , id , row , column=0 ) :
+            item = gtk.Entry()
+            item.set_max_length( self.labels[id][1] )
+            self.add_label( table , id , item ,row , column )
+            return item
+
+    class FuelpadFullEdit ( FuelpadGtkEditwin , FuelpadAbstractFullEdit ) :
+
+        def __init__( self , config , add ) :
+            FuelpadGtkEditwin.__init__( self , config )
+
+            table = gtk.Table(4, 4, False)
+            self.add_table( table, "Fuel fill" )
 
             # First row, first entry
             self.entrydate = self.add_item( table , 'EDIT_DATE' , 0 )
@@ -429,15 +430,9 @@ else :
     #        completion.set_text_column( configuration.column_dict['NOTES'] )
     #        self.entrynotes.set_completion( completion )
 
-            # Table ready - show it
-            table.show()
-            scrollwin.show()
-
-            label = gtk.Label( "Fuel fill" )
-            self.append_page( scrollwin, label )
-
             # Service etc. self
             table = gtk.Table(1, 3, False)
+            self.add_table( table, "Service/oil/tires" )
 
             # First row, first entry
             self.entryservice = self.add_item( table , 'EDIT_SERVICE' , 0 )
@@ -448,14 +443,9 @@ else :
             # Third row, first entry
             self.entrytires = self.add_item( table , 'EDIT_TIRES' , 2)
 
-            # Table ready - show it
-            table.show()
-
-            label = gtk.Label ( "Service/oil/tires" )
-            self.append_page( table, label)
-
             if add :
               table = gtk.Table(2, 2, False)
+              self.add_table( table , "Driver and car" )
 
               # First row, first entry 
               self.carcombo = combos.FuelpadCarCombo( config )
@@ -465,30 +455,13 @@ else :
               self.drivercombo = combos.FuelpadDriverCombo( config )
               self.add_label( table , 'EDIT_DRIVER' , self.drivercombo , 1 )
 
-              table.show()
-
-              label = gtk.Label( "Driver and car" )
-              self.append_page( table , label )
-
-        def add_item ( self , table , id , row , column=0 ) :
-            item = gtk.Entry()
-            item.set_max_length( self.labels[id][1] )
-            self.add_label( table , id , item ,row , column )
-            return item
-
-    class FuelpadSettingsEdit ( gtk.Notebook , FuelpadAbstractSettingsEdit ) :
+    class FuelpadSettingsEdit ( FuelpadGtkEditwin , FuelpadAbstractSettingsEdit ) :
 
         def __init__( self , config ) :
-            gtk.Notebook.__init__( self )
-            self.set_tab_pos(gtk.POS_TOP)
-
-            scrollwin = gtk.ScrolledWindow(None, None)
-            scrollwin.set_size_request(-1, self.DIALOG_MIN_HEIGHT1)
-            scrollwin.set_policy(gtk.POLICY_NEVER,
-                                 gtk.POLICY_AUTOMATIC)
+            FuelpadGtkEditwin.__init__( self , config )
 
             table = gtk.Table(6, 4, False)
-            scrollwin.add_with_viewport( table )
+            self.add_table( table , "Visualization settings" )
 
             # First row, first entry
             item = combos.FuelpadUnitsystemCombo( config )
@@ -499,18 +472,5 @@ else :
 
             self.add_item( table , 'SETTINGS_CURRENCY' , 2 )
             self.widgets['currency'].set_text( config.currency )
-
-            # Table ready - show it
-            table.show()
-            scrollwin.show()
-
-            label = gtk.Label( "Visualization settings" )
-            self.append_page( scrollwin, label )
-
-        def add_item ( self , table , id , row , column=0 ) :
-            item = gtk.Entry()
-            item.set_max_length( self.labels[id][1] )
-            self.add_label( table , id , item ,row , column )
-            return item
 
 
