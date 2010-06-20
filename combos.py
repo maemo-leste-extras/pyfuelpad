@@ -71,16 +71,10 @@ class FuelpadAbstractItem ( gtk.ToolItem ) :
 
 if hildon :
 
-    class FuelpadSelector ( hildon.TouchSelector , FuelpadAbstractDBCombo ) :
+    class FuelpadSelector ( hildon.TouchSelector ) :
 
-        def __init__ ( self , config , parentCombo ) :
+        def __init__ ( self ) :
             hildon.TouchSelector.__init__( self , text=True )
-            self.key = parentCombo.key
-            self.query = parentCombo.query
-            self.toggle = parentCombo.toggle
-            FuelpadAbstractDBCombo.fill_combo( self , config.db )
-            # NOTE : registering the callback will drive permanent changes (even to DB) even with cancellation !!!
-            self.connect( "changed", self.changed_cb, config.db )
 
         def set_active( self , index ) :
             return hildon.TouchSelector.set_active( self , 0 , index )
@@ -88,25 +82,41 @@ if hildon :
         def get_active( self ) :
             return hildon.TouchSelector.get_active( self , 0 )
 
+    class FuelpadDBSelector ( FuelpadSelector , FuelpadAbstractDBCombo ) :
+
+        def __init__ ( self , config , parentCombo ) :
+            FuelpadSelector.__init__( self )
+            self.key = parentCombo.key
+            self.query = parentCombo.query
+            self.toggle = parentCombo.toggle
+            FuelpadAbstractDBCombo.fill_combo( self , config.db )
+            # NOTE : registering the callback will drive permanent changes (even to DB) even with cancellation !!!
+            self.connect( "changed", self.changed_cb, config.db )
+
         def changed_cb ( self , widget , id , database ) :
             FuelpadAbstractDBCombo.changed_cb( self , widget , database )
 
-    class FuelpadCombo ( hildon.PickerButton ) :
+    class FuelpadButton ( hildon.PickerButton ) :
+
+        def __init__ ( self , title , selector ) :
+            hildon.PickerButton.__init__( self , gtk.HILDON_SIZE_AUTO, hildon.BUTTON_ARRANGEMENT_VERTICAL )
+            self.set_title( title )
+            self.set_selector( selector )
+
+        def select_combo_item ( self , db ) :
+            self.get_selector().select_combo_item(  db )
+
+    class FuelpadCombo ( FuelpadButton ) :
 
         def __init__ ( self , config , toggle=False ) :
-            hildon.PickerButton.__init__( self , gtk.HILDON_SIZE_AUTO, hildon.BUTTON_ARRANGEMENT_VERTICAL )
-            self.set_title( self.key )
 
             if toggle :
                 self.toggle = toggle
             else :
                 self.toggle = None
 
-            selector = FuelpadSelector( config , self )
-            self.set_selector( selector )
-
-        def select_combo_item ( self , db ) :
-            self.get_selector().select_combo_item(  db )
+            selector = FuelpadDBSelector( config , self )
+            FuelpadButton.__init__( self , self.key , selector )
 
     class FuelpadItem ( FuelpadAbstractItem ) :
 
@@ -171,32 +181,20 @@ class  FuelpadAbstractListCombo ( FuelpadAbstractCombo ) :
 
 if hildon :
 
-    class FuelpadListSelector ( hildon.TouchSelector , FuelpadAbstractListCombo ) :
+    class FuelpadListSelector ( FuelpadSelector , FuelpadAbstractListCombo ) :
 
         def __init__ ( self , items , active ) :
-            hildon.TouchSelector.__init__( self , text=True )
+            FuelpadSelector.__init__( self )
             self.fill_combo( items , active )
-
-        def set_active( self , index ) :
-            return hildon.TouchSelector.set_active( self , 0 , index )
-
-        def get_active( self ) :
-            return hildon.TouchSelector.get_active( self , 0 )
 
         def changed_cb ( self , widget , id , database ) :
             FuelpadAbstractListCombo.changed_cb( self , widget , database )
 
-    class FuelpadListCombo ( hildon.PickerButton ) :
+    class FuelpadListCombo ( FuelpadButton ) :
 
         def __init__ ( self , items , active=None ) :
-            hildon.PickerButton.__init__( self , gtk.HILDON_SIZE_AUTO, hildon.BUTTON_ARRANGEMENT_VERTICAL )
-            self.set_title( self.key )
-
             selector = FuelpadListSelector( items , active )
-            self.set_selector( selector )
-
-        def select_combo_item ( self , db ) :
-            self.get_selector().select_combo_item(  db )
+            FuelpadButton.__init__( self , self.key , selector )
 
 else :
 
