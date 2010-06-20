@@ -418,7 +418,7 @@ if hildon :
             image = gtk.image_new_from_stock(gtk.STOCK_ADD, gtk.ICON_SIZE_BUTTON)
             self.stb_addbutton.set_image(image)
             self.stb_add.add( self.stb_addbutton )
-            self.stb_addbutton.connect( "clicked" , callbacks.callback_newrecord , self )
+            self.stb_addbutton.connect( "clicked" , callbacks.callback_newrecord , self , True )
             FuelpadAbstractWindow.create_secondary_toolbar( self )
 
         def create_mainwin_menu ( self , vbox ) :
@@ -527,7 +527,7 @@ else :
 
         def create_secondary_toolbar( self ) :
             self.stb_add = gtk.ToolButton( gtk.STOCK_ADD )
-            self.stb_add.connect( "clicked" , callbacks.callback_newrecord , self )
+            self.stb_add.connect( "clicked" , callbacks.callback_newrecord , self , True )
             FuelpadAbstractWindow.create_secondary_toolbar( self )
 
         def create_mainwin_menu ( self , vbox ) :

@@ -384,16 +384,16 @@ def callback_editrecord ( action , pui ) :
     dialog.show()
 
 # http://wiki.maemo.org/PyMaemo/UI_tutorial/Windows_and_dialogs#Using_GtkDialogs_in_Hildon_applications
-def callback_newrecord ( action, pui ) :
+def callback_newrecord ( action, pui , allowreduced=False ) :
 
     header = ( "Add a new record" , )
 
     if pui.config.db.is_open() :
-        if pui.config.reducedinput :
+        if pui.config.reducedinput and allowreduced :
             editwin = wizard.FuelpadEdit( pui.config , 1 )
         else :
             editwin = wizard.FuelpadFullEdit( pui.config , 1 )
-        if hildon and pui.config.reducedinput :
+        if hildon and pui.config.reducedinput and allowreduced :
             dialog = hildon.WizardDialog( pui , header[0] , editwin )
         else :
             dialog = gtk.Dialog( header[0],
