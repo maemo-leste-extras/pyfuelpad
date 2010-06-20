@@ -5,7 +5,7 @@ import gconf
 
 import gtk
 
-default_db = "/tmp/fuelpad.db"
+default_db = "/home/user/fuelpad.db"
 
 # fontscale
 XSMALL=1
@@ -156,7 +156,6 @@ class FuelpadConfig :
 
         if tmpdatabase :
             self.db.setfilename( tmpdatabase )
-        self.db.setfilename( "/tmp/fuelpad.db" ) #JP
 
         # Current car and driver are zero if this is the first time
         # this program is run
