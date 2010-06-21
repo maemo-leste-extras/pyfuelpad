@@ -68,6 +68,10 @@ class FuelpadModel ( gtk.TreeModelSort ) :
 	    trip , fill = row[2] , row[3]
 	    price , consum = row[5] , row[4]
             co2 = utils.calc_co2_emission( consum , config.db.fueltype() )
+            if price and trip :
+                pricepertrip = config.doubleornothing(price) / config.SIlength2user(trip)
+            else :
+                pricepertrip = 0
 	    iter = store.append()
             store.set( iter ,
                        configuration.column_dict['DAY'], date,
@@ -76,7 +80,7 @@ class FuelpadModel ( gtk.TreeModelSort ) :
                        configuration.column_dict['FILL'], config.SIvolume2user(fill),
                        configuration.column_dict['CONSUM'], config.doubleornothing(config.SIconsumption2user(consum)),
                        configuration.column_dict['PRICE'], price,
-                       configuration.column_dict['PRICEPERTRIP'], config.doubleornothing(price/config.SIlength2user(trip)),
+                       configuration.column_dict['PRICEPERTRIP'], pricepertrip,
                        configuration.column_dict['PRICEPERLITRE'], config.doubleornothing(config.SIppl2user(row[6])),
                        configuration.column_dict['SERVICE'], row[7],
                        configuration.column_dict['OIL'], row[8],

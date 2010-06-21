@@ -65,7 +65,7 @@ def ui_update_row_data ( store , iter , config , date, km, trip, fill, consum, p
   if not fill < 0.0 : store.set( iter, configuration.column_dict['FILL'], config.SIvolume2user(fill) )
   if not consum < 0.0 : store.set( iter, configuration.column_dict['CONSUM'], config.doubleornothing(config.SIconsumption2user(consum)) )
   if not price < 0.0 : store.set( iter, configuration.column_dict['PRICE'], price )
-  if not ( price < 0.0 or trip < 0.0 ) : store.set( iter, configuration.column_dict['PRICEPERTRIP'], config.doubleornothing(price/config.SIlength2user(trip)) )
+  if price > 0 and trip > 0 : store.set( iter, configuration.column_dict['PRICEPERTRIP'], config.doubleornothing(price)/config.SIlength2user(trip))
   if not priceperlitre < 0.0 : store.set( iter, configuration.column_dict['PRICEPERLITRE'], config.doubleornothing(config.SIppl2user(priceperlitre)) )
   if not service < 0.0 : store.set( iter, configuration.column_dict['SERVICE'], service )
   if not oil < 0.0 : store.set( iter, configuration.column_dict['OIL'], oil )
