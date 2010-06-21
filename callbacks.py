@@ -281,10 +281,13 @@ def add_record_response ( widget , event , editwin , pui ) :
            if storeiter :
                ui_update_row_data(store, storeiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
     else :
-      # Find if there are any not full fills before this record
-      fullfill , fullkm = config.db.find_prev_full( km )
+      if fill != -1 and trip != -1 :
+          # Find if there are any not full fills before this record
+          fullfill , fullkm = config.db.find_prev_full( km )
 
-      consum = (fullfill+fill)/(fullkm+trip)*100
+          consum = (fullfill+fill)/(fullkm+trip)*100
+      else :
+          consum = 0
 
     # This is verified also within add_record method
     if config.db.is_open() :
