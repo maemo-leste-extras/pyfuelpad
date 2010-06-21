@@ -261,7 +261,8 @@ def add_record_response ( widget , event , editwin , pui ) :
         service = oil = tires = 0.0
         notes = ""
 
-    if editwin.buttonnotfull.get_active() :
+    if fill and trip :
+      if editwin.buttonnotfull.get_active() :
 
         # Find next full record 
         fullid , fullfill , fullkm = config.db.find_next_full( km )
@@ -276,8 +277,7 @@ def add_record_response ( widget , event , editwin , pui ) :
            storeiter = ui_find_iter( store , fullid )
            if storeiter :
                ui_update_row_data(store, storeiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
-    else :
-      if fill and trip :
+      else :
           # Find if there are any not full fills before this record
           fullfill , fullkm = config.db.find_prev_full( km )
           consum = (fullfill+fill)/(fullkm+trip)*100
