@@ -54,15 +54,11 @@ def get_store_and_iter ( model , view , iter , storeiter , config ) :
     storeiter = None
   return store , storeiter
 
-def ui_update_row_data ( store , iter , config , date, km, trip, fill, consum, price, service, oil, tires, notes , id , visible ) :
+def ui_update_row_data ( store , iter , config , date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes , id , visible ) :
 
   if date :
     userdate = utils.convdate( config.dateformat , None , date )
     store.set( iter, configuration.column_dict['DAY'],  userdate)
-
-  priceperlitre = -1
-  if fill > 0 :
-    priceperlitre = price / fill
 
   if not km < 0.0 : store.set( iter, configuration.column_dict['KM'], config.SIlength2user(km) )
   if not trip < 0.0 : store.set( iter, configuration.column_dict['TRIP'], config.SIlength2user(trip) )
@@ -77,7 +73,7 @@ def ui_update_row_data ( store , iter , config , date, km, trip, fill, consum, p
 #                                /*                      INSURANCE, sqlite3_column_double(ppStmtRecords,5), */
 #                                /*                      OTHER, sqlite3_column_double(ppStmtRecords,5), */
   if not consum < 0.0 : store.set( iter, configuration.column_dict['CO2EMISSION'], 0.0) #JP# config.SIemission2user(calc_co2_emission(consum,currentcar)) )
-  if notes != None : store.set( iter, configuration.column_dict['NOTES'], notes)
+  if notes : store.set( iter, configuration.column_dict['NOTES'], notes)
   store.set( iter, configuration.column_dict['ID'], id )
   store.set( iter, configuration.column_dict['VISIBLE'], visible)
 
@@ -147,17 +143,17 @@ def edit_record_response ( widget , event , editwin , pui ) :
                 date = editwin.entrydate.get_text()
             date = utils.date2sqlite( config.dateformat , date )
 
-            km  = config.user2SIlength( float( editwin.entrykm.get_text() or "-1" ) )
-            trip = config.user2SIlength( float( editwin.entrytrip.get_text() or "-1" ) )
-            fill  = config.user2SIvolume( float( editwin.entryfill.get_text() or "-1" ) )
+            km  = config.user2SIlength( editwin.entrykm.get_text() )
+            trip = config.user2SIlength( editwin.entrytrip.get_text() )
+            fill  = config.user2SIvolume( editwin.entryfill.get_text() )
             if editwin.entryprice :
-                price = float( editwin.entryprice.get_text() or "-1" )
-                service = float( editwin.entryservice.get_text() or "-1" )
-                oil = float( editwin.entryoil.get_text() or "-1" )
-                tires = float( editwin.entrytires.get_text() or "-1" )
+                price = config.doubleornothing( editwin.entryprice.get_text() )
+                service = config.doubleornothing( editwin.entryservice.get_text() )
+                oil = config.doubleornothing( editwin.entryoil.get_text() )
+                tires = config.doubleornothing( editwin.entrytires.get_text() )
                 notes = editwin.entrynotes.get_text()
             else :
-                price = service = oil = tires = 0
+                price = service = oil = tires = 0.0
                 notes = ""
 
             # Well need to obtain the unmodified data to be excluded from the new 
@@ -211,7 +207,7 @@ def edit_record_response ( widget , event , editwin , pui ) :
                 recordid = config.db.update_record(id, date, km, trip, fill, consum, price, price/fill, service, oil, tires, notes)
                 if recordid == id :
                     store , storeiter = get_store_and_iter(model, view, iter, None , config)
-                    ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, service, oil, tires, notes, recordid, True)
+                    ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes, recordid, True)
 
                     # Update the data for the full fill
                     if notfull or notfull!=oldnotfull : # not enough to test notfull, but when?
@@ -219,7 +215,7 @@ def edit_record_response ( widget , event , editwin , pui ) :
                         fullstore , storeiter = get_store_and_iter(None, view, None, None, config)
                         fullstoreiter = ui_find_iter( fullstore , fullid )
                         if fullstoreiter :
-                          ui_update_row_data(fullstore, fullstoreiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
+                          ui_update_row_data(fullstore, fullstoreiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
                     pui.update_totalkm()
 
         widget.destroy()
@@ -228,6 +224,9 @@ def edit_record_response ( widget , event , editwin , pui ) :
         widget.destroy()
 
 def add_record_response ( widget , event , editwin , pui ) :
+
+  consum = 0.0
+  priceperlitre = 0.0
 
   view , config = pui.view , pui.config
 
@@ -249,23 +248,20 @@ def add_record_response ( widget , event , editwin , pui ) :
       date = editwin.entrydate.get_text()
     date = utils.date2sqlite( config.dateformat , date )
 
-    km  = config.user2SIlength( float( editwin.entrykm.get_text() or "-1" ) )
-    trip = config.user2SIlength( float( editwin.entrytrip.get_text() or "-1" ) )
-    fill  = config.user2SIvolume( float( editwin.entryfill.get_text() or "-1" ) )
-    price = float( editwin.entryprice.get_text() or "-1" )
+    km  = config.user2SIlength( editwin.entrykm.get_text() )
+    trip = config.user2SIlength( editwin.entrytrip.get_text() )
+    fill  = config.user2SIvolume( editwin.entryfill.get_text() )
+    price = config.doubleornothing( editwin.entryprice.get_text() )
     if editwin.entryservice :
-        service = float( editwin.entryservice.get_text() or "-1" )
-        oil = float( editwin.entryoil.get_text() or "-1" )
-        tires = float( editwin.entrytires.get_text() or "-1" )
+        service = config.doubleornothing( editwin.entryservice.get_text() )
+        oil = config.doubleornothing( editwin.entryoil.get_text() )
+        tires = config.doubleornothing( editwin.entrytires.get_text() )
         notes = editwin.entrynotes.get_text()
     else :
-        service = oil = tires = 0
+        service = oil = tires = 0.0
         notes = ""
 
     if editwin.buttonnotfull.get_active() :
-
-        # For this record
-        consum = 0.0
 
         # Find next full record 
         fullid , fullfill , fullkm = config.db.find_next_full( km )
@@ -279,23 +275,22 @@ def add_record_response ( widget , event , editwin , pui ) :
            store , storeiter = get_store_and_iter(None, view, None, None, config)
            storeiter = ui_find_iter( store , fullid )
            if storeiter :
-               ui_update_row_data(store, storeiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
+               ui_update_row_data(store, storeiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
     else :
-      if fill != -1 and trip != -1 :
+      if fill and trip :
           # Find if there are any not full fills before this record
           fullfill , fullkm = config.db.find_prev_full( km )
-
           consum = (fullfill+fill)/(fullkm+trip)*100
-      else :
-          consum = 0
 
     # This is verified also within add_record method
     if config.db.is_open() :
-        recordid = config.db.add_record(date, km, trip, fill, consum, price, service, oil, tires, notes)
+        if fill > 0 :
+            priceperlitre = price / fill
+        recordid = config.db.add_record(date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes)
         if recordid : # record succesfully inserted
             store , storeiter = get_store_and_iter(None, view, None, None, config)
             storeiter = store.append()
-            ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, service, oil, tires, notes, recordid, True)
+            ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes, recordid, True)
             pui.update_totalkm()
 
     widget.destroy()

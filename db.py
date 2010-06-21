@@ -345,10 +345,7 @@ class database :
     def totalcost ( self ) :
     
       if self.is_open() :
-    
-        # BUG : We are accounting for all the -1 values !!!
         sqlquery = "SELECT sum(price)+sum(service)+sum(oil)+sum(tires) FROM record WHERE carid=%d" % self.currentcar
-    
         return self.get_float( sqlquery )
     
       return 0.0
@@ -389,13 +386,8 @@ class database :
     def carid ( self , index ) :
         return self.get_float( "SELECT id FROM car LIMIT 1 OFFSET %d" % index )
 
-    def add_record (self, date, km, trip, fill, consum, price, service, oil, tires, notes) :
+    def add_record (self, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes) :
   
-        # NOTE : move to main functions and to arglist
-        priceperlitre = -1
-        if fill > 0 :
-            priceperlitre = price / fill
-
         if self.is_open() :
             query = self.ppStmtAddRecord % ( self.currentcar, self.currentdriver, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes )
             rc = self.db.execute( query )

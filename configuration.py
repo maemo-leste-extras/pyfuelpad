@@ -207,14 +207,7 @@ class FuelpadConfig :
     # To be revised
     def doubleornothing ( self , input ) :
       if not input :
-        print "Calling doubleornothing with",input,type(input)
         return 0.0
-    #  if (isnan(input) || isinf(input)) :
-    #    ret=0.0
-    #  else :
-    #    ret=input
-    #  print "HOLA",input,type(input)
-    #  ret=input
       return float( input )
 
 
@@ -233,18 +226,16 @@ class FuelpadConfig :
     mcf = ( 1.0 , 453.59237 , 453.59237 )
 
     def SIlength2user ( self , length ) :
-    #    if not length : length=0
-        return length / self.lcf[self.units['length']]
+        return self.doubleornothing(length) / self.lcf[self.units['length']]
 
     def user2SIlength ( self , length ) :
-    #    if not length : length=0
-        return length * self.lcf[self.units['length']]
+        return self.doubleornothing(length) * self.lcf[self.units['length']]
 
     def SIvolume2user ( self , length ) :
-        return length / self.vcf[self.units['volume']]
+        return self.doubleornothing(length )/ self.vcf[self.units['volume']]
 
     def user2SIvolume ( self , length ) :
-        return length * self.vcf[self.units['volume']];
+        return self.doubleornothing(length) * self.vcf[self.units['volume']];
 
     def SIconsumption2user ( self , consum ) :
         if self.isSI( 'consume' ) :
