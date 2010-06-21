@@ -286,8 +286,8 @@ class database :
        if self.is_open() :
            result = self.get_row( self.ppStmtNextFull % ( self.currentcar , km ) )
            if result :
-               if not result[3]*result[3] > 1e-6 : # Full fill not found
-                   return result[4] , result[2] , result[1]
+               fullfill , fullkm = self.find_prev_full( result[0] )
+               return result[4] , fullfill + result[2] , fullkm + result[1]
 
        return 0 , 0.0 , 0.0
 
