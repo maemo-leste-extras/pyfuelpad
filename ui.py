@@ -236,7 +236,7 @@ class FuelpadAbstractWindow :
         self.mtb_edit = gtk.ToolButton( gtk.STOCK_EDIT )
       #  self.mtb_up = gtk.ToolButton( gtk.STOCK_GO_UP )
       #  self.mtb_down = gtk.ToolButton( gtk.STOCK_GO_DOWN )
-      #  self.mtb_delete = gtk.ToolButton( gtk.STOCK_DELETE )
+        self.mtb_delete = gtk.ToolButton( gtk.STOCK_DELETE )
       #  self.mtb_reminder = gtk.ToolButton()
         self.mtb_close = gtk.ToolButton( gtk.STOCK_QUIT )
 
@@ -244,7 +244,7 @@ class FuelpadAbstractWindow :
         self.mtb_edit.set_expand( True )
       #  self.mtb_up.set_expand( True )
       #  self.mtb_down.set_expand( True )
-      #  self.mtb_delete.set_expand( True )
+        self.mtb_delete.set_expand( True )
       #  self.mtb_reminder.set_expand( True )
         self.mtb_close.set_expand( True )
 
@@ -257,8 +257,8 @@ class FuelpadAbstractWindow :
       #  self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
       #  self.main_toolbar.insert( self.mtb_down, -1)
       #  self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
-      #  self.main_toolbar.insert( self.mtb_delete, -1)
-      #  self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
+        self.main_toolbar.insert( self.mtb_delete, -1)
+        self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
       #  self.main_toolbar.insert( self.mtb_reminder, -1)
       #  self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
         self.main_toolbar.insert( self.mtb_close, -1)
@@ -267,7 +267,7 @@ class FuelpadAbstractWindow :
         self.mtb_edit.connect( "clicked", callbacks.callback_editrecord, self)
       #  self.mtb_up.connect( "clicked", callback_prevrecord, self)
       #  self.mtb_down.connect( "clicked", callback_nextrecord, self)
-      #  self.mtb_delete.connect( "clicked", callback_deleterecord, self)
+        self.mtb_delete.connect( "clicked", callbacks.callback_deleterecord, self)
       #  self.mtb_reminder.connect( "clicked", callback_alarm, self)
         self.mtb_close.connect( "clicked" , callbacks.delete_event , self )
 
@@ -483,7 +483,7 @@ if hildon :
             self.mm_item_edit.connect( "clicked", callbacks.callback_editrecord , self )
         #  self.mm_item_alarm.connect( "clicked", callback_alarm , self )
             self.mm_item_settings.connect( "clicked", callbacks.callback_settings , self )
-        #  self.mm_item_delete.connect( "clicked", callback_deleterecord , self )
+            self.mm_item_delete.connect( "clicked", callbacks.callback_deleterecord , self )
         #  self.mm_item_filter.connect( "clicked", callback_filter_records , self )
         #  self.mm_item_stat.connect( "clicked", callback_stat , self )
         #  self.mm_item_report.connect( "clicked", callback_report , self )
@@ -685,7 +685,7 @@ else :
 
             self.mm_item_new.connect( "activate" , callbacks.callback_newrecord, self )
             self.mm_item_edit.connect( "activate" , callbacks.callback_editrecord, self )
-        #    g_signal_connect(G_OBJECT(self.mm_item_delete), "activate", callback_deleterecord), pui);
+            self.mm_item_delete.connect( "activate" , callbacks.callback_deleterecord, self )
 
             self.main_menu_item_fullscreen.connect( "toggled" , callbacks.cb_main_fullscreen , self )
         #    g_signal_connect(G_OBJECT(self.mm_item_columnselect), "activate", callback_select_columns), pui);

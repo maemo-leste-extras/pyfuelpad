@@ -325,11 +325,6 @@ def callback_settings ( action, pui ) :
     dialog.show_all()
 
 
-def callback_recordactivated ( view , path , col ) :
-  iter = view.get_model().get_iter(path) 
-  if iter :
-    callback_editrecord(None, None)
-
 def callback_editrecord ( action , pui ) :
 
     header = ( "Edit a record" , )
@@ -433,6 +428,57 @@ def callback_newrecord ( action, pui , allowreduced=False ) :
         dialog.connect( "response", destroy_event , None )
 
     dialog.show()
+
+def callback_recordactivated ( view , path , col ) :
+  iter = view.get_model().get_iter(path) 
+  if iter :
+    callback_editrecord(None, None)
+
+def callback_deleterecord ( action, pui ) :
+
+    km = fill = trip = consum = 0.0
+
+    selection = pui.view.get_selection()
+    model , iter = selection.get_selected()
+    if iter :
+        id = model.get( iter , configuration.column_dict['ID'] )[0]
+
+        # Ask for confirmation and remove events
+
+        query = pui.config.db.ppStmtOneRecord % id
+        row = pui.config.db.get_row( query )
+        if row :
+            km = row[1]
+            fill = row[3]
+            trip = row[2]
+            consum = row[9]
+
+        if pui.config.db.delete_record( id ) :
+            # Remove from window
+
+            store , storeiter = get_store_and_iter(model, pui.view, iter, None , pui.config)
+            store.remove( storeiter )
+
+            if fill :
+                if abs(consum) < 1e-5 :
+
+                    # Find next full record 
+                    fullid , fullfill , fullkm = config.db.find_next_full( km )
+                    if fullid : 
+                        fullconsum = fullfill/fullkm*100
+
+                        # Update now the full record consum
+                        query = "UPDATE record SET consum=%s WHERE id=%s" % ( fullconsum , fullid )
+                        config.db.db.execute( query )
+
+                        # Update the data for the full fill
+                        fullstore , storeiter = get_store_and_iter(None, view, None, None, config)
+                        fullstoreiter = ui_find_iter( fullstore , fullid )
+                        if fullstoreiter :
+                            ui_update_row_data(fullstore, fullstoreiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
+            pui.update_totalkm()
+
+            # Delete the corresponding alarmevent
 
 
 # Actions for carcombo item done

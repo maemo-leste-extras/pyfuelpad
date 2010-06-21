@@ -181,7 +181,7 @@ class database :
     ppStmtUpdateDriver = "UPDATE driver SET fullname=?, nickname=? WHERE id=?"
     ppStmtAddCar = "INSERT INTO car(mark,model,year,register,notes,fueltype) VALUES(?,?,?,?,?,?)"
     ppStmtUpdateCar = "UPDATE car SET mark=?, model=?, year=?, register=?, notes=?, fueltype=? WHERE id=?"
-    ppStmtDeleteRecord = "DELETE FROM record WHERE id=?"
+    ppStmtDeleteRecord = "DELETE FROM record WHERE id=%d"
     ppStmtOneRecord = "SELECT day,km,trip,fill,price,service,oil,tires,notes,consum,id FROM record WHERE id=%d"
     ppStmtRecords = "SELECT day,km,trip,fill,consum,price,priceperlitre,service,oil,tires,notes,id FROM record WHERE carid=? ORDER BY km"
     ppStmtExport = "SELECT day,km,trip,fill,consum,price,priceperlitre,service,oil,tires,notes,driverid FROM record WHERE carid=? ORDER BY km"
@@ -407,5 +407,12 @@ class database :
                 self.db.commit()
                 return id
 
+        return False
+
+    def delete_record ( self , id ) :
+        rc = self.db.execute( self.ppStmtDeleteRecord % id )
+        if rc.rowcount :
+            self.db.commit()
+            return True
         return False
 
