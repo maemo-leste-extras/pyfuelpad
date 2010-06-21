@@ -36,11 +36,8 @@ def font_attrs ( fontsize , widget=None ) :
   return attrs
 
 # unit
-SI=0
-US=1
-IMPERIAL=2
-
 unitsystem = [ 'SI' , 'US' , 'IMPERIAL' ]
+unitrange = range( len(unitsystem) )
 
 # dbtimespan
 OVERALL=0
@@ -161,16 +158,16 @@ class FuelpadConfig :
         # this program is run
         if self.db.currentcar == 0 : self.db.currentcar = 1
         if self.db.currentdriver == 0 :  self.db.currentdriver = 1
-        if self.units['main'] > IMPERIAL or self.units['main'] < SI :
-            self.units['main'] = SI
-        if self.units['length'] > IMPERIAL or self.units['length'] < SI :
-            self.units['length'] = SI
-        if self.units['volume'] > IMPERIAL or self.units['volume'] < SI :
-            self.units['volume'] = SI
-        if self.units['consume'] > IMPERIAL or self.units['consume'] < SI :
-            self.units['consume'] = SI
-        if self.units['mass'] > IMPERIAL or self.units['mass'] < SI :
-            self.units['mass'] = SI
+        if self.units['main'] not in unitrange :
+            self.units['main'] = unitsystem.index('SI')
+        if self.units['length'] not in unitrange :
+            self.units['length'] = unitsystem.index('SI')
+        if self.units['volume'] not in unitrange :
+            self.units['volume'] = unitsystem.index('SI')
+        if self.units['consume'] not in unitrange :
+            self.units['consume'] = unitsystem.index('SI')
+        if self.units['mass'] not in unitrange :
+            self.units['mass'] = unitsystem.index('SI')
         if self.dateformat < 0 or self.dateformat > len(datefmtstr) :
             self.dateformat = 0
 
@@ -212,11 +209,10 @@ class FuelpadConfig :
 
 
     def isSI ( self , unittype  ) :
-        return self.units[ unittype ] == SI
+        return self.units[ unittype ] == unitsystem.index('SI')
 
-# Conversions are likely ported, but maybe there are missing items
-    # Conversions are likely ported, but maybe there are missing items
     # Unit conversion functions
+    # Conversions are likely ported, but maybe there are missing items
 
     # lcf = length conversion factor
     # vcf = volume conversion factor
