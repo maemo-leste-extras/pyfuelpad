@@ -157,19 +157,20 @@ def edit_record_response ( widget , event , editwin , pui ) :
                 service = oil = tires = 0.0
                 notes = ""
 
-            oldnotfull = False
-            # Well need to obtain the unmodified data to be excluded from the new 
-            # consumption calculations 
-            query = config.db.ppStmtOneRecord % id
-            row = config.db.get_row( query )
-            if row :
+            if fill and trip :
+              oldnotfull = False
+              # Well need to obtain the unmodified data to be excluded from the new 
+              # consumption calculations 
+              query = config.db.ppStmtOneRecord % id
+              row = config.db.get_row( query )
+              if row :
                 oldfill = row[3]
                 oldtrip = row[2]
                 oldconsum = row[9]
                 oldnotfull = oldfill>0.0 and abs(oldconsum)<1e-5
 
-            notfull = editwin.buttonnotfull.get_active()
-            if notfull :
+              notfull = editwin.buttonnotfull.get_active()
+              if notfull :
 
                 # Find next full record 
                 fullid , fullfill , fullkm = config.db.find_next_full( km )
@@ -183,7 +184,7 @@ def edit_record_response ( widget , event , editwin , pui ) :
                     query = "UPDATE record set consum=%s WHERE id=%s" % ( fullconsum , fullid )
                     config.db.db.execute( query )
 
-            else :
+              else :
 
                 if oldnotfull :
 
@@ -213,13 +214,14 @@ def edit_record_response ( widget , event , editwin , pui ) :
                     store , storeiter = get_store_and_iter(model, view, iter, None , config)
                     ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes, recordid, True)
 
-                    # Update the data for the full fill
-                    if notfull or notfull!=oldnotfull : # not enough to test notfull, but when?
-                      if fullid :
-                        fullstore , storeiter = get_store_and_iter(None, view, None, None, config)
-                        fullstoreiter = ui_find_iter( fullstore , fullid )
-                        if fullstoreiter :
-                          ui_update_row_data(fullstore, fullstoreiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
+                    if fill and trip :
+                      # Update the data for the full fill
+                      if notfull or notfull!=oldnotfull : # not enough to test notfull, but when?
+                        if fullid :
+                          fullstore , storeiter = get_store_and_iter(None, view, None, None, config)
+                          fullstoreiter = ui_find_iter( fullstore , fullid )
+                          if fullstoreiter :
+                            ui_update_row_data(fullstore, fullstoreiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
                     pui.update_totalkm()
 
         widget.destroy()
