@@ -172,6 +172,26 @@ class timed_locator :
 
 class database :
 
+    ppStmtDriver = "SELECT nickname,fullname,id FROM driver"
+    ppStmtCar = "SELECT mark,register,id FROM car"
+    ppStmtOneDriver = "SELECT fullname,nickname FROM driver WHERE id=?"
+    ppStmtCurCar = "SELECT mark,model,register,year FROM car where id=?"
+    ppStmtOneCar = "SELECT mark,model,year,register,notes,fueltype FROM car where id=?"
+    ppStmtAddDriver = "INSERT INTO driver(fullname,nickname) VALUES(?,?)"
+    ppStmtUpdateDriver = "UPDATE driver SET fullname=?, nickname=? WHERE id=?"
+    ppStmtAddCar = "INSERT INTO car(mark,model,year,register,notes,fueltype) VALUES(?,?,?,?,?,?)"
+    ppStmtUpdateCar = "UPDATE car SET mark=?, model=?, year=?, register=?, notes=?, fueltype=? WHERE id=?"
+    ppStmtDeleteRecord = "DELETE FROM record WHERE id=?"
+    ppStmtOneRecord = "SELECT day,km,trip,fill,price,service,oil,tires,notes,consum,id FROM record WHERE id=?"
+    ppStmtRecords = "SELECT day,km,trip,fill,consum,price,priceperlitre,service,oil,tires,notes,id FROM record WHERE carid=? ORDER BY km"
+    ppStmtExport = "SELECT day,km,trip,fill,consum,price,priceperlitre,service,oil,tires,notes,driverid FROM record WHERE carid=? ORDER BY km"
+    ppStmtExportCar = "SELECT mark,model,year,register,notes FROM car WHERE id=?"
+    ppStmtAddRecord = "INSERT INTO record(carid,driverid,day,km,trip,fill,consum,price,priceperlitre,service,oil,tires,notes) VALUES(%d,%d,'%s',%f,%f,%f,%f,%f,%f,%f,%f,%f,'%s')"
+    ppStmtNextFull = "SELECT km,trip,fill,consum,id FROM record WHERE carid=%d AND km>%f AND fill>0 AND consum>0 ORDER BY km LIMIT 1"
+    ppStmtPrevFull = "SELECT km,trip,fill,consum,id FROM record WHERE carid=%d AND km<%f AND fill>0 ORDER BY km DESC"
+    ppStmtUpdateRecord = "UPDATE record SET day='%s', km=%f, trip=%f, fill=%f, consum=%f, price=%f, priceperlitre=%f, service=%f, oil=%f, tires=%f, notes='%s' WHERE id=%d"
+    ppStmtGetYears = "SELECT DISTINCT STRFTIME('%Y',date(day)) FROM record WHERE carid=?"
+
     def __init__ ( self , dbname=None ) :
         self.result_db = dbname
         self.db = None
@@ -179,41 +199,26 @@ class database :
         self.currentdriver = None
         self.locator = None
 
-    def get_current ( self , key ) :
-        if key.lower() == "car" :
-            return self.currentcar
-        if key.lower() == "driver" :
-            return self.currentdriver
-        raise Exception( "Unknown current value for '%s'" % key )
+    def get_row ( self , query ) :
+        rc = self.db.execute( query )
+        return rc.fetchone()
 
-    def last_refill ( self , newkm ) :
-        return self.get_float( "SELECT km FROM record WHERE carid=%d AND trip>0 AND km<%f ORDER BY km DESC LIMIT 1" % ( self.currentcar , newkm ) )
+    def get_rows ( self , query ) :
+        rc = self.db.execute( query )
+        return rc.fetchall()
 
-    def last_km ( self ) :
-        return self.get_float( "SELECT max(km) FROM record WHERE carid=%d" % self.currentcar )
-
-    def carid ( self , index ) :
-        return self.get_float( "SELECT id FROM car LIMIT 1 OFFSET %d" % index )
-
-    def driverid ( self , index ) :
-        return self.get_float( "SELECT id FROM driver LIMIT 1 OFFSET %d" % index )
-
-    def fueltype ( self ) :
-        return self.get_float( "SELECT fueltype FROM car WHERE id=%d" % self.currentcar )
+    def get_single ( self, query ) :
+        if self.is_open() :
+            result = self.get_row( query )
+            if result :
+                return result[0]
+        return None
 
     def get_float ( self, query ) :
         result = self.get_single( query )
         if result :
-            return float( result )
+            return result
         return 0.0
-
-    def get_single ( self, query ) :
-        if self.is_open() :
-            rc = self.db.execute( query )
-            result = rc.fetchone()
-            if result :
-                return result[0]
-        return None
 
     def setfilename ( self , dbname ) :
         self.result_db = dbname
@@ -259,44 +264,32 @@ class database :
             return False 
         return True 
 
-    def get_rows ( self , query ) :
-        rc = self.db.execute( query )
-        return rc.fetchall()
+    def fueltype ( self ) :
+        return self.get_float( "SELECT fueltype FROM car WHERE id=%d" % self.currentcar )
 
-    def add_record (self, date, km, trip, fill, consum, price, service, oil, tires, notes) :
-  
-        # NOTE : move to main functions and to arglist
-        priceperlitre = -1
-        if fill > 0 :
-            priceperlitre = price / fill
+    def last_km ( self ) :
+        return self.get_float( "SELECT max(km) FROM record WHERE carid=%d" % self.currentcar )
 
-        if self.is_open() :
+    def last_refill ( self , newkm ) :
+        return self.get_float( "SELECT km FROM record WHERE carid=%d AND trip>0 AND km<%f ORDER BY km DESC LIMIT 1" % ( self.currentcar , newkm ) )
 
-            columns = ( "carid" , "driverid" , "day" , "km" , "trip" , "fill" , "consum" , "price" , "priceperlitre" , "service" , "oil" , "tires" , "notes" )
-            values = "%s , %s , '%s' , %s , %s , %s , %s , %s , %s , %s , %s , %s , '%s'" % ( self.currentcar, self.currentdriver, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes )
-            query = "INSERT INTO record ( %s ) VALUES  ( %s )" % ( ",".join(columns) , values )
-            rc = self.db.execute( query )
-            if rc.rowcount :
-                self.locator = timed_locator( rc.lastrowid , self.db )
-                self.db.commit()
-                return rc.lastrowid
+    def find_prev_full ( self , km ) :
+       if self.is_open() :
+           result = self.get_row( self.ppStmtPrevFull % ( self.currentcar , km ) )
+           if result :
+               if not result[3]*result[3] > 1e-6 : # Full fill not found
+                   return result[2] , result[1]
 
-        return False
+       return 0.0 , 0.0
 
-    def update_record (self, id, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes) :
+    def find_next_full ( self , km ) :
+       if self.is_open() :
+           result = self.get_row( self.ppStmtNextFull % ( self.currentcar , km ) )
+           if result :
+               if not result[3]*result[3] > 1e-6 : # Full fill not found
+                   return result[4] , result[2] , result[1]
 
-        if self.is_open() :
-
-        #    columns = ( "day" , "km" , "trip" , "fill" , "consum" , "price" , "priceperlitre" , "service" , "oil" , "tires" , "notes" )
-        #    values = "'%s' , %s , %s , %s , %s , %s , %s , %s , %s , %s , '%s'" % ( date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes )
-
-            query = "UPDATE record SET day='%s' , km=%s, trip=%s, fill=%s, consum=%s, price=%s, priceperlitre=%s, service=%s, oil=%s, tires=%s, notes='%s' WHERE id=%s" % ( date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes , id )
-            rc = self.db.execute( query )
-            if rc.rowcount :
-                self.db.commit()
-                return id
-
-        return False
+       return 0 , 0.0 , 0.0
 
     # Fill view is apparently ported
     def create_fillview ( self ) :
@@ -322,10 +315,7 @@ class database :
         else :
           sqlquery = querystr % ( "MAX(km)-MIN(km)" , self.currentcar , "" )
     
-        rc = self.db.execute( sqlquery )
-        res = rc.fetchone()
-        if res[0] :
-          return float( res[0] )
+        return self.get_float( sqlquery )
     
       return 0.0
     
@@ -346,12 +336,9 @@ class database :
           else :
             sqlquery = querystr % ( self.currentcar , "" )
     
-          rc = self.db.execute( sqlquery )
-          self.drop_fillview();
-    
-          res = rc.fetchone()
-          if res[0] :
-            return float( res[0] )
+          value = self.get_float( sqlquery )
+          self.drop_fillview()
+          return value
     
       return 0.0
     
@@ -362,10 +349,7 @@ class database :
         # BUG : We are accounting for all the -1 values !!!
         sqlquery = "SELECT sum(price)+sum(service)+sum(oil)+sum(tires) FROM record WHERE carid=%d" % self.currentcar
     
-        rc = self.db.execute( sqlquery )
-        res = rc.fetchone()
-        if res[0] :
-          return float( res[0] )
+        return self.get_float( sqlquery )
     
       return 0.0
     
@@ -386,36 +370,50 @@ class database :
           else :
             sqlquery = querystr % ( self.currentcar , "" )
     
-        rc = self.db.execute( sqlquery )
-        self.drop_fillview();
-    
-        res = rc.fetchone()
-        if res[0] :
-          return float( res[0] )
+        value = self.get_float( sqlquery )
+        self.drop_fillview()
+        return value
     
       return 0.0
 
-    def find_prev_full ( self , km ) :
-       if self.is_open() :
-           query = "SELECT km,trip,fill,consum,id FROM record WHERE carid=%d AND km<%d AND fill>0 ORDER BY km DESC" % ( self.currentcar , km )
-           rc = self.db.execute( query )
-           result = rc.fetchone()
-           if result :
-               consum = float( result[3] )
-               if not consum*consum > 1e-6 : # Full fill not found
-                   return float( result[2] ) , float( result[1] )
+    def get_current ( self , key ) :
+        if key.lower() == "car" :
+            return self.currentcar
+        if key.lower() == "driver" :
+            return self.currentdriver
+        raise Exception( "Unknown current value for '%s'" % key )
 
-       return 0.0 , 0.0
+    def driverid ( self , index ) :
+        return self.get_float( "SELECT id FROM driver LIMIT 1 OFFSET %d" % index )
 
-    def find_next_full ( self , km ) :
-       if self.is_open() :
-           query = "SELECT km,trip,fill,consum,id FROM record WHERE carid=%d AND km>%d AND fill>0 AND consum>0 ORDER BY km LIMIT 1" % ( self.currentcar , km )
-           rc = self.db.execute( query )
-           result = rc.fetchone()
-           if result :
-               consum = float( result[3] )
-               if not consum*consum > 1e-6 : # Full fill not found
-                   return float(result[4]) , float( result[2] ) , float( result[1] )
+    def carid ( self , index ) :
+        return self.get_float( "SELECT id FROM car LIMIT 1 OFFSET %d" % index )
 
-       return 0 , 0.0 , 0.0
+    def add_record (self, date, km, trip, fill, consum, price, service, oil, tires, notes) :
+  
+        # NOTE : move to main functions and to arglist
+        priceperlitre = -1
+        if fill > 0 :
+            priceperlitre = price / fill
+
+        if self.is_open() :
+            query = self.ppStmtAddRecord % ( self.currentcar, self.currentdriver, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes )
+            rc = self.db.execute( query )
+            if rc.rowcount :
+                self.locator = timed_locator( rc.lastrowid , self.db )
+                self.db.commit()
+                return rc.lastrowid
+
+        return False
+
+    def update_record (self, id, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes) :
+
+        if self.is_open() :
+            query = self.ppStmtUpdateRecord % ( date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes , id )
+            rc = self.db.execute( query )
+            if rc.rowcount :
+                self.db.commit()
+                return id
+
+        return False
 

@@ -187,14 +187,14 @@ class FuelpadDriverCombo ( FuelpadCombo ) :
 
     def __init__ ( self , config ) :
         self.key = "Driver"
-        self.query = "SELECT nickname,fullname,id FROM driver"
+        self.query = config.db.ppStmtDriver
         FuelpadCombo.__init__( self , config )
 
 class FuelpadCarCombo ( FuelpadCombo ) :
 
     def __init__ ( self , config ) :
         self.key = "Car"
-        self.query = "SELECT mark,register,id FROM car"
+        self.query = config.db.ppStmtCar
         FuelpadCombo.__init__( self , config )
 
 class FuelpadCarItem ( FuelpadItem ) :
