@@ -121,6 +121,7 @@ def settings_response ( widget , event , editwin , pui ) :
 
 def edit_record_response ( widget , event , editwin , pui ) :
 
+    consum = 0.0
     view , config = pui.view , pui.config
 
     if not config.db.is_open() :
@@ -146,30 +147,29 @@ def edit_record_response ( widget , event , editwin , pui ) :
             km  = config.user2SIlength( editwin.entrykm.get_text() )
             trip = config.user2SIlength( editwin.entrytrip.get_text() )
             fill  = config.user2SIvolume( editwin.entryfill.get_text() )
-            if editwin.entryprice :
-                price = config.doubleornothing( editwin.entryprice.get_text() )
+            price = config.doubleornothing( editwin.entryprice.get_text() )
+            if editwin.entryservice :
                 service = config.doubleornothing( editwin.entryservice.get_text() )
                 oil = config.doubleornothing( editwin.entryoil.get_text() )
                 tires = config.doubleornothing( editwin.entrytires.get_text() )
                 notes = editwin.entrynotes.get_text()
             else :
-                price = service = oil = tires = 0.0
+                service = oil = tires = 0.0
                 notes = ""
 
+            oldnotfull = False
             # Well need to obtain the unmodified data to be excluded from the new 
             # consumption calculations 
-            query = "SELECT day,km,trip,fill,price,service,oil,tires,notes,consum,id FROM record where id=%s" % id
-            row = config.db.db.execute( query ).fetchone()
-            oldfill = row[ configuration.column_dict['FILL'] ]
-            oldtrip = row[ configuration.column_dict['TRIP'] ]
-            oldconsum = row[ configuration.column_dict['CONSUM'] ]
-            oldnotfull = oldfill>0.0 and abs(oldconsum)<1e-5
+            query = config.db.ppStmtOneRecord % id
+            row = config.db.get_row( query )
+            if row :
+                oldfill = row[3]
+                oldtrip = row[2]
+                oldconsum = row[9]
+                oldnotfull = oldfill>0.0 and abs(oldconsum)<1e-5
 
             notfull = editwin.buttonnotfull.get_active()
             if notfull :
-
-                # For this record
-                consum = 0.0
 
                 # Find next full record 
                 fullid , fullfill , fullkm = config.db.find_next_full( km )
@@ -204,7 +204,11 @@ def edit_record_response ( widget , event , editwin , pui ) :
                 consum = (fullfill+fill)/(fullkm+trip)*100
 
             if config.db.is_open() :
-                recordid = config.db.update_record(id, date, km, trip, fill, consum, price, price/fill, service, oil, tires, notes)
+                if fill > 0 :
+                    priceperlitre = price / fill
+                else :
+                    priceperlitre = 0.0
+                recordid = config.db.update_record(id, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes)
                 if recordid == id :
                     store , storeiter = get_store_and_iter(model, view, iter, None , config)
                     ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes, recordid, True)
@@ -226,7 +230,6 @@ def edit_record_response ( widget , event , editwin , pui ) :
 def add_record_response ( widget , event , editwin , pui ) :
 
   consum = 0.0
-  priceperlitre = 0.0
 
   view , config = pui.view , pui.config
 
@@ -270,7 +273,7 @@ def add_record_response ( widget , event , editwin , pui ) :
            fullconsum = (fullfill+fill)/(fullkm+trip)*100
 
            # Update now the full record consum and tree view also
-           query = "UPDATE record set consum=%s WHERE id=%s" % ( fullconsum , fullid )
+           query = "UPDATE record SET consum=%s WHERE id=%s" % ( fullconsum , fullid )
            config.db.execute( query )
 
            store , storeiter = get_store_and_iter(None, view, None, None, config)
@@ -286,6 +289,8 @@ def add_record_response ( widget , event , editwin , pui ) :
     if config.db.is_open() :
         if fill > 0 :
             priceperlitre = price / fill
+        else :
+            priceperlitre = 0.0
         recordid = config.db.add_record(date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes)
         if recordid : # record succesfully inserted
             store , storeiter = get_store_and_iter(None, view, None, None, config)

@@ -182,7 +182,7 @@ class database :
     ppStmtAddCar = "INSERT INTO car(mark,model,year,register,notes,fueltype) VALUES(?,?,?,?,?,?)"
     ppStmtUpdateCar = "UPDATE car SET mark=?, model=?, year=?, register=?, notes=?, fueltype=? WHERE id=?"
     ppStmtDeleteRecord = "DELETE FROM record WHERE id=?"
-    ppStmtOneRecord = "SELECT day,km,trip,fill,price,service,oil,tires,notes,consum,id FROM record WHERE id=?"
+    ppStmtOneRecord = "SELECT day,km,trip,fill,price,service,oil,tires,notes,consum,id FROM record WHERE id=%d"
     ppStmtRecords = "SELECT day,km,trip,fill,consum,price,priceperlitre,service,oil,tires,notes,id FROM record WHERE carid=? ORDER BY km"
     ppStmtExport = "SELECT day,km,trip,fill,consum,price,priceperlitre,service,oil,tires,notes,driverid FROM record WHERE carid=? ORDER BY km"
     ppStmtExportCar = "SELECT mark,model,year,register,notes FROM car WHERE id=?"
