@@ -3,8 +3,6 @@ import db
 
 import gconf
 
-import gtk
-
 default_db = "/home/user/fuelpad.db"
 
 # fontscale
@@ -144,7 +142,7 @@ class FuelpadConfig :
             self.wizardcol = WIZARDCOLS
 
         self.maintablesortcol = 0
-        self.maintablesortorder = gtk.SORT_ASCENDING
+        self.maintablesortorder = 0
 
         if not tmpcurrency :
             self.currency = "Pts" # localeconv()->int_curr_symbol
