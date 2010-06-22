@@ -717,3 +717,6 @@ else :
 
             FuelpadAbstractWindow.enable_mainmenu_items( self )
 
+def main_loop ( ) :
+    gtk.main()
+

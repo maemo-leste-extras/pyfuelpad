@@ -4,8 +4,6 @@
 
 import configuration , ui
 
-import gtk
-
 import sys
 
 
@@ -54,7 +52,7 @@ def main ( argv ) :
     ui.FuelpadWindow( config )
 
     # ui_main_loop
-    gtk.main()
+    ui.main_loop()
 
 #  filter_clear(recfilter)
     # fuelpad_exit
