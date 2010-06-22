@@ -363,6 +363,9 @@ if hildon :
 
         def __init__ ( self , config ) :
 
+            config.main_toolbar_visible = False
+            config.secondary_toolbar_visible = True
+
             model = FuelpadModel( config )
             hildon.GtkTreeView.__init__( self , gtk.HILDON_UI_MODE_EDIT , model )
             FuelpadAbstractView.__init__( self , config )
