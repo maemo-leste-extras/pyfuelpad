@@ -38,18 +38,31 @@ class ButtonPad ( gtk.Table ) :
 
     # FIXME : while label is empty, backspace button must be disabled
 
-    def __init__ ( self , decimals=False ) :
+    def __init__ ( self , title , decimals=False ) :
 
         gtk.Table.__init__( self , 4 , 4 , True )
 
-        # Label for written values
         x , y = 0 , 0
+        # Label for written values
+        hbox = gtk.HBox()
+        self.title = gtk.Label()
+        attrs = configuration.font_attrs( -1 )
+        self.title.set_attributes( attrs )
+        hbox.pack_start( self.title , expand=False, fill=False )
+        self.title.show()
+        self.units = gtk.Label()
+        attrs = configuration.font_attrs( -1 )
+        self.units.set_attributes( attrs )
+        hbox.pack_end( self.units , expand=False, fill=False )
+        self.units.show()
         # FIXME : is self.label already allocated ???
         self.label = gtk.Label()
         attrs = configuration.font_attrs( -1 )
         self.label.set_attributes( attrs )
-        self.attach( self.label , x , x+4 , y , y+1 )
+        hbox.pack_end( self.label , expand=True, fill=True )
         self.label.show()
+        self.attach( hbox , x , x+4 , y , y+1 )
+        hbox.show()
 
         # Button for decimal dot
         if decimals :
@@ -140,17 +153,38 @@ class FuelpadEdit ( gtk.Notebook ) :
         gtk.Notebook.__init__( self )
 
         page = {}
-        page["Price"] = self.entryprice = ButtonPad( True )
-        page["Fill"] = self.entryfill = ButtonPad( True )
-        page["Trip"] = self.entrytrip = ButtonPad( True )
-        page["Total KM"] = self.entrykm = ButtonPad()
+        page["Price"] = self.entryprice = ButtonPad( "Price" , True )
+        page["Fill"] = self.entryfill = ButtonPad( "Fill" , True )
+        page["Trip"] = self.entrytrip = ButtonPad( "Trip" ,  True )
+        page["Total"] = self.entrykm = ButtonPad( "Total" )
         tabs = ( configuration.column_dict['PRICE'] , configuration.column_dict['FILL'] , configuration.column_dict['TRIP'], configuration.column_dict['KM'] )
-        labels = ( "Price" , "Fill" , "Trip", "Total KM" )
+        labels = ( "Price" , "Fill" , "Trip", "Total" )
         for i in range( len(tabs) ) :
             if config.wizardcol & (1<<configuration.column_info[tabs[i]][0]):
                 self.append_page( page[ labels[i] ] , gtk.Label( labels[i] ) )
+                page[ labels[i] ].title.set_text( labels[i] )
             else :
                 page[ labels[i] ] = False
+        if page["Price"] :
+            page[ "Price" ].units.set_text( config.currency )
+        if page["Fill"] :
+            info =  configuration.column_info[tabs[1]]
+            if config.isSI( "length" ) :
+                page[ "Fill" ].units.set_text( "litres" )
+            else :
+                page[ "Fill" ].units.set_text( "gallons" )
+        if page["Trip"] :
+            info =  configuration.column_info[tabs[3]]
+            if config.isSI( "length" ) :
+                page[ "Trip" ].units.set_text( info[2] )
+            else :
+                page[ "Trip" ].units.set_text( info[4] )
+        if page["Total"] :
+            info =  configuration.column_info[tabs[3]]
+            if config.isSI( "length" ) :
+                page[ "Total" ].units.set_text( info[2] )
+            else :
+                page[ "Total" ].units.set_text( info[4] )
 
         # Not shown widgets
         self.entrydate = gtk.Entry()
