@@ -151,6 +151,7 @@ class FuelpadEdit ( gtk.Notebook ) :
 
     def __init__( self , config , add ) :
         gtk.Notebook.__init__( self )
+        self.set_size_request(450,260)
 
         page = {}
         page["Price"] = self.entryprice = ButtonPad( "Price" , True )
