@@ -429,10 +429,10 @@ def callback_newrecord ( action, pui , allowreduced=False ) :
 
     dialog.show()
 
-def callback_recordactivated ( view , path , col ) :
+def callback_recordactivated ( view , path , col=None ) :
   iter = view.get_model().get_iter(path) 
   if iter :
-    callback_editrecord(None, None)
+    callback_editrecord( None , view.get_toplevel() )
 
 def callback_deleterecord ( action, pui ) :
 

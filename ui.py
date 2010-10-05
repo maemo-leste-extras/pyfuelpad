@@ -135,7 +135,6 @@ class FuelpadAbstractView :
 
         select = self.get_selection()
         select.set_mode( gtk.SELECTION_SINGLE )
-    #    self.connect( "row-activated" , callbacks.callback_recordactivated )
 
     def update_column_headers ( self , config ) :
 
@@ -369,6 +368,7 @@ if hildon :
             model = FuelpadModel( config )
             hildon.GtkTreeView.__init__( self , gtk.HILDON_UI_MODE_EDIT , model )
             FuelpadAbstractView.__init__( self , config )
+            self.connect( "hildon-row-tapped" , callbacks.callback_recordactivated )
 
     class FuelpadWindow( hildon.StackableWindow , FuelpadAbstractWindow ) :
 
@@ -505,6 +505,7 @@ else :
             model = FuelpadModel( config )
             gtk.TreeView.__init__( self , model )
             FuelpadAbstractView.__init__( self , config )
+            self.connect( "row-activated" , callbacks.callback_recordactivated )
 
     class FuelpadWindow( gtk.Window , FuelpadAbstractWindow ) :
 
