@@ -20,7 +20,12 @@ def convdate ( outformat , informat, date ) :
 def date2sqlite ( format, date ) :
   return convdate( None , format , date )
 
-def gettimefmt ( format ) :
+def getdatestruct ( record_date ) :
+    return time.strptime( record_date , default_format )
+
+def gettimefmt ( format , record_date=None ) :
+  if record_date :
+    return time.strftime( configuration.datefmtstr[format] , getdatestruct( record_date ) )
   return time.strftime( configuration.datefmtstr[format] , time.localtime() )
 
 

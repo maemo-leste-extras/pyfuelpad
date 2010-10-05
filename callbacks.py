@@ -340,7 +340,7 @@ def callback_editrecord ( action , pui ) :
                                    gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT
                                    )
                                  )
-            editwin = wizard.FuelpadFullEdit( pui , 0 )
+            editwin = wizard.FuelpadFullEdit( pui , model.get_value( iter , 0 ) )
 
             # FIXME : notfull toggle needs to be manually worked
             for colid,widget in editwin.widgets.iteritems() :
@@ -392,7 +392,7 @@ def callback_newrecord ( action, pui , allowreduced=False ) :
         if pui.config.reducedinput and allowreduced :
             editwin = wizard.FuelpadEdit( pui.config , 1 )
         else :
-            editwin = wizard.FuelpadFullEdit( pui , 1 )
+            editwin = wizard.FuelpadFullEdit( pui , False )
         if hildon and pui.config.reducedinput and allowreduced :
             dialog = hildon.WizardDialog( pui , header[0] , editwin )
         else :

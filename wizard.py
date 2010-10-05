@@ -297,11 +297,11 @@ if hildon :
 
     class FuelpadFullEdit ( FuelpadHildonEditwin , FuelpadAbstractFullEdit ) :
 
-        def __init__( self , pui , add ) :
+        def __init__( self , pui , record_date ) :
             config = pui.config
             FuelpadHildonEditwin.__init__( self , config )
 
-            if add :
+            if record_date is False :
                 table = gtk.Table(12, 2, False)
             else :
                 table = gtk.Table(10, 2, False)
@@ -309,7 +309,7 @@ if hildon :
 
             row = 0
 
-            if add :
+            if record_date is False :
 
                 self.carcombo = combos.FuelpadCarCombo( config )
                 self.add_button( table , self.carcombo , row )
@@ -321,6 +321,9 @@ if hildon :
 
             # First row, first entry
             self.entrydate = hildon.DateButton( gtk.HILDON_SIZE_FINGER_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
+            if record_date :
+                datestruct = utils.getdatestruct( record_date )
+                self.entrydate.set_date( datestruct[0] , datestruct[1]-1 , datestruct[2] )
             self.add_button( table , self.entrydate , row )
             self.widgets[ self.labels['EDIT_DATE'][2] ] = self.entrydate
             row += 1
@@ -332,14 +335,14 @@ if hildon :
               self.entrykm = self.add_item( table , 'EDIT_MILES' , row )
             row += 1
 
-            if add :
+            if record_date is False :
               self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
 
             # Second row, first entry
             self.entrytrip = self.add_item( table , 'EDIT_TRIP' , row )
             row += 1
 
-            if add :
+            if record_date is False :
               self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
 
             # Second row, second entry
@@ -426,7 +429,7 @@ else :
 
     class FuelpadFullEdit ( FuelpadGtkEditwin , FuelpadAbstractFullEdit ) :
 
-        def __init__( self , pui , add ) :
+        def __init__( self , pui , record_date ) :
             config = pui.config
             FuelpadGtkEditwin.__init__( self , config )
 
@@ -435,7 +438,11 @@ else :
 
             # First row, first entry
             self.entrydate = self.add_item( table , 'EDIT_DATE' , 0 )
-            self.entrydate.set_text( utils.gettimefmt( config.dateformat ) )
+            if record_date :
+                print "SETTING DATE TO %s" % record_date
+                self.entrydate.set_text( utils.gettimefmt( config.dateformat , record_date ) )
+            else :
+                self.entrydate.set_text( utils.gettimefmt( config.dateformat ) )
 
             # First row, second entry
             if config.isSI( 'length' ) :
@@ -443,13 +450,13 @@ else :
             else :
               self.entrykm = self.add_item( table , 'EDIT_MILES' , 0 , 2 )
 
-            if add :
+            if record_date is False :
               self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
 
             # Second row, first entry
             self.entrytrip = self.add_item( table , 'EDIT_TRIP' , 1 )
 
-            if add :
+            if record_date is False :
               self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
 
             # Second row, second entry
@@ -487,7 +494,7 @@ else :
             # Third row, first entry
             self.entrytires = self.add_item( table , 'EDIT_TIRES' , 2)
 
-            if add :
+            if record_date is False :
               table = gtk.Table(2, 2, False)
               self.add_table( table , "Driver and car" )
 
