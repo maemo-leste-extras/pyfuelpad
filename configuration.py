@@ -137,7 +137,7 @@ class FuelpadConfig :
         if value is not None :
             self.reducedinput = value.get_bool()
 
-        self.wizardcol = client.get_int( "/apps/fuelpad/wizardpcol" )
+        self.wizardcol = client.get_int( "/apps/fuelpad/wizardcol" )
         if self.wizardcol == 0 :
             self.wizardcol = WIZARDCOLS
 
