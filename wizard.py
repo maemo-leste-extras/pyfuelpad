@@ -417,7 +417,7 @@ if hildon :
             self.add_button( table , item , 1 )
 
             self.add_item( table , 'SETTINGS_CURRENCY' , 2 )
-            self.widgets['currency'].set_text( config.currency )
+            self.widgets[ self.labels['SETTINGS_CURRENCY'][2] ].set_text( config.currency )
 
 else :
 
@@ -537,7 +537,7 @@ else :
             self.add_label( table , 'SETTINGS_FONTSIZE' , item , 1 )
 
             self.add_item( table , 'SETTINGS_CURRENCY' , 2 )
-            self.widgets['currency'].set_text( config.currency )
+            self.widgets[ self.labels['SETTINGS_CURRENCY'][2] ].set_text( config.currency )
 
             item = gtk.VBox()
             label = gtk.Label( self.labels['SETTINGS_WIZARDCOLS'][0] )
