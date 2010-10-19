@@ -154,6 +154,9 @@ class FuelpadConfig :
 
         self.wizarditems = WizardItems( client.get_int( "/apps/fuelpad/wizardcol" ) )
 
+        self.use_gps = client.get_bool( "/apps/fuelpad/gps" )
+        self.gps_timeout = client.get_int( "/apps/fuelpad/gps_timeout" )
+
         self.maintablesortcol = 0
         self.maintablesortorder = 0
 
@@ -211,6 +214,9 @@ class FuelpadConfig :
 
         client.set_bool( "/apps/fuelpad/reducedinput" , self.reducedinput )
         client.set_int( "/apps/fuelpad/wizardcol" , self.wizarditems.wizardcol )
+
+        client.set_bool( "/apps/fuelpad/gps" , self.use_gps )
+        client.set_int( "/apps/fuelpad/gps_timeout" , self.gps_timeout )
 
     # To be revised
     def doubleornothing ( self , input ) :

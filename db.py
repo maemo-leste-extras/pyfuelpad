@@ -117,11 +117,10 @@ create_gpsinfo = """ALTER TABLE record ADD COLUMN gpstime TIMESTAMP;
 
 import location , gobject
 
-delay_for_fix = 120
 
 class timed_locator :
 
-    def __init__ ( self , rowid , database ) :
+    def __init__ ( self , rowid , database , delay_for_fix ) :
         self.rowid , self.db = rowid , database
         self.control = location.GPSDControl.get_default()
         self.device = None
@@ -129,9 +128,9 @@ class timed_locator :
         self.fix = None
         self.time = None
         self.lat , self.lon = None , None
-        self.do_start()
+        self.do_start( delay_for_fix )
 
-    def do_start ( self ) :
+    def do_start ( self , delay_for_fix ) :
         if not self.device :
             self.device = location.GPSDevice()
         if not self.update_handler :
@@ -198,6 +197,7 @@ class database :
         self.currentcar = None
         self.currentdriver = None
         self.locator = None
+        self.delay_for_fix = 0
 
     def get_row ( self , query ) :
         rc = self.db.execute( query )
@@ -227,6 +227,9 @@ class database :
 
         if self.db :
             self.close()
+
+        if config.gps :
+            self.delay_for_fix = config.gps_timeout
 
         self.db = sqlite3.connect( self.result_db )
 
@@ -392,7 +395,8 @@ class database :
             query = self.ppStmtAddRecord % ( self.currentcar, self.currentdriver, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes )
             rc = self.db.execute( query )
             if rc.rowcount :
-                self.locator = timed_locator( rc.lastrowid , self.db )
+                if self.delay_for_fix :
+                    self.locator = timed_locator( rc.lastrowid , self.db , self.delay_for_fix )
                 self.db.commit()
                 return rc.lastrowid
 
