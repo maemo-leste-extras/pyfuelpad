@@ -288,6 +288,26 @@ class FuelpadAbstractSettingsEdit :
                'SETTINGS_WIZARDCOLS':( "Wizard items", None , "wizardcol")  
                }
 
+    def wizard_items_box ( self , config ) :
+        item = gtk.VBox()
+        item.add( gtk.Label( self.labels['SETTINGS_WIZARDCOLS'][0] ) )
+        frame = gtk.HBox()
+        wizard_items = WizardItems()
+        for i in range( len(wizard_items.tabs) ) :
+            button = gtk.ToggleButton( label=wizard_items.labels[i] )
+            if config.wizardcol & (1<<configuration.column_info[wizard_items.tabs[i]][0]) :
+                button.set_active( True )
+            button.connect("toggled", self.toggle_callback, config, wizard_items.tabs[i])
+            frame.add( button )
+        item.add( frame )
+        return item
+
+    def toggle_callback ( self , widget , config , wizard_item) :
+        state = widget.get_active()
+        if state :
+            config.wizardcol += 1<<configuration.column_info[wizard_item][0]
+        else :
+            config.wizardcol -= 1<<configuration.column_info[wizard_item][0]
 
 if hildon :
 
@@ -419,6 +439,9 @@ if hildon :
             self.add_item( table , 'SETTINGS_CURRENCY' , 2 )
             self.widgets[ self.labels['SETTINGS_CURRENCY'][2] ].set_text( config.currency )
 
+            item = self.wizard_items_box( config )
+            self.add_widget( table , 'SETTINGS_WIZARDCOLS' , item , 3 )
+
 else :
 
     class FuelpadGtkEditwin ( gtk.Notebook , FuelpadAbstractEditwin ) :
@@ -539,24 +562,6 @@ else :
             self.add_item( table , 'SETTINGS_CURRENCY' , 2 )
             self.widgets[ self.labels['SETTINGS_CURRENCY'][2] ].set_text( config.currency )
 
-            item = gtk.VBox()
-            label = gtk.Label( self.labels['SETTINGS_WIZARDCOLS'][0] )
-            item.add( label )
-            frame = gtk.HBox()
-            item.add( frame )
-            wizard_items = WizardItems()
-            for i in range( len(wizard_items.tabs) ) :
-                button = gtk.ToggleButton( label=wizard_items.labels[i] )
-                if config.wizardcol & (1<<configuration.column_info[wizard_items.tabs[i]][0]) :
-                    button.set_active( True )
-                button.connect("toggled", self.toggle_callback, config, wizard_items.tabs[i])
-                frame.add( button )
+            item = self.wizard_items_box( config )
             self.add_widget( table , 'SETTINGS_WIZARDCOLS' , item , 3 )
-
-        def toggle_callback ( self , widget , config , wizard_item) :
-            state = widget.get_active()
-            if state :
-                config.wizardcol += 1<<configuration.column_info[wizard_item][0]
-            else :
-                config.wizardcol -= 1<<configuration.column_info[wizard_item][0]
 
