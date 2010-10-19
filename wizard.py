@@ -158,8 +158,8 @@ class FuelpadEdit ( gtk.Notebook ) :
         page["Fill"] = self.entryfill = ButtonPad( "Fill" , True )
         page["Trip"] = self.entrytrip = ButtonPad( "Trip" ,  True )
         page["Total"] = self.entrykm = ButtonPad( "Total" )
-        for i in range( len(config.wizarditems.tabs) ) :
-            if config.wizarditems.wizardcol & (1<<configuration.column_info[config.wizarditems.tabs[i]][0]):
+        for i in range( len(config.wizarditems) ) :
+            if config.wizarditems.is_on( i ) :
                 self.append_page( page[ config.wizarditems[i] ] , gtk.Label( config.wizarditems[i] ) )
                 page[ config.wizarditems[i] ].title.set_text( config.wizarditems[i] )
             else :
@@ -167,23 +167,14 @@ class FuelpadEdit ( gtk.Notebook ) :
         if page["Price"] :
             page[ "Price" ].units.set_text( config.currency )
         if page["Fill"] :
-            info =  configuration.column_info[config.wizarditems.tabs[1]]
             if config.isSI( "length" ) :
                 page[ "Fill" ].units.set_text( "litres" )
             else :
                 page[ "Fill" ].units.set_text( "gallons" )
         if page["Trip"] :
-            info =  configuration.column_info[config.wizarditems.tabs[3]]
-            if config.isSI( "length" ) :
-                page[ "Trip" ].units.set_text( info[2] )
-            else :
-                page[ "Trip" ].units.set_text( info[4] )
+            page[ "Trip" ].units.set_text( config.length_unit() )
         if page["Total"] :
-            info =  configuration.column_info[config.wizarditems.tabs[3]]
-            if config.isSI( "length" ) :
-                page[ "Total" ].units.set_text( info[2] )
-            else :
-                page[ "Total" ].units.set_text( info[4] )
+            page[ "Total" ].units.set_text( config.length_unit() )
 
         # Not shown widgets
         self.entrydate = gtk.Entry()
@@ -284,11 +275,11 @@ class FuelpadAbstractSettingsEdit :
         item = gtk.VBox()
         item.add( gtk.Label( self.labels['SETTINGS_WIZARDCOLS'][0] ) )
         frame = gtk.HBox()
-        for i in range( len(config.wizarditems.tabs) ) :
+        for i in range( len(config.wizarditems) ) :
             button = gtk.ToggleButton( label=config.wizarditems[i] )
-            if config.wizarditems.wizardcol & (1<<configuration.column_info[config.wizarditems.tabs[i]][0]) :
+            if config.wizarditems.is_on( i ) :
                 button.set_active( True )
-            button.connect("toggled", self.toggle_callback, config, config.wizarditems.tabs[i])
+            button.connect("toggled", self.toggle_callback, config, i)
             frame.add( button )
         item.add( frame )
         return item
@@ -296,9 +287,9 @@ class FuelpadAbstractSettingsEdit :
     def toggle_callback ( self , widget , config , wizard_item) :
         state = widget.get_active()
         if state :
-            config.wizarditems.wizardcol += 1<<configuration.column_info[wizard_item][0]
+            config.wizarditems.set( wizard_item )
         else :
-            config.wizarditems.wizardcol -= 1<<configuration.column_info[wizard_item][0]
+            config.wizarditems.unset( wizard_item )
 
 if hildon :
 

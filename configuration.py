@@ -94,10 +94,17 @@ class WizardItems ( list ) :
     def __init__( self , wizardcols=0 ) :
 
         list.__init__( self , ( "Fill" , "Price" , "Trip", "Total" ) )
-        self.tabs = ( column_dict['PRICE'] , column_dict['FILL'] , column_dict['TRIP'], column_dict['KM'] )
+        self.__keys = ( COL_FILL , COL_PRICE , COL_TRIP , COL_KM )
         self.wizardcol = wizardcols or ( 1<<COL_KM | 1<<COL_TRIP | 1<<COL_FILL )
-        if self.wizardcol == 0 :
-            self.wizardcol = 1<<COL_KM | 1<<COL_TRIP | 1<<COL_FILL
+
+    def set( self , i ) :
+        self.wizardcol += 1 << self.__keys[i]
+
+    def unset( self , i ) :
+        self.wizardcol -= 1 << self.__keys[i]
+
+    def is_on ( self , i ) :
+        return self.wizardcol & ( 1 << self.__keys[i] )
 
 class FuelpadConfig :
 
@@ -214,6 +221,12 @@ class FuelpadConfig :
 
     def isSI ( self , unittype  ) :
         return self.units[ unittype ] == unitsystem.index('SI')
+
+    def length_unit ( self ) :
+        if self.isSI( "length" ) :
+            return column_info[ column_dict['KM'] ][2]
+        else :
+            return column_info[ column_dict['KM'] ][4]
 
     # Unit conversion functions
     # Conversions are likely ported, but maybe there are missing items
