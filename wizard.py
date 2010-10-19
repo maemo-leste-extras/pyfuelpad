@@ -268,7 +268,9 @@ class FuelpadAbstractSettingsEdit :
     labels = { 'SETTINGS_UNITSYSTEM':( "Unit system", None , "current_unit") ,
                'SETTINGS_FONTSIZE':( "Font size", None , "mainviewfontsize") ,
                'SETTINGS_CURRENCY':( "Currency", 30 , "currency") ,
-               'SETTINGS_WIZARDCOLS':( "Wizard items", None , None )  
+               'SETTINGS_WIZARDCOLS':( "Wizard items", None , None ) ,
+               'SETTINGS_GPS':( "GPS settings", None , None) ,
+               'SETTINGS_DELAY':( "Position timeout", 10 , "gps_timeout")
                }
 
     def wizard_items_box ( self , config ) :
@@ -546,4 +548,28 @@ else :
 
             item = self.wizard_items_box( config )
             self.add_widget( table , 'SETTINGS_WIZARDCOLS' , item , 3 )
+
+            item = self.gps_box( config )
+            self.add_widget( table , 'SETTINGS_GPS' , item , 4 )
+
+        def gps_box ( self , config ) :
+            frame = gtk.VBox()
+            frame.add( gtk.Label( self.labels['SETTINGS_GPS'][0] ) )
+            switcher = gtk.CheckButton( label="Use GPS" )
+            switcher.set_active( config.use_gps )
+            def gps_switch ( widget , config ) :
+                config.use_gps = widget.get_active()
+            switcher.connect("toggled", gps_switch, config )
+            frame.add( switcher )
+            id = 'SETTINGS_DELAY'
+            delay_frame = gtk.HBox( homogeneous=False )
+            delay_frame.add( gtk.Label( self.labels[id][0] ) )
+            delay = self.new_item()
+            if self.labels[id][2] :
+                self.widgets[ self.labels[id][2] ] = delay
+            delay.set_max_length( self.labels[id][1] )
+            delay.set_text( "%s" % config.gps_timeout )
+            delay_frame.add( delay )
+            frame.add( delay_frame )
+            return frame
 

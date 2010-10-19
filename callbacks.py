@@ -112,6 +112,8 @@ def settings_response ( widget , event , editwin , pui ) :
                 pui.config.units[ unit ] = editwin.widgets["current_unit"].get_active()
         if editwin.widgets["currency"].get_text() != pui.config.currency :
             pui.config.currency = editwin.widgets["currency"].get_text()
+        if editwin.widgets["gps_timeout"].get_text() != pui.config.gps_timeout :
+            pui.config.gps_timeout = int( editwin.widgets["gps_timeout"].get_text() )
 
         pui.view.update( pui )
         widget.destroy()

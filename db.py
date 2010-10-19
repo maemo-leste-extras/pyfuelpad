@@ -228,7 +228,7 @@ class database :
         if self.db :
             self.close()
 
-        if config.gps :
+        if config.use_gps :
             self.delay_for_fix = config.gps_timeout
 
         self.db = sqlite3.connect( self.result_db )
