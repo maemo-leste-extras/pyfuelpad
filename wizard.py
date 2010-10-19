@@ -285,7 +285,7 @@ class FuelpadAbstractSettingsEdit :
     labels = { 'SETTINGS_UNITSYSTEM':( "Unit system", None , "current_unit") ,
                'SETTINGS_FONTSIZE':( "Font size", None , "mainviewfontsize") ,
                'SETTINGS_CURRENCY':( "Currency", 30 , "currency") ,
-               'SETTINGS_WIZARDCOLS':( "Wizard items", None , "wizardcol")  
+               'SETTINGS_WIZARDCOLS':( "Wizard items", None , None )  
                }
 
     def wizard_items_box ( self , config ) :
