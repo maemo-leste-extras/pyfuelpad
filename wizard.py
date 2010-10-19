@@ -147,13 +147,6 @@ def callback_kmadded ( widget , event , editwin , config ) :
     return False
 
 
-class WizardItems :
-
-    def __init__( self ) :
-
-        self.tabs = ( configuration.column_dict['PRICE'] , configuration.column_dict['FILL'] , configuration.column_dict['TRIP'], configuration.column_dict['KM'] )
-        self.labels = ( "Price" , "Fill" , "Trip", "Total" )
-
 class FuelpadEdit ( gtk.Notebook ) :
 
     def __init__( self , config , add ) :
@@ -165,29 +158,28 @@ class FuelpadEdit ( gtk.Notebook ) :
         page["Fill"] = self.entryfill = ButtonPad( "Fill" , True )
         page["Trip"] = self.entrytrip = ButtonPad( "Trip" ,  True )
         page["Total"] = self.entrykm = ButtonPad( "Total" )
-        wizard_items = WizardItems()
-        for i in range( len(wizard_items.tabs) ) :
-            if config.wizardcol & (1<<configuration.column_info[wizard_items.tabs[i]][0]):
-                self.append_page( page[ wizard_items.labels[i] ] , gtk.Label( wizard_items.labels[i] ) )
-                page[ wizard_items.labels[i] ].title.set_text( wizard_items.labels[i] )
+        for i in range( len(config.wizarditems.tabs) ) :
+            if config.wizarditems.wizardcol & (1<<configuration.column_info[config.wizarditems.tabs[i]][0]):
+                self.append_page( page[ config.wizarditems[i] ] , gtk.Label( config.wizarditems[i] ) )
+                page[ config.wizarditems[i] ].title.set_text( config.wizarditems[i] )
             else :
-                page[ wizard_items.labels[i] ] = False
+                page[ config.wizarditems[i] ] = False
         if page["Price"] :
             page[ "Price" ].units.set_text( config.currency )
         if page["Fill"] :
-            info =  configuration.column_info[wizard_items.tabs[1]]
+            info =  configuration.column_info[config.wizarditems.tabs[1]]
             if config.isSI( "length" ) :
                 page[ "Fill" ].units.set_text( "litres" )
             else :
                 page[ "Fill" ].units.set_text( "gallons" )
         if page["Trip"] :
-            info =  configuration.column_info[wizard_items.tabs[3]]
+            info =  configuration.column_info[config.wizarditems.tabs[3]]
             if config.isSI( "length" ) :
                 page[ "Trip" ].units.set_text( info[2] )
             else :
                 page[ "Trip" ].units.set_text( info[4] )
         if page["Total"] :
-            info =  configuration.column_info[wizard_items.tabs[3]]
+            info =  configuration.column_info[config.wizarditems.tabs[3]]
             if config.isSI( "length" ) :
                 page[ "Total" ].units.set_text( info[2] )
             else :
@@ -292,12 +284,11 @@ class FuelpadAbstractSettingsEdit :
         item = gtk.VBox()
         item.add( gtk.Label( self.labels['SETTINGS_WIZARDCOLS'][0] ) )
         frame = gtk.HBox()
-        wizard_items = WizardItems()
-        for i in range( len(wizard_items.tabs) ) :
-            button = gtk.ToggleButton( label=wizard_items.labels[i] )
-            if config.wizardcol & (1<<configuration.column_info[wizard_items.tabs[i]][0]) :
+        for i in range( len(config.wizarditems.tabs) ) :
+            button = gtk.ToggleButton( label=config.wizarditems[i] )
+            if config.wizarditems.wizardcol & (1<<configuration.column_info[config.wizarditems.tabs[i]][0]) :
                 button.set_active( True )
-            button.connect("toggled", self.toggle_callback, config, wizard_items.tabs[i])
+            button.connect("toggled", self.toggle_callback, config, config.wizarditems.tabs[i])
             frame.add( button )
         item.add( frame )
         return item
@@ -305,9 +296,9 @@ class FuelpadAbstractSettingsEdit :
     def toggle_callback ( self , widget , config , wizard_item) :
         state = widget.get_active()
         if state :
-            config.wizardcol += 1<<configuration.column_info[wizard_item][0]
+            config.wizarditems.wizardcol += 1<<configuration.column_info[wizard_item][0]
         else :
-            config.wizardcol -= 1<<configuration.column_info[wizard_item][0]
+            config.wizarditems.wizardcol -= 1<<configuration.column_info[wizard_item][0]
 
 if hildon :
 

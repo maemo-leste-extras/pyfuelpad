@@ -65,8 +65,6 @@ NUM_COLS=15
 
 DISPCOLDEFAULT = 1<<COL_NOTES | 1<<COL_PRICEPERTRIP | 1<<COL_PRICE | 1<<COL_CONSUM | 1<<COL_FILL | 1<<COL_TRIP | 1<<COL_KM | 1<<COL_DAY
 
-WIZARDCOLS = 1<<COL_KM | 1<<COL_TRIP | 1<<COL_FILL
-
 #COLUMN STRUCT  : number , header , non_SI_header , formatvals(None) ,  hidden
 # number , name , header , unittype , non_SI_header , format ,  showable , comparison
 column_info = (
@@ -90,6 +88,16 @@ column_dict = {}
 for item in column_info :
     column_dict[ item[1] ] = item[0]
 
+
+class WizardItems ( list ) :
+
+    def __init__( self , wizardcols=0 ) :
+
+        list.__init__( self , ( "Fill" , "Price" , "Trip", "Total" ) )
+        self.tabs = ( column_dict['PRICE'] , column_dict['FILL'] , column_dict['TRIP'], column_dict['KM'] )
+        self.wizardcol = wizardcols or ( 1<<COL_KM | 1<<COL_TRIP | 1<<COL_FILL )
+        if self.wizardcol == 0 :
+            self.wizardcol = 1<<COL_KM | 1<<COL_TRIP | 1<<COL_FILL
 
 class FuelpadConfig :
 
@@ -137,9 +145,7 @@ class FuelpadConfig :
         if value is not None :
             self.reducedinput = value.get_bool()
 
-        self.wizardcol = client.get_int( "/apps/fuelpad/wizardcol" )
-        if self.wizardcol == 0 :
-            self.wizardcol = WIZARDCOLS
+        self.wizarditems = WizardItems( client.get_int( "/apps/fuelpad/wizardcol" ) )
 
         self.maintablesortcol = 0
         self.maintablesortorder = 0
@@ -197,7 +203,7 @@ class FuelpadConfig :
         client.set_bool( "/apps/fuelpad/secondarytoolbar_visible" , not self.secondary_toolbar_visible )
 
         client.set_bool( "/apps/fuelpad/reducedinput" , self.reducedinput )
-        client.set_int( "/apps/fuelpad/wizardcol" , self.wizardcol )
+        client.set_int( "/apps/fuelpad/wizardcol" , self.wizarditems.wizardcol )
 
     # To be revised
     def doubleornothing ( self , input ) :
