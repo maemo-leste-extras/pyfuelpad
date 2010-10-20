@@ -179,7 +179,7 @@ class FuelpadEdit ( gtk.Notebook ) :
         # Not shown widgets
         self.entrydate = gtk.Entry()
         self.entrydate.set_text( utils.gettimefmt( config.dateformat ) )
-        self.buttonnotfull = gtk.CheckButton()
+        self.buttonnotfull = CheckButton()
 
         # To avoid confusion with FuelpadFullEdit
         self.entryservice = False
@@ -397,8 +397,7 @@ if hildon :
             row += 1
 
             # Not full button
-            self.buttonnotfull = hildon.CheckButton( gtk.HILDON_SIZE_FINGER_HEIGHT )
-            self.buttonnotfull.set_label( self.labels['EDIT_NOTFULL'][0] )
+            self.buttonnotfull = CheckButton( self.labels['EDIT_NOTFULL'][0] )
             table.attach( self.buttonnotfull, 1, 2, row, row+1,
                        gtk.EXPAND|gtk.FILL,
                        0, 0, 5)
@@ -522,7 +521,7 @@ else :
             self.entryfill = self.add_item( table , 'EDIT_FILL' , 1 , 2 )
 
             # Not full button
-            self.buttonnotfull = gtk.CheckButton( label=self.labels['EDIT_NOTFULL'][0] )
+            self.buttonnotfull = CheckButton( self.labels['EDIT_NOTFULL'][0] )
             table.attach( self.buttonnotfull, 3, 4, 2, 3,
                        gtk.EXPAND|gtk.FILL,
                        0, 0, 5)
