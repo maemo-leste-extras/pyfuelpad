@@ -191,8 +191,11 @@ class FuelpadEdit ( gtk.Notebook ) :
             page[ "Total" ].units.set_text( config.length_unit() )
 
         # Not shown widgets
-        self.entrydate = gtk.Entry()
-        self.entrydate.set_text( utils.gettimefmt( config.dateformat ) )
+        if hildon :
+            self.entrydate = hildon.DateButton( gtk.HILDON_SIZE_FINGER_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
+        else :
+            self.entrydate = gtk.Entry()
+            self.entrydate.set_text( utils.gettimefmt( config.dateformat ) )
         self.buttonnotfull = CheckButton()
 
         # To avoid confusion with FuelpadFullEdit
@@ -500,7 +503,6 @@ else :
             # First row, first entry
             self.entrydate = self.add_item( table , 'EDIT_DATE' , row )
             if record_date :
-                print "SETTING DATE TO %s" % record_date
                 self.entrydate.set_text( utils.gettimefmt( config.dateformat , record_date ) )
             else :
                 self.entrydate.set_text( utils.gettimefmt( config.dateformat ) )
