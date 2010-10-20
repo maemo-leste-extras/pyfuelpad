@@ -25,6 +25,13 @@ if hildon :
             hildon.Button.__init__( self , gtk.HILDON_SIZE_THUMB_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
             KeypadAbstractButton.__init__( self , text_label )
 
+    class CheckButton ( hildon.CheckButton ) :
+
+        def __init__ ( self , label=None ) :
+            hildon.CheckButton.__init__( self , gtk.HILDON_SIZE_FINGER_HEIGHT )
+            if label :
+                self.set_label( label )
+
 else :
 
     class KeypadButton ( gtk.Button , KeypadAbstractButton ) :
@@ -32,6 +39,13 @@ else :
         def __init__ ( self , text_label ) :
             gtk.Button.__init__( self )
             KeypadAbstractButton.__init__( self , text_label )
+
+    class CheckButton ( gtk.CheckButton ) :
+
+        def __init__ ( self , label=None ) :
+            gtk.CheckButton.__init__( self )
+            if label :
+                self.set_label( label )
 
 
 class ButtonPad ( gtk.Table ) :
@@ -317,12 +331,6 @@ class FuelpadAbstractSettingsEdit :
 
 if hildon :
 
-    class CheckButton ( hildon.CheckButton ) :
-
-        def __init__ ( self , label ) :
-            hildon.CheckButton.__init__( self , gtk.HILDON_SIZE_FINGER_HEIGHT )
-            self.set_label( label )
-
     class FuelpadHildonEditwin ( hildon.PannableArea , FuelpadAbstractEditwin ) :
 
         def __init__( self , config ) :
@@ -458,11 +466,6 @@ if hildon :
 
 
 else :
-
-    class CheckButton ( gtk.CheckButton ) :
-
-        def __init__ ( self , label ) :
-            gtk.CheckButton.__init__( self , label=label )
 
     class FuelpadGtkEditwin ( gtk.Notebook , FuelpadAbstractEditwin ) :
 
