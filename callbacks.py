@@ -73,7 +73,8 @@ def ui_update_row_data ( store , iter , config , date, km, trip, fill, consum, p
 #                                /*                      INSURANCE, sqlite3_column_double(ppStmtRecords,5), */
 #                                /*                      OTHER, sqlite3_column_double(ppStmtRecords,5), */
   if not consum < 0.0 : store.set( iter, configuration.column_dict['CO2EMISSION'], 0.0) #JP# config.SIemission2user(calc_co2_emission(consum,currentcar)) )
-  if notes : store.set( iter, configuration.column_dict['NOTES'], notes)
+  if not notes : notes = ""
+  store.set( iter, configuration.column_dict['NOTES'], notes)
   store.set( iter, configuration.column_dict['ID'], id )
   store.set( iter, configuration.column_dict['VISIBLE'], visible)
 
