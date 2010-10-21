@@ -205,7 +205,6 @@ class FuelpadEdit ( gtk.Notebook ) :
         self.connect_object( "switch-page" , self.on_page_switch , config )
 
     def on_page_switch( self , config , page , num ) :
-        print "switching",self,config,page,num
         if self.get_current_page() == 1 :
             callback_tripadded( None , None , self , config )
         elif self.get_current_page() == 2 :
