@@ -448,7 +448,7 @@ if hildon :
                                                           hildon.BUTTON_ARRANGEMENT_VERTICAL,
                                                           "Delete record" ,
                                                           None)
-        #    self.main_menu.append( self.mm_item_delete )
+            self.main_menu.append( self.mm_item_delete )
 
             self.mm_item_filter = hildon.Button(gtk.HILDON_SIZE_AUTO,
                                                           hildon.BUTTON_ARRANGEMENT_VERTICAL,
@@ -482,6 +482,12 @@ if hildon :
                                                           None)
             self.main_menu.append( self.mm_item_settings )
 
+            self.mm_item_about = hildon.Button(gtk.HILDON_SIZE_AUTO,
+                                                          hildon.BUTTON_ARRANGEMENT_VERTICAL,
+                                                          "About ..." ,
+                                                          None)
+            self.main_menu.append( self.mm_item_about )
+
             self.mm_item_new.connect( "clicked", callbacks.callback_newrecord , self )
             self.mm_item_edit.connect( "clicked", callbacks.callback_editrecord , self )
         #  self.mm_item_alarm.connect( "clicked", callback_alarm , self )
@@ -491,6 +497,7 @@ if hildon :
         #  self.mm_item_stat.connect( "clicked", callback_stat , self )
         #  self.mm_item_report.connect( "clicked", callback_report , self )
         #  self.mm_item_alarm.connect( "clicked", callback_alarm , self )
+            self.mm_item_about.connect( "clicked", callbacks.callback_about , self )
 
             self.set_app_menu( self.main_menu )
 
@@ -679,7 +686,7 @@ else :
         #    self.mm_item_report.connect( "activate", callback_report, pui)
         #    #if libhelp :
         #    #  g_signal_connect(G_OBJECT(self.mm_item_help), "activate", callback_help), NULL);
-        #    g_signal_connect(G_OBJECT(self.mm_item_about), "activate", callback_about), NULL);
+            self.mm_item_about.connect( "activate", callbacks.about, self )
             self.mm_item_exit.connect( "activate", callbacks.delete_event, self )
 
         #    g_signal_connect(G_OBJECT(self.mm_item_open), "activate", callback_open_db), pui);

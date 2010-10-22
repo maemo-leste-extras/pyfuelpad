@@ -308,6 +308,17 @@ def add_record_response ( widget , event , editwin , pui ) :
   elif event == gtk.RESPONSE_REJECT :
      widget.destroy()
 
+def callback_about ( action, pui ) :
+    dialog = gtk.MessageDialog( pui,
+                                gtk.DIALOG_DESTROY_WITH_PARENT,
+                                gtk.MESSAGE_INFO,
+                                gtk.BUTTONS_OK,
+                                "PyFuelpad 1.1"
+                                )
+    dialog.set_title( "About PyFuelpad ..." )
+    dialog.format_secondary_text( "(C) Javier Palacios Bermejo 2010\nLicense : GPL" )
+    dialog.connect("response", lambda x,y: dialog.destroy())
+    dialog.show_all()
 
 def callback_settings ( action, pui ) :
 
