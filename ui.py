@@ -686,7 +686,7 @@ else :
         #    self.mm_item_report.connect( "activate", callback_report, pui)
         #    #if libhelp :
         #    #  g_signal_connect(G_OBJECT(self.mm_item_help), "activate", callback_help), NULL);
-            self.mm_item_about.connect( "activate", callbacks.about, self )
+            self.mm_item_about.connect( "activate", callbacks.callback_about, self )
             self.mm_item_exit.connect( "activate", callbacks.delete_event, self )
 
         #    g_signal_connect(G_OBJECT(self.mm_item_open), "activate", callback_open_db), pui);
