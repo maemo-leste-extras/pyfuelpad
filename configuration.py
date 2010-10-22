@@ -13,25 +13,26 @@ LARGE=4
 
 fontsizes = [ 'Preconfigured' , 'XSMALL' , 'SMALL' , 'MEDIUM' , 'LARGE' ]
 
-# DB format is hardcoded to "%Y-%m-%d"
-# Possible date format strings (see strptime(3) for format descri ption) 
-datefmtstr = ("%Y-%m-%d", "%d.%m.%Y", "%d/%m/%Y", "%d/%m/%y",
-                    "%d-%m-%Y", "%m/%d/%Y", "%m/%d/%y")
-
-
 import pango
 fontscalefactors = ( pango.SCALE_MEDIUM , pango.SCALE_X_SMALL , pango.SCALE_SMALL , pango.SCALE_MEDIUM , pango.SCALE_LARGE , pango.SCALE_XX_LARGE )
 
 # text size : create/modify pango attributes
 def font_attrs ( fontsize , widget=None ) :
-  attr = pango.AttrScale( fontscalefactors[fontsize] , 0 , -1 )
-  if widget :
-      attrs = widget.get_attributes()
-      attrs.insert(attr)
-  else :
-      attrs = pango.AttrList()
-      attrs.change(attr)
-  return attrs
+    attr = pango.AttrScale( fontscalefactors[fontsize] , 0 , -1 )
+    if widget :
+        attrs = widget.get_attributes()
+        attrs.insert(attr)
+    else :
+        attrs = pango.AttrList()
+        attrs.change(attr)
+    return attrs
+
+
+# DB format is hardcoded to "%Y-%m-%d"
+# Possible date format strings (see strptime(3) for format descri ption) 
+datefmtstr = ("%Y-%m-%d", "%d.%m.%Y", "%d/%m/%Y", "%d/%m/%y",
+                    "%d-%m-%Y", "%m/%d/%Y", "%m/%d/%y")
+
 
 # unit
 unitsystem = [ 'SI' , 'US' , 'IMPERIAL' ]
@@ -218,7 +219,6 @@ class FuelpadConfig :
         client.set_bool( "/apps/fuelpad/gps" , self.use_gps )
         client.set_int( "/apps/fuelpad/gps_timeout" , self.gps_timeout )
 
-    # To be revised
     def doubleornothing ( self , input ) :
       if not input :
         return 0.0
@@ -257,6 +257,8 @@ class FuelpadConfig :
         return self.doubleornothing(length) * self.vcf[self.units['volume']];
 
     def SIconsumption2user ( self , consum ) :
+        if consum == 0 :
+           return consum
         if self.isSI( 'consume' ) :
            return consum
         else :

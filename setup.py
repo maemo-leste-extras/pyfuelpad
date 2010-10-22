@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name = 'pyfuelpad',
-    version = '1.0',
+    version = '1.1',
     description = 'Fuelpad reimplementation',
     author = 'Javier Palacios',
     author_email = 'javiplx@gmail.com',

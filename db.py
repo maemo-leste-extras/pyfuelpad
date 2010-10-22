@@ -173,23 +173,12 @@ class database :
 
     ppStmtDriver = "SELECT nickname,fullname,id FROM driver"
     ppStmtCar = "SELECT mark,register,id FROM car"
-    ppStmtOneDriver = "SELECT fullname,nickname FROM driver WHERE id=?"
-    ppStmtCurCar = "SELECT mark,model,register,year FROM car where id=?"
-    ppStmtOneCar = "SELECT mark,model,year,register,notes,fueltype FROM car where id=?"
-    ppStmtAddDriver = "INSERT INTO driver(fullname,nickname) VALUES(?,?)"
-    ppStmtUpdateDriver = "UPDATE driver SET fullname=?, nickname=? WHERE id=?"
-    ppStmtAddCar = "INSERT INTO car(mark,model,year,register,notes,fueltype) VALUES(?,?,?,?,?,?)"
-    ppStmtUpdateCar = "UPDATE car SET mark=?, model=?, year=?, register=?, notes=?, fueltype=? WHERE id=?"
     ppStmtDeleteRecord = "DELETE FROM record WHERE id=%d"
     ppStmtOneRecord = "SELECT day,km,trip,fill,price,service,oil,tires,notes,consum,id FROM record WHERE id=%d"
-    ppStmtRecords = "SELECT day,km,trip,fill,consum,price,priceperlitre,service,oil,tires,notes,id FROM record WHERE carid=? ORDER BY km"
-    ppStmtExport = "SELECT day,km,trip,fill,consum,price,priceperlitre,service,oil,tires,notes,driverid FROM record WHERE carid=? ORDER BY km"
-    ppStmtExportCar = "SELECT mark,model,year,register,notes FROM car WHERE id=?"
     ppStmtAddRecord = "INSERT INTO record(carid,driverid,day,km,trip,fill,consum,price,priceperlitre,service,oil,tires,notes) VALUES(%d,%d,'%s',%f,%f,%f,%f,%f,%f,%f,%f,%f,'%s')"
     ppStmtNextFull = "SELECT km,trip,fill,consum,id FROM record WHERE carid=%d AND km>%f AND fill>0 AND consum>0 ORDER BY km LIMIT 1"
     ppStmtPrevFull = "SELECT km,trip,fill,consum,id FROM record WHERE carid=%d AND km<%f AND fill>0 ORDER BY km DESC"
     ppStmtUpdateRecord = "UPDATE record SET day='%s', km=%f, trip=%f, fill=%f, consum=%f, price=%f, priceperlitre=%f, service=%f, oil=%f, tires=%f, notes='%s' WHERE id=%d"
-    ppStmtGetYears = "SELECT DISTINCT STRFTIME('%Y',date(day)) FROM record WHERE carid=?"
 
     def __init__ ( self , dbname=None ) :
         self.result_db = dbname
@@ -256,8 +245,6 @@ class database :
         # self.currentcar = maxid = self.get_float( "SELECT max(id) FROM car" )
         # self.currentdriver = maxid = self.get_float( "SELECT max(id) FROM driver" )
 
-        # And lots of sqlite3_prepare_v2 statements ...
-
     def close ( self ) :
         self.db.close()
         self.db = None
@@ -294,7 +281,6 @@ class database :
 
        return 0 , 0.0 , 0.0
 
-    # Fill view is apparently ported
     def create_fillview ( self ) :
         query = "CREATE TEMP VIEW fillview AS SELECT * FROM record WHERE carid=%d ORDER BY km LIMIT -1 OFFSET 1" % self.currentcar
         return self.db.execute( query )
@@ -302,7 +288,6 @@ class database :
     def drop_fillview ( self ) :
         return self.db.execute( "DROP VIEW fillview" )
 
-    # Summarizer functions completelly ported
     def totalkm ( self , timespan ) :
     
       if self.is_open() :

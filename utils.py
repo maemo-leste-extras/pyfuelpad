@@ -18,15 +18,15 @@ def convdate ( outformat , informat, date ) :
     return time.strftime( _outformat , _date )
 
 def date2sqlite ( format, date ) :
-  return convdate( None , format , date )
+    return convdate( None , format , date )
 
 def getdatestruct ( record_date ) :
     return time.strptime( record_date , default_format )
 
 def gettimefmt ( format , record_date=None ) :
-  if record_date :
-    return time.strftime( configuration.datefmtstr[format] , getdatestruct( record_date ) )
-  return time.strftime( configuration.datefmtstr[format] , time.localtime() )
+    if record_date :
+        return time.strftime( configuration.datefmtstr[format] , getdatestruct( record_date ) )
+    return time.strftime( configuration.datefmtstr[format] , time.localtime() )
 
 
 def calc_co2_emission ( consum , fueltype ) :
@@ -43,5 +43,5 @@ def calc_co2_emission ( consum , fueltype ) :
 
 emissionperlitre = ( 2350.0 , 2660.0 )
 def get_emission_per_litre ( fueltype ) :
-  return emissionperlitre[ int(fueltype) ]
+    return emissionperlitre[ int(fueltype) ]
 

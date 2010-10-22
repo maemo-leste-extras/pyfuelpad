@@ -59,12 +59,7 @@ class FuelpadModel ( gtk.TreeModelSort ) :
 
             date = utils.convdate( config.dateformat , None , row[0] )
 
-	    # Convert notes to utf8 (earlier versions might have imported wrongly encoded data
 	    convnotes = row[10]
-	    #if (!g_utf8_validate(notes, -1, NULL))
-	    #  convnotes=g_convert(notes, -1, "UTF-8", "ISO-8859-15", NULL, NULL, NULL);
-	    #else
-	    #  convnotes=g_strndup(notes, strlen(notes));
 	    trip , fill = row[2] , row[3]
 	    price , consum = row[5] , row[4]
             co2 = utils.calc_co2_emission( consum , config.db.fueltype() )
@@ -148,8 +143,6 @@ class FuelpadAbstractView :
 
     def update ( self , pui ) :
 
-#        ui_show_banner( "Updating, please wait" )
-
         # Update the UI
         while gtk.events_pending() :
             gtk.main_iteration()
@@ -174,11 +167,6 @@ class FuelpadAbstractWindow :
 
         self.warn = False
         self.create_mainwin_widgets()
-
-        # View the reminder system toolbar item */
-      #  self.alarmview = create_alarmview_and_model (&ui);
-      #  self.warn = update_next_event( self.alarmview.get_model() )
-      #  Update_reminder_toolbutton (&ui, ui.warn);
 
         # Begin the main application
         self.show_all()
@@ -220,7 +208,6 @@ class FuelpadAbstractWindow :
 
     def create_mainwin_menu ( self , vbox ) :
 
-         # Make all menu widgets visible
          self.main_menu.show_all()
 
     def create_mainwin_toolbar ( self ) :
@@ -228,46 +215,28 @@ class FuelpadAbstractWindow :
         # Create toolbar
         self.main_toolbar = gtk.Toolbar();
 
-        # xx , tooltip , privtext , callback , userdata , position
-
         # Create toolbar button items
         self.mtb_add = gtk.ToolButton( gtk.STOCK_ADD )
         self.mtb_edit = gtk.ToolButton( gtk.STOCK_EDIT )
-      #  self.mtb_up = gtk.ToolButton( gtk.STOCK_GO_UP )
-      #  self.mtb_down = gtk.ToolButton( gtk.STOCK_GO_DOWN )
         self.mtb_delete = gtk.ToolButton( gtk.STOCK_DELETE )
-      #  self.mtb_reminder = gtk.ToolButton()
         self.mtb_close = gtk.ToolButton( gtk.STOCK_QUIT )
 
         self.mtb_add.set_expand( True )
         self.mtb_edit.set_expand( True )
-      #  self.mtb_up.set_expand( True )
-      #  self.mtb_down.set_expand( True )
         self.mtb_delete.set_expand( True )
-      #  self.mtb_reminder.set_expand( True )
         self.mtb_close.set_expand( True )
 
         # Add all items to toolbar
         self.main_toolbar.insert( self.mtb_add, -1)
         self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
         self.main_toolbar.insert( self.mtb_edit, -1)
-      #  self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
-      #  self.main_toolbar.insert( self.mtb_up, -1)
-      #  self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
-      #  self.main_toolbar.insert( self.mtb_down, -1)
-      #  self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
         self.main_toolbar.insert( self.mtb_delete, -1)
         self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
-      #  self.main_toolbar.insert( self.mtb_reminder, -1)
-      #  self.main_toolbar.insert( gtk.SeparatorToolItem(), -1)
         self.main_toolbar.insert( self.mtb_close, -1)
 
-        self.mtb_add.connect( "clicked" , callbacks.callback_newrecord , self )
-        self.mtb_edit.connect( "clicked", callbacks.callback_editrecord, self)
-      #  self.mtb_up.connect( "clicked", callback_prevrecord, self)
-      #  self.mtb_down.connect( "clicked", callback_nextrecord, self)
-        self.mtb_delete.connect( "clicked", callbacks.callback_deleterecord, self)
-      #  self.mtb_reminder.connect( "clicked", callback_alarm, self)
+        self.mtb_add.connect( "clicked" , callbacks.newrecord , self )
+        self.mtb_edit.connect( "clicked", callbacks.editrecord, self)
+        self.mtb_delete.connect( "clicked", callbacks.deleterecord, self)
         self.mtb_close.connect( "clicked" , callbacks.delete_event , self )
 
     def create_secondary_toolbar( self ) :
@@ -325,9 +294,6 @@ class FuelpadAbstractWindow :
         dbopen = self.config.db.is_open()
         self.mtb_add.set_sensitive( dbopen )
         self.mtb_edit.set_sensitive( dbopen )
-      #  self.mtb_up.set_sensitive( dbopen )
-      #  self.mtb_down.set_sensitive( dbopen )
-      #  self.mtb_delete.set_sensitive( dbopen )
 
     def update_totalkm ( self ) :
 
@@ -368,26 +334,11 @@ if hildon :
             model = FuelpadModel( config )
             hildon.GtkTreeView.__init__( self , gtk.HILDON_UI_MODE_EDIT , model )
             FuelpadAbstractView.__init__( self , config )
-            self.connect( "hildon-row-tapped" , callbacks.callback_recordactivated )
+            self.connect( "hildon-row-tapped" , callbacks.recordactivated )
 
     class FuelpadWindow( hildon.StackableWindow , FuelpadAbstractWindow ) :
 
         def __init__ ( self , config ) :
-
-        #    app.osso = osso_initialize ("org.luukko.fuelpad", VERSION, TRUE, NULL);
-        #    if (app.osso == NULL) {
-        #      fprintf (stderr, "osso_initialize failed.\n");
-        #      exit (1);
-        #    }
-        #
-        #    ret = osso_rpc_set_default_cb_f (app.osso, dbus_callback, NULL);
-        #    if (ret != OSSO_OK)
-        #      {
-        #        fprintf (stderr, "osso_rpc_set_default_cb_f failed: %d.\n", ret);
-        #        exit (1);
-        #      }
-        #
-        #      osso_hw_set_event_cb(app.osso, NULL, osso_hw_state_callback, NULL);
 
             # Create the hildon program and setup the title
             program = hildon.Program.get_instance()
@@ -396,12 +347,6 @@ if hildon :
             # Create HildonWindow and set it to HildonProgram
             hildon.StackableWindow.__init__( self )
             program.add_window( self )
-
-       #    # Link app data to ui data
-       #    ui.app = app
-
-            # Callback for hardware keys
-        #    self.connect( "key_press_event" , key_press_cb, ui)
 
             FuelpadAbstractWindow.__init__( self , config )
 
@@ -425,7 +370,7 @@ if hildon :
             image = gtk.image_new_from_stock(gtk.STOCK_ADD, gtk.ICON_SIZE_BUTTON)
             self.stb_addbutton.set_image(image)
             self.stb_add.add( self.stb_addbutton )
-            self.stb_addbutton.connect( "clicked" , callbacks.callback_newrecord , self , True )
+            self.stb_addbutton.connect( "clicked" , callbacks.newrecord , self , True )
             FuelpadAbstractWindow.create_secondary_toolbar( self )
 
         def create_mainwin_menu ( self , vbox ) :
@@ -450,32 +395,6 @@ if hildon :
                                                           None)
             self.main_menu.append( self.mm_item_delete )
 
-            self.mm_item_filter = hildon.Button(gtk.HILDON_SIZE_AUTO,
-                                                          hildon.BUTTON_ARRANGEMENT_VERTICAL,
-                                                          "Filter records" ,
-                                                          None)
-        #    self.main_menu.append( self.mm_item_filter )
-
-            self.mm_item_stat = hildon.Button(gtk.HILDON_SIZE_AUTO,
-                                                          hildon.BUTTON_ARRANGEMENT_VERTICAL,
-                                                          "Statistics" ,
-                                                          None)
-        #    self.main_menu.append( self.mm_item_stat )
-
-            self.mm_item_report = hildon.Button(gtk.HILDON_SIZE_AUTO,
-                                                          hildon.BUTTON_ARRANGEMENT_VERTICAL,
-                                                          "Report" ,
-                                                          None)
-        #    self.main_menu.append( self.mm_item_report )
-
-            if self.warn : warn_text = "Active"
-            else : warn_text = "Not active"
-            self.mm_item_alarm = hildon.Button(gtk.HILDON_SIZE_AUTO,
-                                                          hildon.BUTTON_ARRANGEMENT_VERTICAL,
-                                                          "Reminders" ,
-                                                          warn_text)
-        #    self.main_menu.append( self.mm_item_alarm )
-
             self.mm_item_settings = hildon.Button(gtk.HILDON_SIZE_AUTO,
                                                           hildon.BUTTON_ARRANGEMENT_VERTICAL,
                                                           "Settings",
@@ -488,16 +407,11 @@ if hildon :
                                                           None)
             self.main_menu.append( self.mm_item_about )
 
-            self.mm_item_new.connect( "clicked", callbacks.callback_newrecord , self )
-            self.mm_item_edit.connect( "clicked", callbacks.callback_editrecord , self )
-        #  self.mm_item_alarm.connect( "clicked", callback_alarm , self )
-            self.mm_item_settings.connect( "clicked", callbacks.callback_settings , self )
-            self.mm_item_delete.connect( "clicked", callbacks.callback_deleterecord , self )
-        #  self.mm_item_filter.connect( "clicked", callback_filter_records , self )
-        #  self.mm_item_stat.connect( "clicked", callback_stat , self )
-        #  self.mm_item_report.connect( "clicked", callback_report , self )
-        #  self.mm_item_alarm.connect( "clicked", callback_alarm , self )
-            self.mm_item_about.connect( "clicked", callbacks.callback_about , self )
+            self.mm_item_new.connect( "clicked", callbacks.newrecord , self )
+            self.mm_item_edit.connect( "clicked", callbacks.editrecord , self )
+            self.mm_item_settings.connect( "clicked", callbacks.settings , self )
+            self.mm_item_delete.connect( "clicked", callbacks.deleterecord , self )
+            self.mm_item_about.connect( "clicked", callbacks.about , self )
 
             self.set_app_menu( self.main_menu )
 
@@ -512,7 +426,7 @@ else :
             model = FuelpadModel( config )
             gtk.TreeView.__init__( self , model )
             FuelpadAbstractView.__init__( self , config )
-            self.connect( "row-activated" , callbacks.callback_recordactivated )
+            self.connect( "row-activated" , callbacks.recordactivated )
 
     class FuelpadWindow( gtk.Window , FuelpadAbstractWindow ) :
 
@@ -524,9 +438,6 @@ else :
 
             # NOTE : temporary to get a decent window
             self.set_size_request(640,480)
-
-          #  # Link app data to ui data
-          #  ui.app = app
 
             FuelpadAbstractWindow.__init__( self , config )
 
@@ -542,7 +453,7 @@ else :
 
         def create_secondary_toolbar( self ) :
             self.stb_add = gtk.ToolButton( gtk.STOCK_ADD )
-            self.stb_add.connect( "clicked" , callbacks.callback_newrecord , self , True )
+            self.stb_add.connect( "clicked" , callbacks.newrecord , self , True )
             FuelpadAbstractWindow.create_secondary_toolbar( self )
 
         def create_mainwin_menu ( self , vbox ) :
@@ -562,8 +473,6 @@ else :
             self.mm_item_alarm = gtk.MenuItem( label="Reminders..." )
             self.mm_item_view = gtk.MenuItem( label="View" )
             self.mm_item_settings = gtk.MenuItem( label="Settings..." )
-            #if libhelp :
-            #  self.mm_item_help = gtk.MenuItem( label="Help" )
             self.mm_item_about = gtk.MenuItem( label="About" )
             self.mm_item_exit = gtk.MenuItem( label="Exit" )
 
@@ -612,7 +521,6 @@ else :
 
             # Add menu items to right menus
             # Main menu
-            #self.main_menu.append( self.mm_item_db )
             self.main_menu.append( self.mm_item_record )
             self.main_menu.append( self.mm_item_stat )
             self.main_menu.append( gtk.SeparatorMenuItem() )
@@ -622,8 +530,6 @@ else :
             self.main_menu.append( gtk.SeparatorMenuItem() )
             self.main_menu.append( self.mm_item_settings )
             self.main_menu.append( gtk.SeparatorMenuItem() )
-            #if libhelp :
-            #  self.main_menu.append( self.mm_item_help )
             self.main_menu.append( self.mm_item_about )
             self.main_menu.append( self.mm_item_exit )
 
@@ -665,13 +571,10 @@ else :
             self.mm_menubar.show()
             self.mm_item_db.set_submenu( self.mm_menu_db )
             self.mm_menubar.append( self.mm_item_db )
-            #self.main_menu.append( self.mm_item_db )
-            #self.mm_menubar.append( self.mm_item_db )
             self.mm_item_fuelpad = gtk.MenuItem( label="fuelpad" )
             self.mm_item_fuelpad.show()
             self.mm_item_fuelpad.set_submenu( self.main_menu )
             self.mm_menubar.append( self.mm_item_fuelpad )
-            #self.mm_item_db.set_submenu( self.mm_menu_db )
             self.mm_item_record.set_submenu( self.mm_menu_record )
             self.mm_item_stat.set_submenu( self.mm_menu_stat )
             self.mm_item_view.set_submenu( self.mm_menu_view )
@@ -679,35 +582,22 @@ else :
             self.mm_item_fontsize.set_submenu( self.mm_menu_fontsize )
 
             # Attach the callback functions to the activate signal
-        #    self.mm_item_alarm.connect( "activate", callback_alarm, pui)
-            self.mm_item_settings.connect( "activate", callbacks.callback_settings, self)
-        #    self.mm_item_quick.connect( "activate", callback_quick_stat, pui)
-        #    self.mm_item_monthly.connect( "activate", callback_stat, pui)
-        #    self.mm_item_report.connect( "activate", callback_report, pui)
-        #    #if libhelp :
-        #    #  g_signal_connect(G_OBJECT(self.mm_item_help), "activate", callback_help), NULL);
-            self.mm_item_about.connect( "activate", callbacks.callback_about, self )
+            self.mm_item_settings.connect( "activate", callbacks.settings, self)
+            self.mm_item_about.connect( "activate", callbacks.about, self )
             self.mm_item_exit.connect( "activate", callbacks.delete_event, self )
 
-        #    g_signal_connect(G_OBJECT(self.mm_item_open), "activate", callback_open_db), pui);
-        #    g_signal_connect(G_OBJECT(self.mm_item_close), "activate", callback_close_db), pui);
-        #    g_signal_connect(G_OBJECT(self.mm_item_import), "activate", callback_import), pui);
-        #    g_signal_connect(G_OBJECT(self.mm_item_export), "activate", callback_export), NULL);
+            self.mm_item_new.connect( "activate" , callbacks.newrecord, self )
+            self.mm_item_edit.connect( "activate" , callbacks.editrecord, self )
+            self.mm_item_delete.connect( "activate" , callbacks.deleterecord, self )
 
-            self.mm_item_new.connect( "activate" , callbacks.callback_newrecord, self )
-            self.mm_item_edit.connect( "activate" , callbacks.callback_editrecord, self )
-            self.mm_item_delete.connect( "activate" , callbacks.callback_deleterecord, self )
+            self.main_menu_item_fullscreen.connect( "toggled" , callbacks.main_fullscreen , self )
 
-            self.main_menu_item_fullscreen.connect( "toggled" , callbacks.cb_main_fullscreen , self )
-        #    g_signal_connect(G_OBJECT(self.mm_item_columnselect), "activate", callback_select_columns), pui);
-        #    g_signal_connect(G_OBJECT(self.mm_item_filter), "activate", callback_filter_records), pui);
-
-            self.mm_item_toolbar_main.connect( "toggled" , callbacks.cb_main_toolbar , self )
-            self.mm_item_toolbar_secondary.connect( "toggled" , callbacks.cb_secondary_toolbar , self )
-            self.mm_item_fontsize_x_small.connect( "toggled", callbacks.cb_fontsize_x_small , self )
-            self.mm_item_fontsize_small.connect( "toggled" , callbacks.cb_fontsize_small , self )
-            self.mm_item_fontsize_medium.connect( "toggled", callbacks.cb_fontsize_medium , self )
-            self.mm_item_fontsize_large.connect( "toggled" , callbacks.cb_fontsize_large , self )
+            self.mm_item_toolbar_main.connect( "toggled" , callbacks.main_toolbar , self )
+            self.mm_item_toolbar_secondary.connect( "toggled" , callbacks.secondary_toolbar , self )
+            self.mm_item_fontsize_x_small.connect( "toggled", callbacks.fontsize_x_small , self )
+            self.mm_item_fontsize_small.connect( "toggled" , callbacks.fontsize_small , self )
+            self.mm_item_fontsize_medium.connect( "toggled", callbacks.fontsize_medium , self )
+            self.mm_item_fontsize_large.connect( "toggled" , callbacks.fontsize_large , self )
 
             FuelpadAbstractWindow.create_mainwin_menu( self , vbox )
 

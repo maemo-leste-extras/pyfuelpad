@@ -18,65 +18,63 @@ except :
 delay_quit_interval = 10
 
 def delete_event ( widget , event , data=None ) :
-  locator = None
-  if data :
-    if data.config.db.locator :
-      locator = data.config.db.locator 
-  else :
-    if event.config.db.locator :
-      locator = event.config.db.locator 
-  if locator :
-    if locator.timeout_handler :
-      gobject.timeout_add( delay_quit_interval * 1000 , mainloop_exit , locator )
+    locator = None
+    if data :
+        if data.config.db.locator :
+            locator = data.config.db.locator 
     else :
-      gtk.main_quit()
-  else :
-    gtk.main_quit()
+        if event.config.db.locator :
+            locator = event.config.db.locator 
+    if locator :
+        if locator.timeout_handler :
+            gobject.timeout_add( delay_quit_interval * 1000 , mainloop_exit , locator )
+        else :
+            gtk.main_quit()
+    else :
+        gtk.main_quit()
 
 def mainloop_exit ( locator ) :
-  if locator.timeout_handler :
-    return True
-  gtk.main_quit()
-  return False
+    if locator.timeout_handler :
+        return True
+    gtk.main_quit()
+    return False
 
 def destroy_event ( widget , event , data=None ) :
-  widget.destroy()
+    widget.destroy()
 
 
 def get_store_and_iter ( model , view , iter , storeiter , config ) :
-  sortable = view.get_model()
-  store = sortable.get_model()
-  if model and iter :
-    if storeiter :
-      raise Exception ("Not implemented")
-    storeiter = model.convert_iter_to_child_iter( storeiter , iter )
-  else :
-    storeiter = None
-  return store , storeiter
+    sortable = view.get_model()
+    store = sortable.get_model()
+    if model and iter :
+        if storeiter :
+            raise Exception ("Not implemented")
+        storeiter = model.convert_iter_to_child_iter( storeiter , iter )
+    else :
+        storeiter = None
+    return store , storeiter
 
 def ui_update_row_data ( store , iter , config , date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes , id , visible ) :
 
-  if date :
-    userdate = utils.convdate( config.dateformat , None , date )
-    store.set( iter, configuration.column_dict['DAY'],  userdate)
+    if date :
+        userdate = utils.convdate( config.dateformat , None , date )
+        store.set( iter, configuration.column_dict['DAY'],  userdate)
 
-  if not km < 0.0 : store.set( iter, configuration.column_dict['KM'], config.SIlength2user(km) )
-  if not trip < 0.0 : store.set( iter, configuration.column_dict['TRIP'], config.SIlength2user(trip) )
-  if not fill < 0.0 : store.set( iter, configuration.column_dict['FILL'], config.SIvolume2user(fill) )
-  if not consum < 0.0 : store.set( iter, configuration.column_dict['CONSUM'], config.doubleornothing(config.SIconsumption2user(consum)) )
-  if not price < 0.0 : store.set( iter, configuration.column_dict['PRICE'], price )
-  if price > 0 and trip > 0 : store.set( iter, configuration.column_dict['PRICEPERTRIP'], config.doubleornothing(price)/config.SIlength2user(trip))
-  if not priceperlitre < 0.0 : store.set( iter, configuration.column_dict['PRICEPERLITRE'], config.doubleornothing(config.SIppl2user(priceperlitre)) )
-  if not service < 0.0 : store.set( iter, configuration.column_dict['SERVICE'], service )
-  if not oil < 0.0 : store.set( iter, configuration.column_dict['OIL'], oil )
-  if not tires < 0.0 : store.set( iter, configuration.column_dict['TIRES'], tires )
-#                                /*                      INSURANCE, sqlite3_column_double(ppStmtRecords,5), */
-#                                /*                      OTHER, sqlite3_column_double(ppStmtRecords,5), */
-  if not consum < 0.0 : store.set( iter, configuration.column_dict['CO2EMISSION'], 0.0) #JP# config.SIemission2user(calc_co2_emission(consum,currentcar)) )
-  if not notes : notes = ""
-  store.set( iter, configuration.column_dict['NOTES'], notes)
-  store.set( iter, configuration.column_dict['ID'], id )
-  store.set( iter, configuration.column_dict['VISIBLE'], visible)
+    if not km < 0.0 : store.set( iter, configuration.column_dict['KM'], config.SIlength2user(km) )
+    if not trip < 0.0 : store.set( iter, configuration.column_dict['TRIP'], config.SIlength2user(trip) )
+    if not fill < 0.0 : store.set( iter, configuration.column_dict['FILL'], config.SIvolume2user(fill) )
+    if not consum < 0.0 : store.set( iter, configuration.column_dict['CONSUM'], config.doubleornothing(config.SIconsumption2user(consum)) )
+    if not price < 0.0 : store.set( iter, configuration.column_dict['PRICE'], price )
+    if price > 0 and trip > 0 : store.set( iter, configuration.column_dict['PRICEPERTRIP'], config.doubleornothing(price)/config.SIlength2user(trip))
+    if not priceperlitre < 0.0 : store.set( iter, configuration.column_dict['PRICEPERLITRE'], config.doubleornothing(config.SIppl2user(priceperlitre)) )
+    if not service < 0.0 : store.set( iter, configuration.column_dict['SERVICE'], service )
+    if not oil < 0.0 : store.set( iter, configuration.column_dict['OIL'], oil )
+    if not tires < 0.0 : store.set( iter, configuration.column_dict['TIRES'], tires )
+    if not consum < 0.0 : store.set( iter, configuration.column_dict['CO2EMISSION'], 0.0) #JP# config.SIemission2user(calc_co2_emission(consum,currentcar)) )
+    if not notes : notes = ""
+    store.set( iter, configuration.column_dict['NOTES'], notes)
+    store.set( iter, configuration.column_dict['ID'], id )
+    store.set( iter, configuration.column_dict['VISIBLE'], visible)
 
 def ui_find_iter( store , id ) :
     iter = store.get_iter_first()
@@ -100,13 +98,13 @@ def settings_response ( widget , event , editwin , pui ) :
         if editwin.widgets["mainviewfontsize"].get_active() != pui.config.fontsize :
             pui.config.fontsize = editwin.widgets["mainviewfontsize"].get_active()
             if pui.config.fontsize == 1 :
-                cb_fontsize_x_small ( None , pui )
+                fontsize_x_small ( None , pui )
             elif pui.config.fontsize == 2 :
-                cb_fontsize_small ( None, pui )
+                fontsize_small ( None, pui )
             elif pui.config.fontsize == 3 :
-                cb_fontsize_medium ( None , pui )
+                fontsize_medium ( None , pui )
             elif pui.config.fontsize == 4 :
-                cb_fontsize_large ( None , pui )
+                fontsize_large ( None , pui )
         if editwin.widgets["current_unit"].get_active() != pui.config.units["main"] :
             pui.config.units["main"] = editwin.widgets["current_unit"].get_active()
             for unit in ( 'length', 'volume', 'consume', 'mass' ) :
@@ -229,76 +227,76 @@ def edit_record_response ( widget , event , editwin , pui ) :
 
 def add_record_response ( widget , event , editwin , pui ) :
 
-  consum = 0.0
+    consum = 0.0
 
-  view , config = pui.view , pui.config
+    view , config = pui.view , pui.config
 
-  if not config.db.is_open() :
-       widget.destroy()
-       return
+    if not config.db.is_open() :
+        widget.destroy()
+        return
 
-  # NOTE : response from hildon wizard is an unexpected value
-  if event == gtk.RESPONSE_ACCEPT or event == 2 :
+    # NOTE : response from hildon wizard is an unexpected value
+    if event == gtk.RESPONSE_ACCEPT or event == 2 :
 
-    if config.changed :
-      update_car_changed(pui);
+        if config.changed :
+            update_car_changed(pui);
 
-    date = editwin.entrydate.get_datestring()
-    date = utils.date2sqlite( config.dateformat , date )
+        date = editwin.entrydate.get_datestring()
+        date = utils.date2sqlite( config.dateformat , date )
 
-    km  = config.user2SIlength( editwin.entrykm.get_text() )
-    trip = config.user2SIlength( editwin.entrytrip.get_text() )
-    fill  = config.user2SIvolume( editwin.entryfill.get_text() )
-    price = config.doubleornothing( editwin.entryprice.get_text() )
-    if editwin.entryservice :
-        service = config.doubleornothing( editwin.entryservice.get_text() )
-        oil = config.doubleornothing( editwin.entryoil.get_text() )
-        tires = config.doubleornothing( editwin.entrytires.get_text() )
-        notes = editwin.entrynotes.get_text()
-    else :
-        service = oil = tires = 0.0
-        notes = ""
-
-    if fill and trip :
-      if editwin.buttonnotfull.get_active() :
-
-        # Find next full record 
-        fullid , fullfill , fullkm = config.db.find_next_full( km )
-        if fullid : 
-           fullconsum = (fullfill+fill)/(fullkm+trip)*100
-
-           # Update now the full record consum and tree view also
-           query = "UPDATE record SET consum=%s WHERE id=%s" % ( fullconsum , fullid )
-           config.db.execute( query )
-
-           store , storeiter = get_store_and_iter(None, view, None, None, config)
-           storeiter = ui_find_iter( store , fullid )
-           if storeiter :
-               ui_update_row_data(store, storeiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
-      else :
-          # Find if there are any not full fills before this record
-          fullfill , fullkm = config.db.find_prev_full( km )
-          consum = (fullfill+fill)/(fullkm+trip)*100
-
-    # This is verified also within add_record method
-    if config.db.is_open() :
-        if fill > 0 :
-            priceperlitre = price / fill
+        km  = config.user2SIlength( editwin.entrykm.get_text() )
+        trip = config.user2SIlength( editwin.entrytrip.get_text() )
+        fill  = config.user2SIvolume( editwin.entryfill.get_text() )
+        price = config.doubleornothing( editwin.entryprice.get_text() )
+        if editwin.entryservice :
+            service = config.doubleornothing( editwin.entryservice.get_text() )
+            oil = config.doubleornothing( editwin.entryoil.get_text() )
+            tires = config.doubleornothing( editwin.entrytires.get_text() )
+            notes = editwin.entrynotes.get_text()
         else :
-            priceperlitre = 0.0
-        recordid = config.db.add_record(date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes)
-        if recordid : # record succesfully inserted
-            store , storeiter = get_store_and_iter(None, view, None, None, config)
-            storeiter = store.append()
-            ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes, recordid, True)
-            pui.update_totalkm()
+            service = oil = tires = 0.0
+            notes = ""
 
-    widget.destroy()
+        if fill and trip :
+            if editwin.buttonnotfull.get_active() :
 
-  elif event == gtk.RESPONSE_REJECT :
-     widget.destroy()
+                # Find next full record 
+                fullid , fullfill , fullkm = config.db.find_next_full( km )
+                if fullid : 
+                    fullconsum = (fullfill+fill)/(fullkm+trip)*100
 
-def callback_about ( action, pui ) :
+                    # Update now the full record consum and tree view also
+                    query = "UPDATE record SET consum=%s WHERE id=%s" % ( fullconsum , fullid )
+                    config.db.execute( query )
+
+                    store , storeiter = get_store_and_iter(None, view, None, None, config)
+                    storeiter = ui_find_iter( store , fullid )
+                    if storeiter :
+                        ui_update_row_data(store, storeiter, config , None, -1.0, -1.0, -1.0, fullconsum, -1.0, -1.0, -1.0, -1.0, -1.0, None, fullid, True)
+            else :
+                # Find if there are any not full fills before this record
+                fullfill , fullkm = config.db.find_prev_full( km )
+                consum = (fullfill+fill)/(fullkm+trip)*100
+
+        # This is verified also within add_record method
+        if config.db.is_open() :
+            if fill > 0 :
+                priceperlitre = price / fill
+            else :
+                priceperlitre = 0.0
+            recordid = config.db.add_record(date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes)
+            if recordid : # record succesfully inserted
+                store , storeiter = get_store_and_iter(None, view, None, None, config)
+                storeiter = store.append()
+                ui_update_row_data(store, storeiter, config, date, km, trip, fill, consum, price, priceperlitre, service, oil, tires, notes, recordid, True)
+                pui.update_totalkm()
+
+        widget.destroy()
+
+    elif event == gtk.RESPONSE_REJECT :
+        widget.destroy()
+
+def about ( action, pui ) :
     dialog = gtk.MessageDialog( pui,
                                 gtk.DIALOG_DESTROY_WITH_PARENT,
                                 gtk.MESSAGE_INFO,
@@ -310,7 +308,7 @@ def callback_about ( action, pui ) :
     dialog.connect("response", lambda x,y: dialog.destroy())
     dialog.show_all()
 
-def callback_settings ( action, pui ) :
+def settings ( action, pui ) :
 
     header = ( "Settings" , )
 
@@ -329,7 +327,7 @@ def callback_settings ( action, pui ) :
     dialog.show_all()
 
 
-def callback_editrecord ( action , pui ) :
+def editrecord ( action , pui ) :
 
     header = ( "Edit a record" , )
 
@@ -388,7 +386,7 @@ def callback_editrecord ( action , pui ) :
     dialog.show()
 
 # http://wiki.maemo.org/PyMaemo/UI_tutorial/Windows_and_dialogs#Using_GtkDialogs_in_Hildon_applications
-def callback_newrecord ( action, pui , allowreduced=False ) :
+def newrecord ( action, pui , allowreduced=False ) :
 
     header = ( "Add a new record" , )
 
@@ -413,11 +411,6 @@ def callback_newrecord ( action, pui , allowreduced=False ) :
 
         dialog.connect( "response", add_record_response, editwin , pui )
 
-        #if libhelp :
-        #    help_dialog_help_enable(GTK_DIALOG(dialog),
-        #                                   HELP_ID_ADDRECORD,
-        #                                   pui->app->osso);
-
     else :
         dialog = gtk.Dialog( header[0],
                              pui ,
@@ -433,12 +426,12 @@ def callback_newrecord ( action, pui , allowreduced=False ) :
 
     dialog.show()
 
-def callback_recordactivated ( view , path , col=None ) :
-  iter = view.get_model().get_iter(path) 
-  if iter :
-    callback_editrecord( None , view.get_toplevel() )
+def recordactivated ( view , path , col=None ) :
+    iter = view.get_model().get_iter(path) 
+    if iter :
+        editrecord( None , view.get_toplevel() )
 
-def callback_deleterecord ( action, pui ) :
+def deleterecord ( action, pui ) :
 
     km = fill = trip = consum = 0.0
 
@@ -487,8 +480,8 @@ def callback_deleterecord ( action, pui ) :
 
 # Actions for carcombo item done
 def update_car_changed ( pui ) :
-  pui.config.save()
-  pui.view.update( pui )
+    pui.config.save()
+    pui.view.update( pui )
 
 def car_apply_cb ( widget , window ) :
 
@@ -505,44 +498,44 @@ def car_apply_cb ( widget , window ) :
 # BUG : Under font change, labels are not rescaled
 # Font scaling done
 def update_font_scale ( view , fontsize ) :
-  view.hide()
-  for info in configuration.column_info :
-    if info[6] : 
-      col = view.get_column( info[0] )
-      attrs = configuration.font_attrs( fontsize , col.get_widget() )
-      for renderer in col.get_cell_renderers() :
-        renderer.set_property( "scale" , configuration.fontscalefactors[fontsize] )
-  view.show()
+    view.hide()
+    for info in configuration.column_info :
+        if info[6] : 
+            col = view.get_column( info[0] )
+            attrs = configuration.font_attrs( fontsize , col.get_widget() )
+            for renderer in col.get_cell_renderers() :
+                renderer.set_property( "scale" , configuration.fontscalefactors[fontsize] )
+    view.show()
 
-def cb_fontsize_x_small ( action , pui ) :
-  pui.config.fontsize = configuration.XSMALL;
-  update_font_scale( pui.view , pui.config.fontsize )
-  update_record_model( pui )
+def fontsize_x_small ( action , pui ) :
+    pui.config.fontsize = configuration.XSMALL;
+    update_font_scale( pui.view , pui.config.fontsize )
+    update_record_model( pui )
 
-def cb_fontsize_small ( action, pui ) :
-  pui.config.fontsize = configuration.SMALL;
-  update_font_scale( pui.view , pui.config.fontsize )
+def fontsize_small ( action, pui ) :
+    pui.config.fontsize = configuration.SMALL;
+    update_font_scale( pui.view , pui.config.fontsize )
 
-def cb_fontsize_medium ( action , pui ) :
-  pui.config.fontsize = configuration.MEDIUM;
-  update_font_scale( pui.view , pui.config.fontsize )
+def fontsize_medium ( action , pui ) :
+    pui.config.fontsize = configuration.MEDIUM;
+    update_font_scale( pui.view , pui.config.fontsize )
 
-def cb_fontsize_large ( action , pui ) :
-  pui.config.fontsize = configuration.LARGE;
-  update_font_scale( pui.view , pui.config.fontsize )
+def fontsize_large ( action , pui ) :
+    pui.config.fontsize = configuration.LARGE;
+    update_font_scale( pui.view , pui.config.fontsize )
 
 
 # Toolbars toggles done
-def cb_main_fullscreen ( action , pui ) :
-  main_window_fullscreen(pui)
-  pui.main_menu_item_fullscreen.set_active( pui.mainfullscreen )
+def main_fullscreen ( action , pui ) :
+    main_window_fullscreen(pui)
+    pui.main_menu_item_fullscreen.set_active( pui.mainfullscreen )
 
-def cb_main_toolbar ( action , pui ) :
-  pui.config.main_toolbar_visible = not pui.config.main_toolbar_visible;
-  pui.toolbar_show_hide()
+def main_toolbar ( action , pui ) :
+    pui.config.main_toolbar_visible = not pui.config.main_toolbar_visible;
+    pui.toolbar_show_hide()
 
-def cb_secondary_toolbar ( action , pui ) :
-  pui.config.secondary_toolbar_visible = not pui.config.secondary_toolbar_visible;
-  pui.toolbar_show_hide()
+def secondary_toolbar ( action , pui ) :
+    pui.config.secondary_toolbar_visible = not pui.config.secondary_toolbar_visible;
+    pui.toolbar_show_hide()
 
 

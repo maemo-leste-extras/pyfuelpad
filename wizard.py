@@ -142,7 +142,7 @@ class ButtonPad ( gtk.Table ) :
         return self.label.set_text( value )
 
 
-def callback_tripadded ( widget , event , editwin , config ) :
+def tripadded ( widget , event , editwin , config ) :
     if not editwin.entrytrip.get_text() :
         return False
     newkm = float( editwin.entrykm.get_text() or "0" )
@@ -161,7 +161,7 @@ def callback_tripadded ( widget , event , editwin , config ) :
         editwin.entrykm.set_text( buf )
     return False
 
-def callback_kmadded ( widget , event , editwin , config ) :
+def kmadded ( widget , event , editwin , config ) :
     if not editwin.entrykm.get_text() :
         return False
     trip = float( editwin.entrytrip.get_text() or "0" )
@@ -219,20 +219,17 @@ class FuelpadEdit ( gtk.Notebook ) :
 
     def on_page_switch( self , config , page , num ) :
         if self.get_current_page() == 1 :
-            callback_tripadded( None , None , self , config )
+            tripadded( None , None , self , config )
         elif self.get_current_page() == 2 :
-            callback_kmadded( None , None , self , config )
+            kmadded( None , None , self , config )
         return True
 
 class FuelpadAbstractEditwin :
 
     widgets = {}
 
-    #DIALOG_MIN_HEIGHT0 = 300
     DIALOG_MIN_HEIGHT1 = 150
-    #DIALOG_MIN_HEIGHT2 = 150
     DIALOG_MIN_HEIGHTMAX = 400
-    #DIALOG_MIN_WIDTH1 = 720
 
     def add_button ( self , table , item , col , row , end_col=False , end_row=False ) :
         end_col = end_col or col + 1
@@ -399,14 +396,14 @@ if hildon :
             row += 1
 
             if record_date is False :
-              self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
+              self.entrykm.connect( "focus-out-event", kmadded , self , config )
 
             # Second row, first entry
             self.entrytrip = self.add_item( table , 'EDIT_TRIP' , row )
             row += 1
 
             if record_date is False :
-              self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
+              self.entrytrip.connect( "focus-out-event", tripadded , self , config )
 
             # Second row, second entry
             self.entryfill = self.add_item( table , 'EDIT_FILL' , row )
@@ -527,13 +524,13 @@ else :
             row += 1
 
             if record_date is False :
-              self.entrykm.connect( "focus-out-event", callback_kmadded , self , config )
+              self.entrykm.connect( "focus-out-event", kmadded , self , config )
 
             # Second row, first entry
             self.entrytrip = self.add_item( table , 'EDIT_TRIP' , row )
 
             if record_date is False :
-              self.entrytrip.connect( "focus-out-event", callback_tripadded , self , config )
+              self.entrytrip.connect( "focus-out-event", tripadded , self , config )
 
             # Second row, second entry
             self.entryfill = self.add_item( table , 'EDIT_FILL' , row , 2 )

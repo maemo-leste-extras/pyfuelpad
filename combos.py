@@ -27,17 +27,12 @@ class  FuelpadAbstractDBCombo ( FuelpadAbstractCombo ) :
         i=0
         if db.is_open() :
 
-#         # We'll need to block, otherwise changed_cb would be fired in between
-#         self.handler_block_by_func( self.changed_cb )
-
          for row in db.get_rows( self.query ) :
             listitemtext = self.render_label( row )
             self.append_text( listitemtext )
             if row[2] == db.get_current( self.key ) :
               active = i
             i += 1
-
-#         self.handler_unblock_by_func( self.changed_cb )
 
          self.set_active( active )
 
