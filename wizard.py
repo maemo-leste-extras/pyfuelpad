@@ -34,8 +34,11 @@ if hildon :
 
     class DateEntry ( hildon.DateButton ) :
 
-        def __init__ ( self ) :
+        def __init__ ( self , config , date=None ) :
             hildon.DateButton.__init__( self , gtk.HILDON_SIZE_FINGER_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
+            if date :
+                datestruct = utils.getdatestruct( date )
+                self.set_date( datestruct[0] , datestruct[1]-1 , datestruct[2] )
 
         def get_datestring ( self ) :
             year , month , day = self.get_date()
@@ -58,9 +61,9 @@ else :
 
     class DateEntry ( gtk.Entry ) :
 
-        def __init__ ( self ) :
+        def __init__ ( self , config , date=None ) :
             gtk.Entry.__init__( self )
-            self.set_text( utils.gettimefmt( config.dateformat ) )
+            self.set_text( utils.gettimefmt( config.dateformat , date ) )
 
         def get_datestring ( self ) :
             return self.get_text()
@@ -209,7 +212,7 @@ class FuelpadEdit ( gtk.Notebook ) :
             page[ "Total" ].units.set_text( config.length_unit() )
 
         # Not shown widgets
-        self.entrydate = DateEntry()
+        self.entrydate = DateEntry( config )
         self.buttonnotfull = CheckButton()
 
         # To avoid confusion with FuelpadFullEdit
@@ -381,10 +384,7 @@ if hildon :
                 row += 1
 
             # First row, first entry
-            self.entrydate = hildon.DateButton( gtk.HILDON_SIZE_FINGER_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
-            if record_date :
-                datestruct = utils.getdatestruct( record_date )
-                self.entrydate.set_date( datestruct[0] , datestruct[1]-1 , datestruct[2] )
+            self.entrydate = DateEntry( config , record_date )
             self.add_button( table , self.entrydate , 0 , row , 2 )
             self.widgets[ self.labels['EDIT_DATE'][2] ] = self.entrydate
             row += 1
@@ -511,11 +511,9 @@ else :
             row = 0
 
             # First row, first entry
-            self.entrydate = self.add_item( table , 'EDIT_DATE' , row )
-            if record_date :
-                self.entrydate.set_text( utils.gettimefmt( config.dateformat , record_date ) )
-            else :
-                self.entrydate.set_text( utils.gettimefmt( config.dateformat ) )
+            self.entrydate = DateEntry( config , record_date )
+            self.entrydate.set_max_length( self.labels['EDIT_DATE'][1] )
+            self.add_label( table , 'EDIT_DATE' , self.entrydate , row )
 
             # First row, second entry
             if config.isSI( 'length' ) :
