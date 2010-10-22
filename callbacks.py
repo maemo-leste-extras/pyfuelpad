@@ -139,12 +139,7 @@ def edit_record_response ( widget , event , editwin , pui ) :
         if iter :
             id = model.get( iter , configuration.column_dict['ID'] )[0]
 
-            if hildon :
-                year , month , day = editwin.entrydate.get_date()
-                month += 1
-                date = "%d-%02d-%02d" % ( year , month , day )
-            else :
-                date = editwin.entrydate.get_text()
+            date = editwin.entrydate.get_datestring()
             date = utils.date2sqlite( config.dateformat , date )
 
             km  = config.user2SIlength( editwin.entrykm.get_text() )
@@ -248,12 +243,7 @@ def add_record_response ( widget , event , editwin , pui ) :
     if config.changed :
       update_car_changed(pui);
 
-    if hildon :
-      year , month , day = editwin.entrydate.get_date()
-      month += 1
-      date = "%d-%02d-%02d" % ( year , month , day )
-    else :
-      date = editwin.entrydate.get_text()
+    date = editwin.entrydate.get_datestring()
     date = utils.date2sqlite( config.dateformat , date )
 
     km  = config.user2SIlength( editwin.entrykm.get_text() )

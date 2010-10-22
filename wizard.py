@@ -32,6 +32,15 @@ if hildon :
             if label :
                 self.set_label( label )
 
+    class DateEntry ( hildon.DateButton ) :
+
+        def __init__ ( self ) :
+            hildon.DateButton.__init__( self , gtk.HILDON_SIZE_FINGER_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
+
+        def get_datestring ( self ) :
+            year , month , day = self.get_date()
+            return "%d-%02d-%02d" % ( year , month+1 , day )
+
 else :
 
     class KeypadButton ( gtk.Button , KeypadAbstractButton ) :
@@ -46,6 +55,14 @@ else :
             gtk.CheckButton.__init__( self )
             if label :
                 self.set_label( label )
+
+    class DateEntry ( gtk.Entry ) :
+
+        def __init__ ( self ) :
+            gtk.Entry.__init__( self )
+            self.set_text( utils.gettimefmt( config.dateformat ) )
+
+        get_datestring = gtk.Entry.get_text
 
 
 class ButtonPad ( gtk.Table ) :
@@ -191,11 +208,7 @@ class FuelpadEdit ( gtk.Notebook ) :
             page[ "Total" ].units.set_text( config.length_unit() )
 
         # Not shown widgets
-        if hildon :
-            self.entrydate = hildon.DateButton( gtk.HILDON_SIZE_FINGER_HEIGHT , hildon.BUTTON_ARRANGEMENT_VERTICAL )
-        else :
-            self.entrydate = gtk.Entry()
-            self.entrydate.set_text( utils.gettimefmt( config.dateformat ) )
+        self.entrydate = DateEntry()
         self.buttonnotfull = CheckButton()
 
         # To avoid confusion with FuelpadFullEdit
