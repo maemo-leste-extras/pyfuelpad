@@ -62,7 +62,8 @@ else :
             gtk.Entry.__init__( self )
             self.set_text( utils.gettimefmt( config.dateformat ) )
 
-        get_datestring = gtk.Entry.get_text
+        def get_datestring ( self ) :
+            return self.get_text()
 
 
 class ButtonPad ( gtk.Table ) :
