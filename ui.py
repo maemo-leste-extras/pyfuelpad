@@ -335,6 +335,7 @@ if hildon :
             hildon.GtkTreeView.__init__( self , gtk.HILDON_UI_MODE_EDIT , model )
             FuelpadAbstractView.__init__( self , config )
             self.connect( "hildon-row-tapped" , callbacks.recordactivated )
+            self.taptime , self.taprow = -1 , -1
 
     class FuelpadWindow( hildon.StackableWindow , FuelpadAbstractWindow ) :
 

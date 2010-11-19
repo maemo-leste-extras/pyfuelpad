@@ -14,6 +14,8 @@ try :
 except :
     hildon = False
 
+import time
+
 
 delay_quit_interval = 10
 
@@ -427,9 +429,16 @@ def newrecord ( action, pui , allowreduced=False ) :
     dialog.show()
 
 def recordactivated ( view , path , col=None ) :
-    iter = view.get_model().get_iter(path) 
-    if iter :
-        editrecord( None , view.get_toplevel() )
+    newtime = time.time()
+    if path[0] == view.taprow :
+        if newtime - view.taptime < 0.4 :
+            iter = view.get_model().get_iter(path) 
+            if iter :
+                editrecord( None , view.get_toplevel() )
+            view.taprow = -1
+    else :
+        view.taprow = path[0]
+    view.taptime = newtime
 
 def deleterecord ( action, pui ) :
 
