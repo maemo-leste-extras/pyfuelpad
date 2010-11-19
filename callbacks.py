@@ -431,7 +431,7 @@ def newrecord ( action, pui , allowreduced=False ) :
 def recordactivated ( view , path , col=None ) :
     newtime = time.time()
     if path[0] == view.taprow :
-        if newtime - view.taptime < 0.4 :
+        if newtime - view.taptime < gtk.settings_get_default().get_property("gtk-double-click-time") / 1000.0 :
             iter = view.get_model().get_iter(path) 
             if iter :
                 editrecord( None , view.get_toplevel() )
