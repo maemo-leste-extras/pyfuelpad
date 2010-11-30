@@ -1,14 +1,15 @@
 Source: pyfuelpad
 Priority: optional
 Maintainer: Javier Palacios <javiplx@gmail.com>
-Build-Depends: debhelper (>= 4.0.0)
+Build-Depends: debhelper (>= 4.0.0) , cdbs (>= 0.4.48) , python-support (>= 0.5.3)
 Standards-Version: 3.6.1
 
 Package: pyfuelpad
+Section: user/navigation
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Improved Python port of fuelpad
-XB-Maemo-Display-Name: PyFuelpad
+XSBC-Maemo-Display-Name: PyFuel
+XSBC-Bugtracker: javiplx@gmail.com
 XB-Maemo-Icon-26:
  iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABGdBTUEAALGP
  C/xhBQAAAAlwSFlzAAAN1wAADdcBQiibeAAAAAd0SU1FB9kLDBYDG30ALAMA

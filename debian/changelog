@@ -1,3 +1,9 @@
+pyfuelpad (1.0-1) fremantle; urgency=low
+
+  * Improved contents of debian control files
+
+ -- Javier Palacios <javiplx@gmail.com>  Fri, 19 Nov 2010 14:37:02 +0100
+
 pyfuelpad (1.0) fremantle; urgency=low
 
   * First version

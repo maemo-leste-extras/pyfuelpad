@@ -1,12 +1,6 @@
 #!/usr/bin/make -f
 
-# workaround to avoid calling Scratchbox python2.3
-PATH := /usr/bin:$(PATH)
-export PATH
-SBOX_REDIRECT_IGNORE = /usr/bin/python
-export SBOX_REDIRECT_IGNORE
-
-DEB_PYTHON_SYSTEM = pycentral
+DEB_PYTHON_SYSTEM = pysupport
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/python-distutils.mk
