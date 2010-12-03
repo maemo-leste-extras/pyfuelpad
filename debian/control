@@ -7,7 +7,12 @@ Standards-Version: 3.6.1
 Package: pyfuelpad
 Section: user/navigation
 Architecture: any
-Description: Improved Python port of fuelpad
+Description: Vehicle compsumption tool
+ PyFuelpad is a partial and enhanced port of Fuelpad. It allows
+ recording of mileage, fuel compsumption and other expenses.
+ .
+ Improvements over Fuelpad are the recording of GPS coordinates
+ and a new wizard interface to add new records.
 XSBC-Maemo-Display-Name: PyFuelpad
 XSBC-Bugtracker: javiplx@gmail.com
 XB-Maemo-Icon-26:
