@@ -429,6 +429,7 @@ else :
             gtk.TreeView.__init__( self , model )
             FuelpadAbstractView.__init__( self , config )
             self.connect( "row-activated" , callbacks.recordactivated )
+            self.taptime , self.taprow = -1 , -1
 
     class FuelpadWindow( gtk.Window , FuelpadAbstractWindow ) :
 

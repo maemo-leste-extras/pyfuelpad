@@ -514,7 +514,7 @@ else :
 
         def new_item ( self , special=False ) :
           if special :
-            return hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+            return FloatEntry()
           else :
             return gtk.Entry()
 
@@ -623,7 +623,7 @@ else :
             self.add_label( table , 'SETTINGS_FONTSIZE' , item , row )
             row += 1
 
-            self.add_floatitem( table , 'SETTINGS_CURRENCY' , row )
+            self.add_item( table , 'SETTINGS_CURRENCY' , row )
             self.widgets[ self.labels['SETTINGS_CURRENCY'][2] ].set_text( config.currency )
             row += 1
 
