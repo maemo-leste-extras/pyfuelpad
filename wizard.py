@@ -198,10 +198,7 @@ class FuelpadEdit ( gtk.Notebook ) :
         if page["Price"] :
             page[ "Price" ].units.set_text( config.currency )
         if page["Fill"] :
-            if config.isSI( "length" ) :
-                page[ "Fill" ].units.set_text( "litres" )
-            else :
-                page[ "Fill" ].units.set_text( "gallons" )
+            page[ "Fill" ].units.set_text( config.volume_unit() )
         if page["Trip"] :
             page[ "Trip" ].units.set_text( config.length_unit() )
         if page["Total"] :

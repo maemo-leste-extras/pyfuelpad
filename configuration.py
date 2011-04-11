@@ -229,6 +229,12 @@ class FuelpadConfig :
         else :
             return column_info[ column_dict['KM'] ][4]
 
+    def volume_unit ( self ) :
+        if self.isSI( "volume" ) :
+            return "litres"
+        else :
+            return "gallons"
+
     # Unit conversion functions
     # Conversions are likely ported, but maybe there are missing items
 
