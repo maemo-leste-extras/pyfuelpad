@@ -147,9 +147,7 @@ class ButtonPad ( gtk.Table ) :
 
 
 def tripadded ( widget , event , editwin , config ) :
-    if not editwin.entrytrip.get_text() :
-        return False
-    newkm = float( editwin.entrykm.get_text() or "0" )
+    newkm = editwin.entrykm.get_text()
     if newkm < 0.1 :
         trip = config.user2SIlength( editwin.entrytrip.get_text() )
         lastkm = config.db.last_refill(newkm)
@@ -166,9 +164,7 @@ def tripadded ( widget , event , editwin , config ) :
     return False
 
 def kmadded ( widget , event , editwin , config ) :
-    if not editwin.entrykm.get_text() :
-        return False
-    trip = float( editwin.entrytrip.get_text() or "0" )
+    trip = editwin.entrytrip.get_text()
     newkm = config.user2SIlength( editwin.entrykm.get_text() )
     if trip < 0.1 and newkm > 0 :
         lastkm = config.db.last_refill(newkm)
@@ -255,11 +251,17 @@ class FuelpadAbstractEditwin :
             self.widgets[ self.labels[id][2] ] = item
         self.add_button( table , item , column , row , column+2 )
 
-    def new_item ( self ) :
+    def new_item ( self , special=False ) :
         raise Exception( "Calling uninmplemented method 'new_item' on class %s" % self.__class__ )
 
     def add_item ( self , table , id , row , column=0 ) :
         item = self.new_item()
+        item.set_max_length( self.labels[id][1] )
+        self.add_label( table , id , item ,row , column )
+        return item
+
+    def add_floatitem ( self , table , id , row , column=0 ) :
+        item = self.new_item( True )
         item.set_max_length( self.labels[id][1] )
         self.add_label( table , id , item ,row , column )
         return item
@@ -346,6 +348,11 @@ class FuelpadAbstractSettingsEdit :
 
 if hildon :
 
+    class FloatEntry ( hildon.Entry ) :
+
+        def get_text ( self ) :
+            return float( hildon.Entry.get_text( self ) )
+
     class FuelpadHildonEditwin ( hildon.PannableArea , FuelpadAbstractEditwin ) :
 
         def __init__( self , config ) :
@@ -356,7 +363,10 @@ if hildon :
             self.add_with_viewport( table )
             table.show()
 
-        def new_item ( self ) :
+        def new_item ( self , special=False ) :
+          if special :
+            return FloatEntry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+          else :
             return hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
 
     class FuelpadFullEdit ( FuelpadHildonEditwin , FuelpadAbstractFullEdit ) :
@@ -391,23 +401,23 @@ if hildon :
 
             # First row, second entry
             if config.isSI( 'length' ) :
-              self.entrykm = self.add_item( table , 'EDIT_KM' , row )
+              self.entrykm = self.add_floatitem( table , 'EDIT_KM' , row )
             else :
-              self.entrykm = self.add_item( table , 'EDIT_MILES' , row )
+              self.entrykm = self.add_floatitem( table , 'EDIT_MILES' , row )
             row += 1
 
             if record_date is False :
               self.entrykm.connect( "focus-out-event", kmadded , self , config )
 
             # Second row, first entry
-            self.entrytrip = self.add_item( table , 'EDIT_TRIP' , row )
+            self.entrytrip = self.add_floatitem( table , 'EDIT_TRIP' , row )
             row += 1
 
             if record_date is False :
               self.entrytrip.connect( "focus-out-event", tripadded , self , config )
 
             # Second row, second entry
-            self.entryfill = self.add_item( table , 'EDIT_FILL' , row )
+            self.entryfill = self.add_floatitem( table , 'EDIT_FILL' , row )
             row += 1
 
             # Not full button
@@ -419,22 +429,22 @@ if hildon :
             row += 1
 
             # Third row, first entry
-            self.entryprice = self.add_item( table , 'EDIT_PRICE' , row )
+            self.entryprice = self.add_floatitem( table , 'EDIT_PRICE' , row )
             row += 1
 
             # Third row, second entry
             self.entrynotes = self.add_textitem( pui.view.get_model() , table , 'EDIT_NOTES' , row )
             row += 1
 
-            self.entryservice = self.add_item( table , 'EDIT_SERVICE' , row )
+            self.entryservice = self.add_floatitem( table , 'EDIT_SERVICE' , row )
             row += 1
 
             # Second row, first entry
-            self.entryoil = self.add_item( table , 'EDIT_OIL' , row )
+            self.entryoil = self.add_floatitem( table , 'EDIT_OIL' , row )
             row += 1
 
             # Third row, first entry
-            self.entrytires = self.add_item( table , 'EDIT_TIRES' , row )
+            self.entrytires = self.add_floatitem( table , 'EDIT_TIRES' , row )
             row += 1
 
         def add_item ( self , table , id , row , column=0 ) :
@@ -479,6 +489,11 @@ if hildon :
 
 else :
 
+    class FloatEntry ( gtk.Entry ) :
+
+        def get_text ( self ) :
+            return float( gtk.Entry.get_text( self ) )
+
     class FuelpadGtkEditwin ( gtk.Notebook , FuelpadAbstractEditwin ) :
 
         def __init__( self , config ) :
@@ -497,7 +512,10 @@ else :
             self.append_page( scrollwin , gtk.Label( label ) )
             scrollwin.show()
 
-        def new_item ( self ) :
+        def new_item ( self , special=False ) :
+          if special :
+            return hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
+          else :
             return gtk.Entry()
 
     class FuelpadFullEdit ( FuelpadGtkEditwin , FuelpadAbstractFullEdit ) :
@@ -517,22 +535,22 @@ else :
 
             # First row, second entry
             if config.isSI( 'length' ) :
-              self.entrykm = self.add_item( table , 'EDIT_KM' , row , 2 )
+              self.entrykm = self.add_floatitem( table , 'EDIT_KM' , row , 2 )
             else :
-              self.entrykm = self.add_item( table , 'EDIT_MILES' , row , 2 )
+              self.entrykm = self.add_floatitem( table , 'EDIT_MILES' , row , 2 )
             row += 1
 
             if record_date is False :
               self.entrykm.connect( "focus-out-event", kmadded , self , config )
 
             # Second row, first entry
-            self.entrytrip = self.add_item( table , 'EDIT_TRIP' , row )
+            self.entrytrip = self.add_floatitem( table , 'EDIT_TRIP' , row )
 
             if record_date is False :
               self.entrytrip.connect( "focus-out-event", tripadded , self , config )
 
             # Second row, second entry
-            self.entryfill = self.add_item( table , 'EDIT_FILL' , row , 2 )
+            self.entryfill = self.add_floatitem( table , 'EDIT_FILL' , row , 2 )
 
             # Not full button
             self.buttonnotfull = CheckButton( self.labels['EDIT_NOTFULL'][0] )
@@ -543,7 +561,7 @@ else :
             row += 1
 
             # Third row, first entry
-            self.entryprice = self.add_item( table , 'EDIT_PRICE' , row )
+            self.entryprice = self.add_floatitem( table , 'EDIT_PRICE' , row )
 
             # Third row, second entry
             self.entrynotes = self.add_textitem( pui.view.get_model() , table , 'EDIT_NOTES' , row , 2 )
@@ -561,15 +579,15 @@ else :
             row = 0
 
             # First row, first entry
-            self.entryservice = self.add_item( table , 'EDIT_SERVICE' , row )
+            self.entryservice = self.add_floatitem( table , 'EDIT_SERVICE' , row )
             row += 1
 
             # Second row, first entry
-            self.entryoil = self.add_item( table , 'EDIT_OIL' , row )
+            self.entryoil = self.add_floatitem( table , 'EDIT_OIL' , row )
             row += 1
 
             # Third row, first entry
-            self.entrytires = self.add_item( table , 'EDIT_TIRES' , row )
+            self.entrytires = self.add_floatitem( table , 'EDIT_TIRES' , row )
             row += 1
 
             if record_date is False :
@@ -605,7 +623,7 @@ else :
             self.add_label( table , 'SETTINGS_FONTSIZE' , item , row )
             row += 1
 
-            self.add_item( table , 'SETTINGS_CURRENCY' , row )
+            self.add_floatitem( table , 'SETTINGS_CURRENCY' , row )
             self.widgets[ self.labels['SETTINGS_CURRENCY'][2] ].set_text( config.currency )
             row += 1
 

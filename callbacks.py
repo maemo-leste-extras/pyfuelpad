@@ -147,9 +147,9 @@ def edit_record_response ( widget , event , editwin , pui ) :
             fill  = config.user2SIvolume( editwin.entryfill.get_text() )
             price = config.doubleornothing( editwin.entryprice.get_text() )
             if editwin.entryservice :
-                service = config.doubleornothing( editwin.entryservice.get_text() )
-                oil = config.doubleornothing( editwin.entryoil.get_text() )
-                tires = config.doubleornothing( editwin.entrytires.get_text() )
+                service = editwin.entryservice.get_text()
+                oil = editwin.entryoil.get_text()
+                tires = editwin.entrytires.get_text()
                 notes = editwin.entrynotes.get_text()
             else :
                 service = oil = tires = 0.0
@@ -251,9 +251,9 @@ def add_record_response ( widget , event , editwin , pui ) :
         fill  = config.user2SIvolume( editwin.entryfill.get_text() )
         price = config.doubleornothing( editwin.entryprice.get_text() )
         if editwin.entryservice :
-            service = config.doubleornothing( editwin.entryservice.get_text() )
-            oil = config.doubleornothing( editwin.entryoil.get_text() )
-            tires = config.doubleornothing( editwin.entrytires.get_text() )
+            service = editwin.entryservice.get_text()
+            oil = editwin.entryoil.get_text()
+            tires = editwin.entrytires.get_text()
             notes = editwin.entrynotes.get_text()
         else :
             service = oil = tires = 0.0
