@@ -220,6 +220,13 @@ class FuelpadConfig :
         client.set_int( "/apps/fuelpad/gps_timeout" , self.gps_timeout )
 
 
+    def set_units ( self , unittype ) :
+        self.units["main"] = unittype
+        for unit in ( 'length', 'volume', 'consume', 'mass' ) :
+            self.units[ unit ] = unittype
+        if unittype == unitsystem.index('IMPERIAL') :
+            self.units[ 'volume' ] = 0
+
     def isSI ( self , unittype  ) :
         return self.units[ unittype ] == unitsystem.index('SI')
 
