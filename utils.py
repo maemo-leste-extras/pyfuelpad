@@ -45,3 +45,9 @@ emissionperlitre = ( 2350.0 , 2660.0 )
 def get_emission_per_litre ( fueltype ) :
     return emissionperlitre[ int(fueltype) ]
 
+def doubleornothing ( input ) :
+    try :
+        return float( input )
+    except ValueError , ex :
+        return 0.0
+

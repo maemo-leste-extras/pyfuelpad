@@ -219,11 +219,6 @@ class FuelpadConfig :
         client.set_bool( "/apps/fuelpad/gps" , self.use_gps )
         client.set_int( "/apps/fuelpad/gps_timeout" , self.gps_timeout )
 
-    def doubleornothing ( self , input ) :
-      if not input :
-        return 0.0
-      return float( input )
-
 
     def isSI ( self , unittype  ) :
         return self.units[ unittype ] == unitsystem.index('SI')
@@ -245,21 +240,19 @@ class FuelpadConfig :
     mcf = ( 1.0 , 453.59237 , 453.59237 )
 
     def SIlength2user ( self , length ) :
-        return self.doubleornothing(length) / self.lcf[self.units['length']]
+        return length / self.lcf[self.units['length']]
 
     def user2SIlength ( self , length ) :
-        return self.doubleornothing(length) * self.lcf[self.units['length']]
+        return length * self.lcf[self.units['length']]
 
     def SIvolume2user ( self , length ) :
-        return self.doubleornothing(length )/ self.vcf[self.units['volume']]
+        return length / self.vcf[self.units['volume']]
 
     def user2SIvolume ( self , length ) :
-        return self.doubleornothing(length) * self.vcf[self.units['volume']];
+        return length * self.vcf[self.units['volume']];
 
     def SIconsumption2user ( self , consum ) :
-        if consum == 0 :
-           return consum
-        if self.isSI( 'consume' ) :
+        if consum == 0 or self.isSI( 'consume' ) :
            return consum
         else :
            return self.vcf[self.units['consume']] / self.lcf[self.units['consume']] * 100.0 / consum

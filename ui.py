@@ -60,26 +60,27 @@ class FuelpadModel ( gtk.TreeModelSort ) :
             date = utils.convdate( config.dateformat , None , row[0] )
 
 	    convnotes = row[10]
-	    trip , fill = row[2] , row[3]
-	    price , consum = row[5] , row[4]
+	    trip , fill = utils.doubleornothing( row[2] ) , utils.doubleornothing( row[3] )
+	    price , consum = utils.doubleornothing( row[5] ) , utils.doubleornothing( row[4] )
+	    length , priceperlitre = utils.doubleornothing( row[1] ) , utils.doubleornothing( row[6] )
             co2 = utils.calc_co2_emission( consum , config.db.fueltype() )
             if price and trip :
-                pricepertrip = config.doubleornothing(price) / config.SIlength2user(trip)
+                pricepertrip = price / config.SIlength2user(trip)
             else :
                 pricepertrip = 0
 	    iter = store.append()
             store.set( iter ,
                        configuration.column_dict['DAY'], date,
-                       configuration.column_dict['KM'], config.SIlength2user(row[1]),
+                       configuration.column_dict['KM'], config.SIlength2user(length),
                        configuration.column_dict['TRIP'], config.SIlength2user(trip),
                        configuration.column_dict['FILL'], config.SIvolume2user(fill),
-                       configuration.column_dict['CONSUM'], config.doubleornothing(config.SIconsumption2user(consum)),
+                       configuration.column_dict['CONSUM'], config.SIconsumption2user(consum),
                        configuration.column_dict['PRICE'], price,
                        configuration.column_dict['PRICEPERTRIP'], pricepertrip,
-                       configuration.column_dict['PRICEPERLITRE'], config.doubleornothing(config.SIppl2user(row[6])),
-                       configuration.column_dict['SERVICE'], row[7],
-                       configuration.column_dict['OIL'], row[8],
-                       configuration.column_dict['TIRES'], row[9],
+                       configuration.column_dict['PRICEPERLITRE'], config.SIppl2user(priceperlitre),
+                       configuration.column_dict['SERVICE'], utils.doubleornothing( row[7] ),
+                       configuration.column_dict['OIL'], utils.doubleornothing( row[8] ),
+                       configuration.column_dict['TIRES'], utils.doubleornothing( row[9] ),
                        configuration.column_dict['CO2EMISSION'], config.SIemission2user( co2 ),
                        configuration.column_dict['NOTES'], convnotes,
                        configuration.column_dict['ID'], row[11],

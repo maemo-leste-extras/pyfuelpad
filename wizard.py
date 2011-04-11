@@ -351,7 +351,7 @@ if hildon :
     class FloatEntry ( hildon.Entry ) :
 
         def get_text ( self ) :
-            return float( hildon.Entry.get_text( self ) )
+            return utils.doubleornothing( hildon.Entry.get_text( self ) )
 
     class FuelpadHildonEditwin ( hildon.PannableArea , FuelpadAbstractEditwin ) :
 
@@ -492,7 +492,7 @@ else :
     class FloatEntry ( gtk.Entry ) :
 
         def get_text ( self ) :
-            return float( gtk.Entry.get_text( self ) )
+            return utils.doubleornothing( gtk.Entry.get_text( self ) )
 
     class FuelpadGtkEditwin ( gtk.Notebook , FuelpadAbstractEditwin ) :
 
