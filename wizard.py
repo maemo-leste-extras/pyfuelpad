@@ -149,31 +149,27 @@ class ButtonPad ( gtk.Table ) :
 def tripadded ( widget , event , editwin , config ) :
     newkm = editwin.entrykm.get_text()
     if newkm < 0.1 :
-        trip = config.user2SIlength( editwin.entrytrip.get_text() )
-        lastkm = config.db.last_refill(newkm)
-        if lastkm < 0.1 :
-            lastkm = config.db.last_km()
-            # BUGFIX : happens when database is brand new
-            if lastkm == 0.0 :
-                return False
+        trip = editwin.entrytrip.get_text()
+        lastkm = config.SIlength2user( config.db.last_km() )
+        # BUGFIX : happens when database is brand new
+        if lastkm == 0.0 :
+            return False
         if widget :
-            buf = "%.1f" % config.SIlength2user( lastkm + trip )
+            buf = "%.1f" % ( lastkm + trip )
         else :
-            buf = "%d" % config.SIlength2user( lastkm + trip )
+            buf = "%d" % ( lastkm + trip )
         editwin.entrykm.set_text( buf )
     return False
 
 def kmadded ( widget , event , editwin , config ) :
     trip = editwin.entrytrip.get_text()
-    newkm = config.user2SIlength( editwin.entrykm.get_text() )
-    if trip < 0.1 and newkm > 0 :
-        lastkm = config.db.last_refill(newkm)
-        if lastkm < 0.1 :
-            lastkm = config.db.last_km()
-            # BUGFIX : happens when database is brand new
-            if lastkm == 0.0 :
-                return False
-        buf = "%.1f" % config.SIlength2user( newkm - lastkm )
+    newkm = editwin.entrykm.get_text()
+    if trip < 0.1 :
+        lastkm = config.SIlength2user( config.db.last_km() )
+	if lastkm == newkm :
+            return False
+    #    lastkm = config.SIlength2user( config.db.last_refill(newkm) )
+        buf = "%.1f" % ( newkm - lastkm )
         editwin.entrytrip.set_text( buf )
     return False
 
