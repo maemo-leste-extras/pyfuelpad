@@ -198,11 +198,11 @@ class FuelpadEdit ( gtk.Notebook ) :
         if page["Price"] :
             page[ "Price" ].units.set_text( config.currency )
         if page["Fill"] :
-            page[ "Fill" ].units.set_text( config.volume_unit() )
+            page[ "Fill" ].units.set_text( config.unit_label( 'volume' ) )
         if page["Trip"] :
-            page[ "Trip" ].units.set_text( config.length_unit() )
+            page[ "Trip" ].units.set_text( config.unit_label( 'length' ) )
         if page["Total"] :
-            page[ "Total" ].units.set_text( config.length_unit() )
+            page[ "Total" ].units.set_text( config.unit_label( 'length' ) )
 
         # Not shown widgets
         self.entrydate = DateEntry( config )
@@ -239,7 +239,7 @@ class FuelpadAbstractEditwin :
     def add_label ( self , table , id , item , row , column=0 ) :
         if self.labels[id][2] :
             self.widgets[ self.labels[id][2] ] = item
-        label = gtk.Label( self.labels[id][0] )
+        label = self.get_label( id )
         self.add_button( table , label , column , row )
         self.add_button( table , item , column+1 , row )
 
@@ -276,8 +276,7 @@ class FuelpadAbstractEditwin :
 class FuelpadAbstractFullEdit :
 
     labels = { 'EDIT_DATE':( "Date", 20 , configuration.column_dict['DAY']) ,
-               'EDIT_KM':( "Km", 8 , configuration.column_dict['KM']) ,
-               'EDIT_MILES':( "Miles", 8 , configuration.column_dict['KM']) ,
+               'EDIT_LENGTH':( "length", 8 , configuration.column_dict['KM']) ,
                'EDIT_TRIP':( "Trip", 8 , configuration.column_dict['TRIP']) ,
                'EDIT_FILL':( "Fill", 8 , configuration.column_dict['FILL']) ,
                'EDIT_NOTFULL':( "Not full tank", None , None) ,
@@ -290,6 +289,9 @@ class FuelpadAbstractFullEdit :
                'EDIT_DRIVER':( "Driver", None , None)
                }
 
+    def get_label ( self , id ) :
+        return gtk.Label( self.config.unit_label( self.labels[id][0] ) )
+
 
 class FuelpadAbstractSettingsEdit :
 
@@ -300,6 +302,9 @@ class FuelpadAbstractSettingsEdit :
                'SETTINGS_GPS':( "GPS settings", None , None) ,
                'SETTINGS_DELAY':( "Position timeout", 10 , "gps_timeout")
                }
+
+    def get_label ( self , id ) :
+        return gtk.Label( self.labels[id][0] )
 
     def wizard_items_box ( self , config ) :
         item = gtk.VBox()
@@ -369,7 +374,7 @@ if hildon :
     class FuelpadFullEdit ( FuelpadHildonEditwin , FuelpadAbstractFullEdit ) :
 
         def __init__( self , pui , record_date ) :
-            config = pui.config
+            self.config = config = pui.config
             FuelpadHildonEditwin.__init__( self , config )
 
             if record_date is False :
@@ -397,10 +402,7 @@ if hildon :
             row += 1
 
             # First row, second entry
-            if config.isSI( 'length' ) :
-              self.entrykm = self.add_floatitem( table , 'EDIT_KM' , row )
-            else :
-              self.entrykm = self.add_floatitem( table , 'EDIT_MILES' , row )
+            self.entrykm = self.add_floatitem( table , 'EDIT_LENGTH' , row )
             row += 1
 
             if record_date is False :
@@ -518,7 +520,7 @@ else :
     class FuelpadFullEdit ( FuelpadGtkEditwin , FuelpadAbstractFullEdit ) :
 
         def __init__( self , pui , record_date ) :
-            config = pui.config
+            self.config = config = pui.config
             FuelpadGtkEditwin.__init__( self , config )
 
             table = gtk.Table(4, 4, False)
@@ -531,10 +533,7 @@ else :
             self.add_label( table , 'EDIT_DATE' , self.entrydate , row )
 
             # First row, second entry
-            if config.isSI( 'length' ) :
-              self.entrykm = self.add_floatitem( table , 'EDIT_KM' , row , 2 )
-            else :
-              self.entrykm = self.add_floatitem( table , 'EDIT_MILES' , row , 2 )
+            self.entrykm = self.add_floatitem( table , 'EDIT_LENGTH' , row , 2 )
             row += 1
 
             if record_date is False :

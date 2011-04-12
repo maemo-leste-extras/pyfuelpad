@@ -23,26 +23,9 @@ def cell_data_func (column, renderer, model, iter, user_data) :
 # Reworked, but completelly ported (except for gettext)
 def get_column_header ( info , config ) :
 
-    if not info[3] :
-        return info[2]
-
-    # BUG : consume also requires this complex handling, instead of hardcoded mixed units. Anyway, consume is not heavily used
-    if info[3] != "mass" :
-        if config.isSI( info[3] ) :
-            return info[2]
-        else :
-            return info[4]
-
-    if config.isSI( "mass" ) :
-        if config.isSI( "length" ) :
-          return info[2]
-        else :
-          return "CO2 Emissions\n[g/mile]"
-    else :
-        if config.isSI( "length" ) :
-          return "CO2 Emissions\n[lb/100 km]"
-        else :
-          return info[4]
+    format = info[3] or "%s"
+    label = config.unit_label( info[2] )
+    return format % label
 
 
 class FuelpadModel ( gtk.TreeModelSort ) :
@@ -111,8 +94,8 @@ class FuelpadAbstractView :
                 col.pack_start(renderer, True)
 
                 col.add_attribute(renderer, "text", info[0])
-                if info[5] :
-                    col.set_cell_data_func( renderer , cell_data_func, ( info[0] , info[5] ) )
+                if info[4] :
+                    col.set_cell_data_func( renderer , cell_data_func, ( info[0] , info[4] ) )
 
                 col.set_resizable( True )
                 renderer.set_property( "scale" , configuration.fontscalefactors[config.fontsize] )
@@ -300,23 +283,15 @@ class FuelpadAbstractWindow :
 
         totalkm = self.config.db.totalkm(self.config.stbstattime)
 
-        str = "%.0f " % self.config.SIlength2user(totalkm)
-        if self.config.isSI( 'length' ) :
-            str += "km"
-        else :
-            str += "miles"
+	str = "%.0f %s" % ( self.config.SIlength2user(totalkm) , self.config.unit_label( "length" ) )
         self.stb_totalkmlabel.set_text( str )
 
         totalfill = self.config.db.totalfill(self.config.stbstattime)
         totalfillkm = self.config.db.totalfillkm(self.config.stbstattime)
         if totalfillkm != 0.0 :
-            str = "%.1f " % self.config.SIconsumption2user(totalfill/totalfillkm*100)
+            str = "%.1f %s" % ( self.config.SIconsumption2user(totalfill/totalfillkm*100) , self.config.unit_label( "consume" ) )
         else :
-            str = "%.1f " % 0.0
-        if self.config.isSI( 'consume' ) :
-            str += "l/100 km"
-        else :
-            str += "MPG"
+            str = "%.1f %s" % ( 0.0 , self.config.unit_label( "consume" ) )
         self.stb_avgconsumlabel.set_text( str )
 
         str = "%.0f %s" % ( self.config.db.totalcost() , self.config.currency )

@@ -38,6 +38,12 @@ datefmtstr = ("%Y-%m-%d", "%d.%m.%Y", "%d/%m/%Y", "%d/%m/%y",
 unitsystem = [ 'SI' , 'US' , 'IMPERIAL' ]
 unitrange = range( len(unitsystem) )
 
+unitnames = {}
+unitnames['length'] = [ "Km" , "Mile" , "Mile" ]
+unitnames['volume'] = [ "Litre" , "Gallon" , "Litre" ]
+unitnames['consume'] = [ "Litre/\n100 Km" , "MPG" , "Litre/Mile" ]
+unitnames['mass'] = [ "CO2 Emissions\n[g/km]" , "CO2 Emissions\n[lb/100 miles]" , "CO2 Emissions\n[lb/miles]" ]
+
 # dbtimespan
 OVERALL=0
 LASTYEAR=1
@@ -66,24 +72,23 @@ NUM_COLS=15
 
 DISPCOLDEFAULT = 1<<COL_NOTES | 1<<COL_PRICEPERTRIP | 1<<COL_PRICE | 1<<COL_CONSUM | 1<<COL_FILL | 1<<COL_TRIP | 1<<COL_KM | 1<<COL_DAY
 
-#COLUMN STRUCT  : number , header , non_SI_header , formatvals(None) ,  hidden
-# number , name , header , unittype , non_SI_header , format ,  showable , comparison
+# COLUMN ITEM : number , header/unittype , ( format , header format ) ,  showable , comparison
 column_info = (
-    ( 0 , "DAY" , "Date" , False , None , "%s" , True , "date" ) , # JP Format is yet to be defined and implemented
-    ( 1 , "KM" , "Km" , "length" , "Miles" , "%.0f" , True , "number" ) ,
-    ( 2 , "TRIP" , "Trip\n[km]" , "length" , "Trip\n[miles]" , "%.1f" , True , "number" ) ,
-    ( 3 , "FILL" , "Fill\n[litre]" , "volume" , "Fill\n[gal.]" , "%.2f" , True , "number" ) ,
-    ( 4 , "CONSUM" , "[litre/\n100 km]" , "consume", "[Miles/\ngallon]" , "%.1f" , True , "number" ) ,
-    ( 5 , "PRICE" , "Price" , False , None , "%.2f" , True , "number" ) ,
-    ( 6 , "PRICEPERTRIP" , "Price/\nkm" , "length" , "Price/\nmile" , "%.2f" , True , "number" ) ,
-    ( 7 , "PRICEPERLITRE" , "Price/\nlitre" , "volume" , "Price/\ngal." , "%.2f" , True , "number" ) ,
-    ( 8 , "SERVICE" , "Service" , False , None , "%.2f" , True , "number" ) ,
-    ( 9 , "OIL" , "Oil" , False , None , "%.2f" , True , "number" ) ,
-    ( 10 , "TIRES" , "Tires" , False , None , "%.2f" , True , "number" ) ,
-    ( 11 , "CO2EMISSION" , "CO2 Emissions\n[g/km]" , "mass", "CO2 Emissions\n[lb/100 miles]" , "%.0f" , True , False ) ,
-    ( 12 , "NOTES" , "Notes" , False , None , "%s" , True , "string" ) ,
-    ( 13 , "ID" , "Id" , False , None , None , False , False ) ,
-    ( 14 , "VISIBLE" , "Visible" , False , None , None , False , False )
+    ( 0 , "DAY" , "Date" , None , "%s" , True , "date" ) ,
+    ( 1 , "KM" , "length" , None , "%.0f" , True , "number" ) ,
+    ( 2 , "TRIP" , "length" , "Trip\n[%s]" , "%.1f" , True , "number" ) ,
+    ( 3 , "FILL" , "volume" , "Fill\n[%s]" , "%.2f" , True , "number" ) ,
+    ( 4 , "CONSUM" , "consume" , "consume: %s" , "%.1f" , True , "number" ) ,
+    ( 5 , "PRICE" , "Price" , None , "%.2f" , True , "number" ) ,
+    ( 6 , "PRICEPERTRIP" , "length" , "Price/\n%s" , "%.2f" , True , "number" ) ,
+    ( 7 , "PRICEPERLITRE" , "volume" , "Price/\n%s" , "%.2f" , True , "number" ) ,
+    ( 8 , "SERVICE" , "Service" , None , "%.2f" , True , "number" ) ,
+    ( 9 , "OIL" , "Oil" , None , "%.2f" , True , "number" ) ,
+    ( 10 , "TIRES" , "Tires" , None , "%.2f" , True , "number" ) ,
+    ( 11 , "CO2EMISSION" , "mass" , None , "%.0f" , True , False ) ,
+    ( 12 , "NOTES" , "Notes" , None , "%s" , True , "string" ) ,
+    ( 13 , "ID" , "Id" , None , None , False , False ) ,
+    ( 14 , "VISIBLE" , "Visible" , None , None , False , False )
     )
 column_dict = {}
 for item in column_info :
@@ -124,7 +129,7 @@ class FuelpadConfig :
         self.fontsize = MEDIUM
         self.stbstattime = OVERALL
 
-        self.units = {}
+        self.units = unitsystem.index('SI')
 
         if read :
             self.read()
@@ -135,11 +140,7 @@ class FuelpadConfig :
 
         self.db.currentcar = client.get_int( "/apps/fuelpad/current_car" )
         self.db.currentdriver = client.get_int( "/apps/fuelpad/current_driver" )
-        self.units['main'] = client.get_int( "/apps/fuelpad/current_unit" )
-        self.units['length'] = client.get_int( "/apps/fuelpad/current_lengthunit" )
-        self.units['volume'] = client.get_int( "/apps/fuelpad/current_volumeunit" )
-        self.units['consume'] = client.get_int( "/apps/fuelpad/current_consumeunit" )
-        self.units['mass'] = client.get_int( "/apps/fuelpad/current_massunit" )
+        self.units = client.get_int( "/apps/fuelpad/current_unit" )
 
         self.dateformat = client.get_int( "/apps/fuelpad/date_format" )
         tmpcurrency = client.get_string( "/apps/fuelpad/currency" )
@@ -173,16 +174,8 @@ class FuelpadConfig :
         # this program is run
         if self.db.currentcar == 0 : self.db.currentcar = 1
         if self.db.currentdriver == 0 :  self.db.currentdriver = 1
-        if self.units['main'] not in unitrange :
-            self.units['main'] = unitsystem.index('SI')
-        if self.units['length'] not in unitrange :
-            self.units['length'] = unitsystem.index('SI')
-        if self.units['volume'] not in unitrange :
-            self.units['volume'] = unitsystem.index('SI')
-        if self.units['consume'] not in unitrange :
-            self.units['consume'] = unitsystem.index('SI')
-        if self.units['mass'] not in unitrange :
-            self.units['mass'] = unitsystem.index('SI')
+        if self.units not in unitrange :
+            self.units = unitsystem.index('SI')
         if self.dateformat < 0 or self.dateformat > len(datefmtstr) :
             self.dateformat = 0
 
@@ -200,11 +193,7 @@ class FuelpadConfig :
 
         client.set_int( "/apps/fuelpad/current_car" , self.db.currentcar )
         client.set_int( "/apps/fuelpad/current_driver" , self.db.currentdriver )
-        client.set_int( "/apps/fuelpad/current_unit" , self.units['main'] )
-        client.set_int( "/apps/fuelpad/current_lengthunit" , self.units['length'] )
-        client.set_int( "/apps/fuelpad/current_volumeunit" , self.units['volume'] )
-        client.set_int( "/apps/fuelpad/current_consumeunit" , self.units['consume'] )
-        client.set_int( "/apps/fuelpad/current_massunit" , self.units['mass'] )
+        client.set_int( "/apps/fuelpad/current_unit" , self.units )
         client.set_int( "/apps/fuelpad/date_format" , self.dateformat )
         client.set_string( "/apps/fuelpad/currency" , self.currency )
         client.set_string( "/apps/fuelpad/database" , self.db.result_db )
@@ -220,27 +209,11 @@ class FuelpadConfig :
         client.set_int( "/apps/fuelpad/gps_timeout" , self.gps_timeout )
 
 
-    def set_units ( self , unittype ) :
-        self.units["main"] = unittype
-        for unit in ( 'length', 'volume', 'consume', 'mass' ) :
-            self.units[ unit ] = unittype
-        if unittype == unitsystem.index('IMPERIAL') :
-            self.units[ 'volume' ] = 0
-
-    def isSI ( self , unittype  ) :
-        return self.units[ unittype ] == unitsystem.index('SI')
-
-    def length_unit ( self ) :
-        if self.isSI( "length" ) :
-            return column_info[ column_dict['KM'] ][2]
+    def unit_label ( self , unittype ) :
+        if unitnames.has_key( unittype ) :
+            return unitnames[ unittype ][ self.units ]
         else :
-            return column_info[ column_dict['KM'] ][4]
-
-    def volume_unit ( self ) :
-        if self.isSI( "volume" ) :
-            return "litres"
-        else :
-            return "gallons"
+            return unittype
 
     # Unit conversion functions
     # Conversions are likely ported, but maybe there are missing items
@@ -253,37 +226,33 @@ class FuelpadConfig :
     mcf = ( 1.0 , 453.59237 , 453.59237 )
 
     def SIlength2user ( self , length ) :
-        return length / self.lcf[self.units['length']]
+        return length / self.lcf[self.units]
 
     def user2SIlength ( self , length ) :
-        return length * self.lcf[self.units['length']]
+        return length * self.lcf[self.units]
 
     def SIvolume2user ( self , length ) :
-        return length / self.vcf[self.units['volume']]
+        return length / self.vcf[self.units]
 
     def user2SIvolume ( self , length ) :
-        return length * self.vcf[self.units['volume']];
+        return length * self.vcf[self.units];
 
     def SIconsumption2user ( self , consum ) :
-        if consum == 0 or self.isSI( 'consume' ) :
+        if consum == 0 or self.units == unitsystem.index('SI') :
            return consum
         else :
-           return self.vcf[self.units['consume']] / self.lcf[self.units['consume']] * 100.0 / consum
-
-    def user2SIconsumption ( self , consum ) :
-        raise Excception("Esto es rarito")
-        return self.SIconsumption2user( consum )
+           return self.vcf[self.units] / self.lcf[self.units] * 100 / consum
 
     def SIppl2user ( self , ppl ) :
         return self.user2SIvolume( ppl )
 
     def SIemission2user ( self , emission ) :
-        if self.isSI( 'mass' ) :
-            return self.SImass2user(emission)*self.lcf[self.units['length']]
+        if self.units == unitsystem.index('SI') :
+            return self.SImass2user(emission)*self.lcf[self.units]
         else :
-            return self.SImass2user(emission)*self.lcf[self.units['length']]*100
+            return self.SImass2user(emission)*self.lcf[self.units]*100
 
     def SImass2user ( self , mass ) :
-        return mass/self.mcf[self.units['mass']]
+        return mass/self.mcf[self.units]
 
 

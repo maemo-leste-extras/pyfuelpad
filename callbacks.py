@@ -107,8 +107,8 @@ def settings_response ( widget , event , editwin , pui ) :
                 fontsize_medium ( None , pui )
             elif pui.config.fontsize == 4 :
                 fontsize_large ( None , pui )
-        if editwin.widgets["current_unit"].get_active() != pui.config.units["main"] :
-            pui.config.set_units( editwin.widgets["current_unit"].get_active() )
+        if editwin.widgets["current_unit"].get_active() != pui.config.units :
+            pui.config.units = editwin.widgets["current_unit"].get_active()
         if editwin.widgets["currency"].get_text() != pui.config.currency :
             pui.config.currency = editwin.widgets["currency"].get_text()
         if editwin.widgets["gps_timeout"].get_text() != pui.config.gps_timeout :

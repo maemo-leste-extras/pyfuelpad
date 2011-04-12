@@ -215,7 +215,7 @@ class FuelpadUnitsystemCombo ( FuelpadListCombo ) :
 
     def __init__ ( self , config , label=None ) :
         self.key = label
-        FuelpadListCombo.__init__( self , configuration.unitsystem , config.units["main"] )
+        FuelpadListCombo.__init__( self , configuration.unitsystem , config.units )
 
 class FuelpadFontsizeCombo ( FuelpadListCombo ) :
 
