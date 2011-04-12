@@ -140,7 +140,7 @@ class ButtonPad ( gtk.Table ) :
             self.label.set_text( txt[:-1] )
 
     def get_text ( self ) :
-        return self.label.get_text()
+        return utils.doubleornothing( self.label.get_text() )
 
     def set_text ( self , value ) :
         return self.label.set_text( value )
