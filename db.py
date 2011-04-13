@@ -264,15 +264,20 @@ class database :
         return self.get_float( "SELECT km FROM record WHERE carid=%d AND trip>0 AND km<%f ORDER BY km DESC LIMIT 1" % ( self.currentcar , newkm ) )
 
     def find_prev_full ( self , km ) :
-       if self.is_open() :
-           result = self.get_row( self.ppStmtPrevFull % ( self.currentcar , km ) )
-           if result :
-               if not result[3]*result[3] > 1e-6 : # Full fill not found
-                   return result[2] , result[1]
+       fullfill , fullkm = 0.0 , 0.0
 
-       return 0.0 , 0.0
+       if self.is_open() :
+           for result in self.get_rows( self.ppStmtPrevFull % ( self.currentcar , km ) ) :
+               if not result[3]*result[3] > 1e-6 : # Full fill not found
+                   break
+               fullfill += row[2]
+               fullkm += row[1]
+
+       return fullfill , fullkm
 
     def find_next_full ( self , km ) :
+       fullfill , fullkm = 0.0 , 0.0
+
        if self.is_open() :
            result = self.get_row( self.ppStmtNextFull % ( self.currentcar , km ) )
            if result :
