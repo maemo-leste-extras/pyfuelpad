@@ -287,6 +287,7 @@ class database :
        return 0 , 0.0 , 0.0
 
     def create_fillview ( self ) :
+      if self.is_open() :
         query = "CREATE TEMP VIEW fillview AS SELECT * FROM record WHERE carid=%d ORDER BY km LIMIT -1 OFFSET 1" % self.currentcar
         return self.db.execute( query )
 
@@ -314,8 +315,6 @@ class database :
     
     def totalfillkm ( self , timespan ) :
     
-      if self.is_open() :
-    
         if self.create_fillview() :
     
           querystr = "SELECT sum(trip) FROM fillview WHERE carid=%d AND fill>0 %s"
@@ -333,19 +332,13 @@ class database :
           self.drop_fillview()
           return value
     
-      return 0.0
+        return 0.0
     
     def totalcost ( self ) :
-    
-      if self.is_open() :
         sqlquery = "SELECT sum(price)+sum(service)+sum(oil)+sum(tires) FROM record WHERE carid=%d" % self.currentcar
         return self.get_float( sqlquery )
     
-      return 0.0
-    
     def totalfill ( self , timespan ) :
-    
-      if self.is_open() :
     
         if self.create_fillview() :
     
@@ -360,11 +353,11 @@ class database :
           else :
             sqlquery = querystr % ( self.currentcar , "" )
     
-        value = self.get_float( sqlquery )
-        self.drop_fillview()
-        return value
+          value = self.get_float( sqlquery )
+          self.drop_fillview()
+          return value
     
-      return 0.0
+        return 0.0
 
     def get_current ( self , key ) :
         if key.lower() == "car" :
