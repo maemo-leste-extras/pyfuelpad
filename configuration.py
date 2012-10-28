@@ -164,7 +164,7 @@ class FuelpadConfig :
         self.maintablesortorder = 0
 
         if not tmpcurrency :
-            self.currency = "Pts" # localeconv()->int_curr_symbol
+            self.currency = "Eur" # localeconv()->int_curr_symbol
         else :
             self.currency = tmpcurrency
 
