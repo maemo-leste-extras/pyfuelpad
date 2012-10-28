@@ -1,9 +1,10 @@
 
 import db
 
+import os
 import gconf
 
-default_db = "/home/user/fuelpad.db"
+default_db = os.path.join( os.environ['HOME'] , "fuelpad.db" )
 
 # fontscale
 XSMALL=1
