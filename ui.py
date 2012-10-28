@@ -72,6 +72,17 @@ class FuelpadModel ( gtk.TreeModelSort ) :
 
         gtk.TreeModelSort.__init__( self , store )
 
+        self.connect_object( "sort-column-changed", self.sort_change , config )
+
+    def sort_change( self , config ) :
+        colid , order = self.get_sort_column_id()
+        if colid is None :
+            config.maintablesorted = False
+        else :
+            config.maintablesorted = True
+            config.maintablesortcol = colid
+            config.maintablesortorder = int(order)
+
 
 class FuelpadAbstractView :
 
@@ -312,6 +323,9 @@ if hildon :
             FuelpadAbstractView.__init__( self , config )
             self.connect( "hildon-row-tapped" , callbacks.recordactivated )
             self.taptime , self.taprow = -1 , -1
+
+            if config.maintablesorted :
+                self.get_model().set_sort_column_id( config.maintablesortcol , config.maintablesortorder )
 
     class FuelpadWindow( hildon.StackableWindow , FuelpadAbstractWindow ) :
 

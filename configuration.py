@@ -160,8 +160,9 @@ class FuelpadConfig :
         self.use_gps = client.get_bool( "/apps/fuelpad/gps" )
         self.gps_timeout = client.get_int( "/apps/fuelpad/gps_timeout" )
 
-        self.maintablesortcol = 0
-        self.maintablesortorder = 0
+        self.maintablesorted = client.get_bool( "/apps/fuelpad/maintablesorted" )
+        self.maintablesortcol = client.get_int( "/apps/fuelpad/maintablesortcol" )
+        self.maintablesortorder = client.get_int( "/apps/fuelpad/maintablesortorder" )
 
         if not tmpcurrency :
             self.currency = "Eur" # localeconv()->int_curr_symbol
@@ -209,6 +210,9 @@ class FuelpadConfig :
         client.set_bool( "/apps/fuelpad/gps" , self.use_gps )
         client.set_int( "/apps/fuelpad/gps_timeout" , self.gps_timeout )
 
+        client.set_bool( "/apps/fuelpad/maintablesorted" , self.maintablesorted )
+        client.set_int( "/apps/fuelpad/maintablesortcol" , self.maintablesortcol )
+        client.set_int( "/apps/fuelpad/maintablesortorder" , self.maintablesortorder )
 
     def unit_label ( self , unittype ) :
         if unitnames.has_key( unittype ) :
