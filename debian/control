@@ -7,6 +7,7 @@ Standards-Version: 3.6.1
 Package: pyfuelpad
 Section: user/navigation
 Architecture: any
+Depends: python (>= 2.5)
 Description: Vehicle compsumption tool
  PyFuelpad is a partial and enhanced port of Fuelpad. It allows
  recording of mileage, fuel compsumption and other expenses.
