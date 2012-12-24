@@ -367,6 +367,13 @@ if hildon :
           else :
             return hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
 
+        def add_floatitem ( self , table , id , row , column=0 ) :
+            item = self.new_item( True )
+            item.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
+            item.set_max_length( self.labels[id][1] )
+            self.add_label( table , id , item ,row , column )
+            return item
+
     class FuelpadFullEdit ( FuelpadHildonEditwin , FuelpadAbstractFullEdit ) :
 
         def __init__( self , pui , record_date ) :
