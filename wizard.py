@@ -241,10 +241,7 @@ class FuelpadAbstractEditwin :
         return item
 
     def add_floatitem ( self , table , id , row , column=0 ) :
-        item = self.new_item( True )
-        item.set_max_length( self.labels[id][1] )
-        self.add_label( table , id , item ,row , column )
-        return item
+        raise Exception( "Calling uninmplemented method 'add_floatitem' on class %s" % self.__class__ )
 
     def add_textitem ( self , store , table , id , row , column=0 ) :
         completion = gtk.EntryCompletion()
@@ -499,6 +496,12 @@ else :
             return FloatEntry()
           else :
             return gtk.Entry()
+
+        def add_floatitem ( self , table , id , row , column=0 ) :
+            item = self.new_item( True )
+            item.set_max_length( self.labels[id][1] )
+            self.add_label( table , id , item ,row , column )
+            return item
 
     class FuelpadFullEdit ( FuelpadGtkEditwin , FuelpadAbstractFullEdit ) :
 
