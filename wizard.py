@@ -436,13 +436,6 @@ if hildon :
             self.entrytires = self.add_floatitem( table , 'EDIT_TIRES' , row )
             row += 1
 
-        def add_item ( self , table , id , row , column=0 ) :
-            item = FuelpadHildonEditwin.add_item( self , table , id , row , column )
-            if id != 'EDIT_NOTES' :
-                item.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
-            #    item.set_property( "autocap", False)
-            return item
-
     class FuelpadSettingsEdit ( FuelpadHildonEditwin , FuelpadAbstractSettingsEdit ) :
 
         def __init__( self , config ) :
