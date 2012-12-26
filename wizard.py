@@ -19,6 +19,11 @@ class KeypadAbstractButton :
 
 if hildon :
 
+    class Entry ( hildon.Entry ) :
+
+        def __init__ ( self ) :
+            hildon.Entry.__init__( self , gtk.HILDON_SIZE_FINGER_HEIGHT )
+
     class KeypadButton ( hildon.Button , KeypadAbstractButton ) :
 
         def __init__ ( self , text_label ) :
@@ -45,6 +50,8 @@ if hildon :
             return "%d-%02d-%02d" % ( year , month+1 , day )
 
 else :
+
+    Entry = gtk.Entry
 
     class KeypadButton ( gtk.Button , KeypadAbstractButton ) :
 
@@ -232,7 +239,10 @@ class FuelpadAbstractEditwin :
         self.add_button( table , item , column , row , column+2 )
 
     def new_item ( self , special=False ) :
-        raise Exception( "Calling uninmplemented method 'new_item' on class %s" % self.__class__ )
+        if special :
+            return FloatEntry()
+        else :
+            return Entry()
 
     def add_item ( self , table , id , row , column=0 ) :
         item = self.new_item()
@@ -330,7 +340,7 @@ class FuelpadAbstractSettingsEdit :
 
 if hildon :
 
-    class FloatEntry ( hildon.Entry ) :
+    class FloatEntry ( Entry ) :
 
         def get_text ( self ) :
             return utils.doubleornothing( hildon.Entry.get_text( self ) )
@@ -344,12 +354,6 @@ if hildon :
         def add_table( self , table ) :
             self.add_with_viewport( table )
             table.show()
-
-        def new_item ( self , special=False ) :
-          if special :
-            return FloatEntry( gtk.HILDON_SIZE_FINGER_HEIGHT )
-          else :
-            return hildon.Entry( gtk.HILDON_SIZE_FINGER_HEIGHT )
 
         def add_floatitem ( self , table , id , row , column=0 ) :
             item = self.new_item( True )
@@ -490,12 +494,6 @@ else :
 
             self.append_page( scrollwin , gtk.Label( label ) )
             scrollwin.show()
-
-        def new_item ( self , special=False ) :
-          if special :
-            return FloatEntry()
-          else :
-            return gtk.Entry()
 
         def add_floatitem ( self , table , id , row , column=0 ) :
             item = self.new_item( True )
