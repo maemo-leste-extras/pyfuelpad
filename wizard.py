@@ -77,55 +77,42 @@ class ButtonPad ( gtk.Table ) :
 
         gtk.Table.__init__( self , 4 , 4 , True )
 
-        x , y = 0 , 0
-        # Label for written values
+        def label ( ) :
+            item = gtk.Label()
+            attrs = configuration.font_attrs( -1 )
+            item.set_attributes( attrs )
+            return item
+
+        self.title = label()
+        self.units = label()
+        self.label = label()
+
         hbox = gtk.HBox()
-        self.title = gtk.Label()
-        attrs = configuration.font_attrs( -1 )
-        self.title.set_attributes( attrs )
         hbox.pack_start( self.title , expand=False, fill=False )
-        self.title.show()
-        self.units = gtk.Label()
-        attrs = configuration.font_attrs( -1 )
-        self.units.set_attributes( attrs )
         hbox.pack_end( self.units , expand=False, fill=False )
-        self.units.show()
-        # FIXME : is self.label already allocated ???
-        self.label = gtk.Label()
-        attrs = configuration.font_attrs( -1 )
-        self.label.set_attributes( attrs )
         hbox.pack_end( self.label , expand=True, fill=True )
-        self.label.show()
-        self.attach( hbox , x , x+4 , y , y+1 )
-        hbox.show()
+        self.attach( hbox , 0 , 4 , 0 , 1 )
 
         # Button for decimal dot
         if decimals :
             self.decimals = decimals
-            x , y = 3 , 2
             button = KeypadButton( "." )
             button.connect("clicked", self.verified_write, ".")
-            self.attach( button , x , x+1 , y , y+1 )
-            button.show()
+            self.attach( button , 3 , 4 , 2 , 3 )
 
         # Button for 0
-        x , y = 3 , 3
         button = KeypadButton( "%s" % 0 )
         button.connect("clicked", self.write, 0)
-        self.attach( button , x , x+1 , y , y+1 )
-        button.show()
+        self.attach( button , 3 , 4 , 3 , 4 )
 
         for i in range(9) :
             button = KeypadButton( "%s" % (i+1) )
             button.connect("clicked", self.write, i+1)
             self.attach( button , i%3 , i%3+1 , int(i/3)+1 , int(i/3)+2 )
-            button.show()
 
-        x , y = 3 , 1
         button = KeypadButton( "<-" )
         button.connect("clicked", self.backspace, None)
-        self.attach( button , x , x+1 , y , y+1 )
-        button.show()
+        self.attach( button , 3 , 4 , 1 , 2 )
 
     def verified_write(self, widget, data=None):
         self.write( widget , data )
