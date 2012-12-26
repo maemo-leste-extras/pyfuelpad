@@ -79,7 +79,7 @@ else :
 class FloatEntry ( Entry ) :
 
     def get_text ( self ) :
-        return utils.doubleornothing( hildon.Entry.get_text( self ) )
+        return utils.doubleornothing( Entry.get_text( self ) )
 
 
 class ButtonPad ( gtk.Table ) :
