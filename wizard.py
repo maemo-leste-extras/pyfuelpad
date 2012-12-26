@@ -553,12 +553,6 @@ else :
             self.entrynotes = self.add_textitem( pui.view.get_model() , table , 'EDIT_NOTES' , row , 2 )
             row += 1
 
-            completion = gtk.EntryCompletion()
-            store = pui.view.get_model()
-            completion.set_model( store )
-            completion.set_text_column( configuration.column_dict['NOTES'] )
-            self.entrynotes.set_completion( completion )
-
             # Service etc. self
             table = gtk.Table(1, 3, False)
             self.add_table( table, "Service/oil/tires" )
