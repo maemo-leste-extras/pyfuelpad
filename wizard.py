@@ -579,11 +579,11 @@ else :
             row = 0
 
             # First row, first entry
-            item = combos.FuelpadUnitsystemCombo( config )
+            item = combos.FuelpadUnitsystemCombo( config , self.labels['SETTINGS_UNITSYSTEM'][0] )
             self.add_label( table , 'SETTINGS_UNITSYSTEM' , item , row )
             row += 1
 
-            item = combos.FuelpadFontsizeCombo( config )
+            item = combos.FuelpadFontsizeCombo( config , self.labels['SETTINGS_FONTSIZE'][0] )
             self.add_label( table , 'SETTINGS_FONTSIZE' , item , row )
             row += 1
 
