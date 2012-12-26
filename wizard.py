@@ -238,14 +238,8 @@ class FuelpadAbstractEditwin :
             self.widgets[ self.labels[id][2] ] = item
         self.add_button( table , item , column , row , column+2 )
 
-    def new_item ( self , special=False ) :
-        if special :
-            return FloatEntry()
-        else :
-            return Entry()
-
     def add_item ( self , table , id , row , column=0 ) :
-        item = self.new_item()
+        item = Entry()
         item.set_max_length( self.labels[id][1] )
         self.add_label( table , id , item ,row , column )
         return item
@@ -328,7 +322,7 @@ class FuelpadAbstractSettingsEdit :
         id = 'SETTINGS_DELAY'
         delay_frame = gtk.HBox( homogeneous=False )
         delay_frame.add( gtk.Label( self.labels[id][0] ) )
-        delay = self.new_item()
+        delay = Entry()
         if self.labels[id][2] :
             self.widgets[ self.labels[id][2] ] = delay
         delay.set_max_length( self.labels[id][1] )
@@ -356,7 +350,7 @@ if hildon :
             table.show()
 
         def add_floatitem ( self , table , id , row , column=0 ) :
-            item = self.new_item( True )
+            item = FloatEntry()
             item.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
             item.set_max_length( self.labels[id][1] )
             self.add_label( table , id , item ,row , column )
@@ -496,7 +490,7 @@ else :
             scrollwin.show()
 
         def add_floatitem ( self , table , id , row , column=0 ) :
-            item = self.new_item( True )
+            item = FloatEntry()
             item.set_max_length( self.labels[id][1] )
             self.add_label( table , id , item ,row , column )
             return item
