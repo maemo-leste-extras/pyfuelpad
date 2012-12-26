@@ -76,6 +76,12 @@ else :
             return self.get_text()
 
 
+class FloatEntry ( Entry ) :
+
+    def get_text ( self ) :
+        return utils.doubleornothing( hildon.Entry.get_text( self ) )
+
+
 class ButtonPad ( gtk.Table ) :
 
     # FIXME : while label is empty, backspace button must be disabled
@@ -245,7 +251,10 @@ class FuelpadAbstractEditwin :
         return item
 
     def add_floatitem ( self , table , id , row , column=0 ) :
-        raise Exception( "Calling uninmplemented method 'add_floatitem' on class %s" % self.__class__ )
+        item = FloatEntry()
+        item.set_max_length( self.labels[id][1] )
+        self.add_label( table , id , item ,row , column )
+        return item
 
     def add_textitem ( self , store , table , id , row , column=0 ) :
         completion = gtk.EntryCompletion()
@@ -334,11 +343,6 @@ class FuelpadAbstractSettingsEdit :
 
 if hildon :
 
-    class FloatEntry ( Entry ) :
-
-        def get_text ( self ) :
-            return utils.doubleornothing( hildon.Entry.get_text( self ) )
-
     class FuelpadHildonEditwin ( hildon.PannableArea , FuelpadAbstractEditwin ) :
 
         def __init__( self , config ) :
@@ -350,10 +354,8 @@ if hildon :
             table.show()
 
         def add_floatitem ( self , table , id , row , column=0 ) :
-            item = FloatEntry()
+            item = FuelpadAbstractEditwin.add_floatitem( self , table , id , row , column )
             item.set_input_mode( gtk.HILDON_GTK_INPUT_MODE_NUMERIC|gtk.HILDON_GTK_INPUT_MODE_SPECIAL )
-            item.set_max_length( self.labels[id][1] )
-            self.add_label( table , id , item ,row , column )
             return item
 
     class FuelpadFullEdit ( FuelpadHildonEditwin , FuelpadAbstractFullEdit ) :
@@ -466,11 +468,6 @@ if hildon :
 
 else :
 
-    class FloatEntry ( gtk.Entry ) :
-
-        def get_text ( self ) :
-            return utils.doubleornothing( gtk.Entry.get_text( self ) )
-
     class FuelpadGtkEditwin ( gtk.Notebook , FuelpadAbstractEditwin ) :
 
         def __init__( self , config ) :
@@ -488,12 +485,6 @@ else :
 
             self.append_page( scrollwin , gtk.Label( label ) )
             scrollwin.show()
-
-        def add_floatitem ( self , table , id , row , column=0 ) :
-            item = FloatEntry()
-            item.set_max_length( self.labels[id][1] )
-            self.add_label( table , id , item ,row , column )
-            return item
 
     class FuelpadFullEdit ( FuelpadGtkEditwin , FuelpadAbstractFullEdit ) :
 
