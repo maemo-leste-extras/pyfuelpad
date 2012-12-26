@@ -180,11 +180,16 @@ class FuelpadEdit ( gtk.Notebook ) :
         gtk.Notebook.__init__( self )
         self.set_size_request(450,260)
 
+        self.entryprice = ButtonPad( "Price" , True )
+        self.entryfill = ButtonPad( "Fill" , True )
+        self.entrytrip = ButtonPad( "Trip" ,  True )
+        self.entrykm = ButtonPad( "Total" )
+
         page = {}
-        page["Price"] = self.entryprice = ButtonPad( "Price" , True )
-        page["Fill"] = self.entryfill = ButtonPad( "Fill" , True )
-        page["Trip"] = self.entrytrip = ButtonPad( "Trip" ,  True )
-        page["Total"] = self.entrykm = ButtonPad( "Total" )
+        page["Price"] = self.entryprice
+        page["Fill"] = self.entryfill
+        page["Trip"] = self.entrytrip
+        page["Total"] = self.entrykm
         for i in range( len(config.wizarditems) ) :
             if config.wizarditems.is_on( i ) :
                 self.append_page( page[ config.wizarditems[i] ] , gtk.Label( config.wizarditems[i] ) )
