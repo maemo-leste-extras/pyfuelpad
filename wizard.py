@@ -229,25 +229,24 @@ class FuelpadAbstractEditwin :
     DIALOG_MIN_HEIGHT1 = 150
     DIALOG_MIN_HEIGHTMAX = 400
 
-    def add_button ( self , table , item , col , row , end_col=False , end_row=False ) :
+    def add_button ( self , table , item , row , col , end_col=False ) :
         end_col = end_col or col + 1
-        end_row = end_row or row + 1
-        table.attach(item, col, end_col, row, end_row,
+        table.attach(item, col, end_col, row, row+1,
                      gtk.EXPAND|gtk.FILL,
                      0, 0, 5)
         item.show()
 
-    def add_label ( self , table , id , item , row , column=0 ) :
-        if self.labels[id][2] :
-            self.widgets[ self.labels[id][2] ] = item
+    def add_label ( self , table , id , item , row , column=0 , end_col=False ) :
         label = self.get_label( id )
-        self.add_button( table , label , column , row )
-        self.add_button( table , item , column+1 , row )
+        self.add_button( table , label , row , column )
+        end_col = end_col or column + 2
+        self.add_widget( table , id , item , row , column+1 , end_col )
 
-    def add_widget ( self , table , id , item , row , column=0 ) :
+    def add_widget ( self , table , id , item , row , column=0 , end_col=False ) :
         if self.labels[id][2] :
             self.widgets[ self.labels[id][2] ] = item
-        self.add_button( table , item , column , row , column+2 )
+        end_col = end_col or column + 2
+        self.add_button( table , item , row , column , end_col )
 
     def add_item ( self , table , id , row , column=0 ) :
         item = Entry()
@@ -354,7 +353,7 @@ if hildon :
             hildon.PannableArea.__init__( self )
             self.set_size_request( -1 , self.DIALOG_MIN_HEIGHTMAX )
 
-        def add_table( self , table ) :
+        def add_table( self , table , label=None ) :
             self.add_with_viewport( table )
             table.show()
 
@@ -373,24 +372,23 @@ if hildon :
                 table = gtk.Table(12, 2, False)
             else :
                 table = gtk.Table(10, 2, False)
-            self.add_table( table )
+            self.add_table( table, "Fuel fill" )
 
             row = 0
 
             if record_date is False :
 
                 self.carcombo = combos.FuelpadCarCombo( config )
-                self.add_button( table , self.carcombo , 0 , row , 2 )
+                self.add_button( table , self.carcombo , row , 0 , 2 )
                 row += 1
 
                 self.drivercombo = combos.FuelpadDriverCombo( config )
-                self.add_button( table , self.drivercombo , 0 , row , 2 )
+                self.add_button( table , self.drivercombo , row , 0 , 2 )
                 row += 1
 
             # First row, first entry
             self.entrydate = DateEntry( config , record_date )
-            self.add_button( table , self.entrydate , 0 , row , 2 )
-            self.widgets[ self.labels['EDIT_DATE'][2] ] = self.entrydate
+            self.add_widget( table , 'EDIT_DATE' , self.entrydate , row , 0 )
             row += 1
 
             # First row, second entry
@@ -413,10 +411,7 @@ if hildon :
 
             # Not full button
             self.buttonnotfull = CheckButton( self.labels['EDIT_NOTFULL'][0] )
-            table.attach( self.buttonnotfull, 1, 2, row, row+1,
-                       gtk.EXPAND|gtk.FILL,
-                       0, 0, 5)
-            self.buttonnotfull.show()
+            self.add_button( self , table , self.buttonnotfull , row , 1 )
             row += 1
 
             # Third row, first entry
@@ -444,18 +439,16 @@ if hildon :
             FuelpadHildonEditwin.__init__( self , config )
 
             table = gtk.Table(6, 4, False)
-            self.add_table( table )
+            self.add_table( table , "Visualization settings" )
             row = 0
 
             # First row, first entry
             item = combos.FuelpadUnitsystemCombo( config , self.labels['SETTINGS_UNITSYSTEM'][0] )
-            self.widgets[ self.labels['SETTINGS_UNITSYSTEM'][2] ] = item
-            self.add_button( table , item , 0 , row , 2 )
+            self.add_widget( table , 'SETTINGS_UNITSYSTEM' , item , row , 0 )
             row += 1
 
             item = combos.FuelpadFontsizeCombo( config , self.labels['SETTINGS_FONTSIZE'][0] )
-            self.widgets[ self.labels['SETTINGS_FONTSIZE'][2] ] = item
-            self.add_button( table , item , 0 , row , 2 )
+            self.add_widget( table , 'SETTINGS_FONTSIZE' , item , row , 0 )
             row += 1
 
             self.add_item( table , 'SETTINGS_CURRENCY' , row )
@@ -524,10 +517,7 @@ else :
 
             # Not full button
             self.buttonnotfull = CheckButton( self.labels['EDIT_NOTFULL'][0] )
-            table.attach( self.buttonnotfull, 3, 4, row, row+1,
-                       gtk.EXPAND|gtk.FILL,
-                       0, 0, 5)
-            self.buttonnotfull.show()
+            self.add_button( self , table , self.buttonnotfull , row , 3 )
             row += 1
 
             # Third row, first entry
