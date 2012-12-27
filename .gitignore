@@ -1,0 +1,16 @@
+
+# Editor backups
+*~
+
+# Python bytecode
+*.pyc
+
+# Python distutils
+build
+python-build-stamp-2.5
+
+# Debian packaging
+debian/files
+debian/*compat
+debian/pyfuelpad/
+debian/pyfuelpad.*
