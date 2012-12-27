@@ -304,7 +304,7 @@ def about ( action, pui ) :
                                 "PyFuelpad 1.1"
                                 )
     dialog.set_title( "About PyFuelpad ..." )
-    dialog.format_secondary_text( "(C) Javier Palacios Bermejo 2010\nLicense : GPL" )
+    dialog.format_secondary_text( "(C) Javier Palacios Bermejo 2010\nLicense : GPLv2" )
     dialog.connect("response", lambda x,y: dialog.destroy())
     dialog.show_all()
 
