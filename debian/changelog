@@ -1,3 +1,8 @@
+pyfuelpad (1.1) leste; urgency=low
+
+  * Upgrade packaging to current debian standards
+
+ -- Javier Palacios <javiplx@gmail.com>  Sat, 29 Feb 2020 17:42:21 +0100
 
 pyfuelpad (1.1-rc1) fremantle; urgency=low
 
