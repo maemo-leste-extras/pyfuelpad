@@ -14,3 +14,7 @@ debian/files
 debian/*compat
 debian/pyfuelpad/
 debian/pyfuelpad.*
+
+dist
+.pybuild
+debian/.debhelper

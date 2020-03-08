@@ -1,12 +1,13 @@
 Source: pyfuelpad
 Priority: optional
 Maintainer: Javier Palacios <javiplx@gmail.com>
-Build-Depends: debhelper (>= 4.0.0) , cdbs (>= 0.4.48) , python-support (>= 0.5.3)
+Build-Depends: debhelper (>= 9) , dh-python , python-all
 Standards-Version: 3.6.1
+X-Python-Version: >= 2.5
 
 Package: pyfuelpad
 Section: user/navigation
-Architecture: any
+Architecture: all
 Depends: python (>= 2.5)
 Description: Vehicle compsumption tool
  PyFuelpad is a partial and enhanced port of Fuelpad. It allows
