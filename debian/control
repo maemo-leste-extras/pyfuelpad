@@ -4,6 +4,7 @@ Maintainer: Javier Palacios <javiplx@gmail.com>
 Build-Depends: debhelper (>= 9) , dh-python , python-all
 Standards-Version: 3.6.1
 X-Python-Version: >= 2.5
+Section: user/navigation
 
 Package: pyfuelpad
 Section: user/navigation
