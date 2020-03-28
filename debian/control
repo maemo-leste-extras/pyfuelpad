@@ -9,7 +9,7 @@ Section: user/navigation
 Package: pyfuelpad
 Section: user/navigation
 Architecture: all
-Depends: python (>= 2.5)
+Depends: python (>= 2.5), python-hildon, python-gconf
 Description: Vehicle compsumption tool
  PyFuelpad is a partial and enhanced port of Fuelpad. It allows
  recording of mileage, fuel compsumption and other expenses.
